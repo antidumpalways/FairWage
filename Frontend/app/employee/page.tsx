@@ -1,0 +1,89 @@
+"use client";
+
+import React from 'react';
+import { useWallet } from '@/contexts/WalletContext';
+import BalanceCard from '@/components/employee/BalanceCard';
+import WithdrawCard from '@/components/employee/WithdrawCard';
+import EmployeeStatsCard from '@/components/employee/EmployeeStatsCard';
+import TransactionHistoryCard from '@/components/employee/TransactionHistoryCard';
+import { Button } from '@/components/ui/button';
+import { Wallet, Users } from 'lucide-react';
+
+export default function EmployeePage() {
+  const { isWalletConnected, publicKey, connectWallet } = useWallet();
+
+  if (!isWalletConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="h-8 w-8 text-white" />
+          </div>
+          
+          <h1 className="text-3xl font-bold text-white mb-4">Employee Dashboard</h1>
+          <p className="text-gray-400 mb-8">
+            Connect your wallet to view your real-time wage balance and withdraw earned funds.
+          </p>
+          
+          <Button
+            onClick={connectWallet}
+            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-8 py-3"
+          >
+            <Wallet className="w-5 h-5 mr-2" />
+            Connect Wallet
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Employee Dashboard</h1>
+          <p className="text-gray-400">
+            Welcome back! View your real-time earnings and withdraw your wages instantly.
+          </p>
+          <div className="mt-2 text-sm text-gray-500">
+            Connected as: {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
+          </div>
+        </div>
+
+        {/* Main Dashboard Grid */}
+        <div className="grid md:grid-cols-2 gap-8">
+          <BalanceCard />
+          <WithdrawCard />
+        </div>
+
+        {/* Employee Statistics */}
+        <div className="mt-12">
+          <EmployeeStatsCard />
+        </div>
+
+        {/* Transaction History */}
+        <div className="mt-12">
+          <TransactionHistoryCard />
+        </div>
+
+        {/* Additional Info Section */}
+        <div className="mt-12 grid md:grid-cols-3 gap-6">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
+            <div className="text-2xl font-bold text-blue-400 mb-2">Real-Time</div>
+            <div className="text-sm text-gray-400">Wages accrue by the second</div>
+          </div>
+          
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
+            <div className="text-2xl font-bold text-green-400 mb-2">Instant</div>
+            <div className="text-sm text-gray-400">Withdraw anytime, no delays</div>
+          </div>
+          
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
+            <div className="text-2xl font-bold text-purple-400 mb-2">Secure</div>
+            <div className="text-sm text-gray-400">Blockchain-powered payroll</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
