@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getContractInfo } from '@/lib/soroban';
 import { useWallet } from '@/contexts/WalletContext';
 
 const ContractInfoCard: React.FC = () => {
@@ -73,11 +72,11 @@ const ContractInfoCard: React.FC = () => {
   }, [isWalletConnected, publicKey]);
 
   return (
-    <Card className="bg-slate-800 border-slate-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white text-lg">Contract Info</CardTitle>
+    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-white text-xl font-semibold">Contract Information</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {isLoading ? (
           <div className="animate-pulse space-y-2">
             <div className="h-8 bg-slate-700 rounded"></div>
@@ -86,49 +85,49 @@ const ContractInfoCard: React.FC = () => {
           </div>
         ) : contractInfo ? (
           <>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">Company:</span>
-              <span className="text-white text-sm font-medium">{contractInfo.companyName}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-slate-400 text-sm">Company:</span>
+              <span className="text-white text-sm font-semibold">{contractInfo.companyName}</span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">Token:</span>
-              <span className="text-white text-sm font-medium">{contractInfo.tokenSymbol}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-slate-400 text-sm">Token:</span>
+              <span className="text-white text-sm font-semibold">{contractInfo.tokenSymbol}</span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">Token ID:</span>
-              <div className="flex items-center space-x-1">
-                <span className="text-white text-xs font-mono">{formatAddress(contractInfo.tokenContractId)}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-slate-400 text-sm">Token ID:</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-white text-sm font-mono">{formatAddress(contractInfo.tokenContractId)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => copyToClipboard(contractInfo.tokenContractId)}
-                  className="text-gray-400 hover:text-white p-1 h-auto"
+                  className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 h-auto rounded-lg"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">FairWage ID:</span>
-              <div className="flex items-center space-x-1">
-                <span className="text-white text-xs font-mono">{formatAddress(contractInfo.fairWageContractId)}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-slate-400 text-sm">FairWage ID:</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-white text-sm font-mono">{formatAddress(contractInfo.fairWageContractId)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => copyToClipboard(contractInfo.fairWageContractId)}
-                  className="text-gray-400 hover:text-white p-1 h-auto"
+                  className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 h-auto rounded-lg"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">Network:</span>
-              <span className="text-white text-xs font-medium">{contractInfo.network}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-slate-400 text-sm">Network:</span>
+              <span className="text-white text-sm font-semibold">{contractInfo.network}</span>
             </div>
           </>
         ) : (

@@ -715,10 +715,10 @@ const EmployeeManagementCard: React.FC = () => {
       </div>
 
       {/* Add Employee Section */}
-    <Card className="bg-slate-800 border-slate-700">
+    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <CardTitle className="text-white">Employee Management</CardTitle>
+          <div className="flex items-center space-x-4">
+            <CardTitle className="text-white text-2xl font-bold">Employee Management</CardTitle>
             {isSyncing && (
               <div className="flex items-center space-x-2 text-sm text-blue-400">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
@@ -726,10 +726,10 @@ const EmployeeManagementCard: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <Button
               onClick={() => setIsAddingEmployee((v) => !v)}
-              className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Plus className="w-4 h-4 mr-2" />
               {isAddingEmployee ? "Cancel" : "Add Employee"}
@@ -738,7 +738,7 @@ const EmployeeManagementCard: React.FC = () => {
               <Button
                 onClick={() => void handlePayAllEmployees()}
                 disabled={isLoading}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
                 Pay All
@@ -748,10 +748,10 @@ const EmployeeManagementCard: React.FC = () => {
       </CardHeader>
         <CardContent>
           {isAddingEmployee && (
-            <div className="bg-slate-700 p-4 rounded-lg mb-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-700/50 p-6 rounded-xl mb-6 border border-slate-600">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-                  <Label htmlFor="employee-address" className="text-white">
+                  <Label htmlFor="employee-address" className="text-white font-semibold mb-2 block">
               Employee Address
             </Label>
             <Input
@@ -759,11 +759,11 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="G... (56 characters)"
                     value={newEmployee.address}
                     onChange={(e) => setNewEmployee({ ...newEmployee, address: e.target.value })}
-                    className="bg-slate-600 border-slate-500 text-white"
+                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="employee-name" className="text-white">
+                  <Label htmlFor="employee-name" className="text-white font-semibold mb-2 block">
                     Employee Name
                   </Label>
                   <Input
@@ -771,11 +771,11 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="John Doe"
                     value={newEmployee.name}
                     onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                    className="bg-slate-600 border-slate-500 text-white"
+                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
             />
           </div>
           <div>
-                  <Label htmlFor="wage-rate" className="text-white">
+                  <Label htmlFor="wage-rate" className="text-white font-semibold mb-2 block">
                     Wage Rate
             </Label>
             <Input
@@ -787,18 +787,18 @@ const EmployeeManagementCard: React.FC = () => {
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, wageRate: parseFloat(e.target.value) || 0 })
                     }
-                    className="bg-slate-600 border-slate-500 text-white"
+                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
             />
           </div>
                 <div>
-                  <Label htmlFor="wage-period" className="text-white">
+                  <Label htmlFor="wage-period" className="text-white font-semibold mb-2 block">
                     Wage Period
                   </Label>
                   <select
                     id="wage-period"
                     value={newEmployee.wagePeriod}
                     onChange={(e) => setNewEmployee({ ...newEmployee, wagePeriod: e.target.value as any })}
-                    className="w-full p-2 bg-slate-600 border border-slate-500 rounded text-white"
+                    className="w-full p-3 bg-slate-600/50 border border-slate-500 rounded-lg text-white focus:border-blue-400 focus:ring-blue-400/20"
                   >
                     <option value="hour">Per Hour</option>
                     <option value="day">Per Day</option>
@@ -807,10 +807,10 @@ const EmployeeManagementCard: React.FC = () => {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end mt-6">
                 <Button
                   onClick={() => void handleAddEmployee()}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Add Employee
                 </Button>
@@ -819,21 +819,21 @@ const EmployeeManagementCard: React.FC = () => {
           )}
 
           {/* Fund Contract Section */}
-          <div className="bg-slate-700 p-4 rounded-lg mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-white font-semibold">Fund Contract</h3>
+          <div className="bg-slate-700/50 p-6 rounded-xl mb-6 border border-slate-600">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-lg">Fund Contract</h3>
               <Button
                 onClick={() => setIsFunding((v) => !v)}
-                className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700"
+                className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
                 {isFunding ? "Cancel" : "Fund Contract"}
               </Button>
             </div>
             {isFunding && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <Label htmlFor="fund-amount" className="text-white">
+                  <Label htmlFor="fund-amount" className="text-white font-semibold mb-2 block">
                     Amount to Fund (Tokens)
                   </Label>
                   <Input
@@ -842,16 +842,16 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="1000"
                     value={fundAmount}
                     onChange={(e) => setFundAmount(e.target.value)}
-                    className="bg-slate-600 border-slate-500 text-white"
+                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
                   />
-                  <p className="text-xs text-gray-400 mt-1">
-                    Transfer tokens from your account to the contract for payroll
+                  <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+                    Transfer tokens from your account to the contract for payroll operations
                   </p>
                 </div>
                 <Button
                   onClick={() => void handleFundContract()}
                   disabled={isLoading || !fundAmount}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {isLoading ? "Funding..." : "Fund Contract"}
                 </Button>

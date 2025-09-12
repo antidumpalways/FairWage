@@ -92,17 +92,17 @@ const CompanyFundsCard: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Add New Contract */}
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white text-lg">Add New Contract</CardTitle>
+      <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-white text-xl font-semibold">Add New Contract</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-400 mb-4">
-            Add a new business contract for additional revenue streams
+          <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+            Deploy additional payroll contracts for multiple business entities or departments
           </p>
-          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-            <Building2 className="w-4 h-4 mr-2" />
-            $ Add Contract
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Building2 className="w-5 h-5 mr-3" />
+            Deploy Contract
           </Button>
         </CardContent>
       </Card>

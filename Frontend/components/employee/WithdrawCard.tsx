@@ -136,42 +136,45 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   }, [isWalletConnected, publicKey, selectedContract]);
 
   return (
-    <Card className="glass-card card-hover bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-600/50 animate-slide-up">
-      <CardHeader className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 animate-shimmer"></div>
-        <CardTitle className="text-white flex items-center relative z-10">
-          <ArrowUpCircle className="w-6 h-6 mr-3 text-emerald-400 animate-bounce-subtle" />
-          <span className="text-gradient-blue text-xl font-bold">Withdraw Wages</span>
+    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+            <ArrowUpCircle className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <span className="text-xl font-bold">Withdraw Wages</span>
+            <p className="text-slate-400 text-sm font-normal mt-1">Access your earned wages instantly with secure blockchain transactions</p>
+          </div>
         </CardTitle>
-        <p className="text-gray-300 text-sm relative z-10">Instantly withdraw your earned wages to your wallet with zero delays</p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Withdrawal Mode Selection */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-4 mb-6">
             <Button
               variant={withdrawMode === 'full' ? 'default' : 'outline'}
-              size="sm"
+              size="lg"
               onClick={() => setWithdrawMode('full')}
-              className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
+              className={`flex-1 font-semibold py-3 transition-all duration-300 ${
                 withdrawMode === 'full' 
-                  ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25' 
-                  : 'bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:border-emerald-400/50'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' 
+                  : 'bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:border-blue-400'
               }`}
             >
-              💰 Withdraw All
+              Withdraw All
             </Button>
             <Button
               variant={withdrawMode === 'partial' ? 'default' : 'outline'}
-              size="sm"
+              size="lg"
               onClick={() => setWithdrawMode('partial')}
-              className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
+              className={`flex-1 font-semibold py-3 transition-all duration-300 ${
                 withdrawMode === 'partial' 
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/25' 
-                  : 'bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:border-purple-400/50'
+                  ? 'bg-slate-600 hover:bg-slate-700 text-white shadow-lg' 
+                  : 'bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:border-slate-400'
               }`}
             >
-              🎯 Custom Amount
+              Custom Amount
             </Button>
           </div>
           

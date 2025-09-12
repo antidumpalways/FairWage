@@ -158,40 +158,43 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
   }
 
   return (
-    <Card className="glass-card card-hover bg-gradient-to-br from-purple-900/30 via-blue-900/20 to-indigo-900/30 border-purple-500/30 animate-slide-up">
-      <CardHeader className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-indigo-500/10 animate-shimmer"></div>
-        <CardTitle className="text-white flex items-center relative z-10">
-          <Building2 className="w-7 h-7 mr-3 text-purple-400 animate-float" />
-          <span className="text-gradient-purple text-2xl font-bold">Select Your Employer</span>
+    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+            <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <span className="text-2xl font-bold">Select Your Employer</span>
+            <p className="text-slate-400 text-sm font-normal mt-1">
+              Choose which company's payroll contract you want to access
+            </p>
+          </div>
         </CardTitle>
-        <p className="text-gray-300 text-sm relative z-10">
-          🏢 Choose which company's wages you want to view and manage
-        </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">
+            <label className="text-sm text-slate-300 mb-3 block font-semibold">
               Available Employers ({contracts.length})
             </label>
             <Select
               value={selectedContract?.contractId || ""}
               onValueChange={handleContractSelect}
             >
-              <SelectTrigger className="w-full glass-card bg-slate-700/50 border-purple-500/30 text-white hover:border-purple-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 py-3">
-                <SelectValue placeholder="🏢 Choose an employer..." />
+              <SelectTrigger className="w-full bg-slate-700/50 border-slate-600 text-white hover:border-slate-500 transition-all duration-300 py-4">
+                <SelectValue placeholder="Choose an employer..." />
               </SelectTrigger>
-              <SelectContent className="glass-card bg-slate-700/95 border-purple-500/30 backdrop-blur-xl">
+              <SelectContent className="bg-slate-700/95 border-slate-600 backdrop-blur-xl">
                 {contracts.map((contract) => (
                   <SelectItem 
                     key={contract.contractId} 
                     value={contract.contractId}
-                    className="text-white hover:bg-purple-600/20 hover:text-purple-200 transition-all duration-200 cursor-pointer"
+                    className="text-white hover:bg-slate-600/50 hover:text-white transition-all duration-200 cursor-pointer"
                   >
                     <div className="flex items-center justify-between w-full py-2">
-                      <span className="font-bold text-lg">🏢 {contract.companyName}</span>
-                      <span className="text-sm text-purple-300 ml-2 font-semibold px-2 py-1 bg-purple-500/20 rounded-full">
+                      <span className="font-bold text-lg">{contract.companyName}</span>
+                      <span className="text-sm text-slate-300 ml-2 font-semibold px-3 py-1 bg-slate-600/50 rounded-full">
                         {contract.tokenSymbol}
                       </span>
                     </div>
@@ -202,7 +205,7 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
           </div>
 
           {selectedContract && (
-            <div className="glass-card bg-gradient-to-br from-purple-800/20 to-blue-800/20 p-5 rounded-xl border border-purple-500/30 animate-fade-in">
+            <div className="bg-slate-700/50 p-6 rounded-xl border border-slate-600">
               <div className="text-white font-bold mb-4 flex items-center">
                 <span className="text-emerald-400 mr-2">✅</span>
                 <span className="text-gradient-purple text-lg">Selected: {selectedContract.companyName}</span>
@@ -239,7 +242,7 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
               onClick={discoverContracts}
               variant="ghost" 
               size="sm"
-              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 px-3 py-2 rounded-lg transition-all duration-300 font-semibold"
+              className="text-slate-400 hover:text-white hover:bg-slate-600/50 px-4 py-2 rounded-lg transition-all duration-300 font-semibold"
             >
               🔄 Refresh
             </Button>
