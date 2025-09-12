@@ -448,7 +448,7 @@ export const addEmployee = async (
             fairWageContractId,
             employeeAddress,
             employeeName,
-            wageRate,
+            wageRate: wageRate * 10000000, // Convert display units to raw units
             wagePeriod
         })
     });
@@ -681,7 +681,7 @@ export const updateWageRate = async (fairWageContractId: string, employeeAddress
             userPublicKey: publicKey,
             fairWageContractId,
             employeeAddress,
-            newWageRate
+            newWageRate: newWageRate * 10000000 // Convert display units to raw units
         })
     });
 
