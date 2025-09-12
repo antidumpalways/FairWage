@@ -29,7 +29,7 @@ interface WithdrawCardProps {
 const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastWithdrawal, setLastWithdrawal] = useState<{ amount: string; timestamp: Date } | null>(null);
-  const [availableBalance, setAvailableBalance] = useState<bigint>(0n);
+  const [availableBalance, setAvailableBalance] = useState<bigint>(BigInt(0));
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [withdrawMode, setWithdrawMode] = useState<'full' | 'partial'>('full');
@@ -50,7 +50,7 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
     } catch (error) {
       console.error('❌ Failed to load withdrawal balance:', error);
       setErrorMsg(error instanceof Error ? error.message : "Failed to load balance");
-      setAvailableBalance(0n);
+      setAvailableBalance(BigInt(0));
     } finally {
       setIsLoadingBalance(false);
     }
@@ -131,7 +131,7 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
 
   useEffect(() => {
     if (isWalletConnected && publicKey && selectedContract) loadAvailableBalance();
-    else { setAvailableBalance(0n); setErrorMsg(null); }
+    else { setAvailableBalance(BigInt(0)); setErrorMsg(null); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWalletConnected, publicKey, selectedContract]);
 
@@ -221,7 +221,7 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
 
           <Button
             onClick={handleWithdraw}
-            disabled={!isWalletConnected || isLoading || availableBalance === 0n || !!errorMsg || (withdrawMode === 'partial' && !customAmount)}
+            disabled={!isWalletConnected || isLoading || availableBalance === BigInt(0) || !!errorMsg || (withdrawMode === 'partial' && !customAmount)}
             className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-lg py-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/25 disabled:hover:scale-100 disabled:hover:shadow-none"
           >
             {isLoading ? (
