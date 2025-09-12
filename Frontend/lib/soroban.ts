@@ -433,7 +433,9 @@ export const setContractId = (contractId: string): void => {
 export const addEmployee = async (
     fairWageContractId: string,
     employeeAddress: string,
-    hourlyWage: number
+    employeeName: string,
+    wageRate: number,
+    wagePeriod: number = 3600 // default to hourly (3600 seconds)
 ): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
@@ -445,7 +447,9 @@ export const addEmployee = async (
             userPublicKey: publicKey,
             fairWageContractId,
             employeeAddress,
-            hourlyWage
+            employeeName,
+            wageRate,
+            wagePeriod
         })
     });
 
