@@ -560,12 +560,12 @@ export const fetchAccruedBalance = async (employeeAddress: string, contractId?: 
 };
 
 // Employee withdrawal function
-export const withdrawEmployeeFunds = async (): Promise<string> => {
+export const withdrawEmployeeFunds = async (contractId?: string): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
     
-    const fairWageContractId = localStorage.getItem('fairWageContractId');
-    if (!fairWageContractId) throw new Error('Contract not found. Please connect to a FairWage contract first.');
+    const fairWageContractId = contractId || localStorage.getItem('fairWageContractId');
+    if (!fairWageContractId) throw new Error('Contract not found. Please provide a contract ID.');
 
     const response = await fetch('/api/pay-employee', {
         method: 'POST',
@@ -886,9 +886,9 @@ export const listEmployees = async (fairWageContractId: string): Promise<any[]> 
 };
 
 // Partial withdraw function for custom amount
-export const partialWithdraw = async (amount: string): Promise<string> => {
-    const contractId = await getCurrentContractId();
-    if (!contractId) throw new Error("Contract not found");
+export const partialWithdraw = async (amount: string, contractId?: string): Promise<string> => {
+    const fairWageContractId = contractId || await getCurrentContractId();
+    if (!fairWageContractId) throw new Error("Contract not found");
 
     const rabet = (window as any).rabet;
     if (!rabet) throw new Error("Rabet wallet not found");
@@ -904,7 +904,7 @@ export const partialWithdraw = async (amount: string): Promise<string> => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userPublicKey: publicKey,
-                fairWageContractId: contractId,
+                fairWageContractId: fairWageContractId,
                 employeeAddress: publicKey,
                 amount: rawAmount
             })

@@ -79,10 +79,10 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
       let withdrawnAmount: bigint;
       
       if (withdrawMode === 'full') {
-        transactionHash = await withdrawEmployeeFunds();
+        transactionHash = await withdrawEmployeeFunds(selectedContract?.contractId);
         withdrawnAmount = availableBalance;
       } else {
-        transactionHash = await partialWithdraw(customAmount);
+        transactionHash = await partialWithdraw(customAmount, selectedContract?.contractId);
         withdrawnAmount = BigInt(Math.floor(parseFloat(customAmount) * 10000000));
         setCustomAmount(''); // Clear input after withdrawal
       }
