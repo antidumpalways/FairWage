@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { Horizon } = require('@stellar/stellar-sdk');
+const { Horizon, rpc } = require('@stellar/stellar-sdk');
 require('dotenv').config();
 
 // Try to load config file, fallback to environment variables
@@ -12,12 +12,13 @@ try {
   config = {
     port: process.env.PORT || 3001,
     nodeEnv: process.env.NODE_ENV || 'development',
+    horizonUrl: process.env.HORIZON_URL || 'https://horizon-testnet.stellar.org',
     rpcUrl: process.env.RPC_URL || 'https://soroban-testnet.stellar.org',
     networkPassphrase: process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
     fairwageContractId: process.env.FAIRWAGE_CONTRACT_ID,
     tokenContractId: process.env.TOKEN_CONTRACT_ID,
     logLevel: process.env.LOG_LEVEL || 'info',
-    corsOrigin: process.env.CORS_ORIGIN || process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'
+    corsOrigin: process.env.CORS_ORIGIN || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000')
   };
 }
 
@@ -32,15 +33,15 @@ app.use(cors({
 app.use(express.json());
 
 // Stellar configuration
+const HORIZON_URL = config.horizonUrl;
 const RPC_URL = config.rpcUrl;
 const NETWORK_PASSPHRASE = config.networkPassphrase;
 const FAIRWAGE_CONTRACT_ID = config.fairwageContractId;
 const TOKEN_CONTRACT_ID = config.tokenContractId;
 
-// Initialize Stellar Horizon server
-const server = new Horizon.Server(RPC_URL, {
-  allowHttp: true
-});
+// Initialize Stellar servers
+const horizonServer = new Horizon.Server(HORIZON_URL);
+const sorobanRpcServer = new rpc.Server(RPC_URL);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -48,6 +49,7 @@ app.get('/health', (req, res) => {
     status: 'OK', 
     timestamp: new Date().toISOString(),
     network: NETWORK_PASSPHRASE,
+    horizonUrl: HORIZON_URL,
     rpcUrl: RPC_URL
   });
 });
@@ -58,6 +60,7 @@ app.get('/api/contracts', (req, res) => {
     fairwageContractId: FAIRWAGE_CONTRACT_ID,
     tokenContractId: TOKEN_CONTRACT_ID,
     network: NETWORK_PASSPHRASE,
+    horizonUrl: HORIZON_URL,
     rpcUrl: RPC_URL
   });
 });
@@ -71,7 +74,7 @@ app.get('/api/balance/:address', async (req, res) => {
       return res.status(400).json({ error: 'Address is required' });
     }
 
-    const account = await server.loadAccount(address);
+    const account = await horizonServer.loadAccount(address);
             res.json({
       address,
       balance: account.balances,
@@ -126,14 +129,15 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// Start server on localhost (backend requirement)
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`🚀 FairWage Backend Server running on localhost:${PORT}`);
-  console.log(`📡 RPC URL: ${RPC_URL}`);
+// Start server on all interfaces (required for Replit environment)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 FairWage Backend Server running on 0.0.0.0:${PORT}`);
+  console.log(`📡 Horizon URL: ${HORIZON_URL}`);
+  console.log(`🔗 Soroban RPC URL: ${RPC_URL}`);
   console.log(`🌐 Network: ${NETWORK_PASSPHRASE}`);
   console.log(`📋 FairWage Contract ID: ${FAIRWAGE_CONTRACT_ID || 'Not configured'}`);
   console.log(`🪙 Token Contract ID: ${TOKEN_CONTRACT_ID || 'Not configured'}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`📝 Configuration: ${config.fairwageContractId ? 'config.js' : 'environment variables'}`);
 });
 

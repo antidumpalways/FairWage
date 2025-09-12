@@ -1,0 +1,41 @@
+# FairWage - Blockchain Payroll System
+
+## Project Overview
+A decentralized payroll system built on Stellar Soroban enabling real-time wage accrual and instant withdrawals.
+
+## Current State
+- **Status**: Successfully imported and configured for Replit environment
+- **Frontend**: Next.js 13 running on port 5000 with proper host configuration (0.0.0.0)
+- **Backend**: Node.js Express server on localhost:3001 with Stellar SDK integration
+- **Smart Contracts**: Rust/Soroban contracts with precompiled WASM files available
+- **Database**: Uses Stellar blockchain (no traditional database required)
+
+## Architecture
+- **Frontend**: Next.js with TypeScript, Tailwind CSS, shadcn/ui components
+- **Backend**: Express API server with Stellar blockchain integration
+- **Blockchain**: Stellar Soroban smart contracts for payroll management
+- **Wallet**: Freighter wallet integration for user authentication
+
+## Recent Changes (Import Setup)
+- Configured Next.js for Replit proxy environment (removed invalid config properties)
+- Fixed Stellar SDK imports in backend (changed from Server to Horizon.Server)
+- Set up CORS configuration for cross-origin requests
+- Configured deployment for autoscale target
+- Established proper port configuration (frontend: 5000, backend: 3001)
+
+## User Preferences
+- None recorded yet
+
+## Key Features
+- Real-time wage accrual per second
+- Instant withdrawals with minimal fees
+- Multi-company support
+- Employer dashboard for employee management
+- Employee dashboard for balance monitoring
+- Blockchain-based audit trail
+
+## Development Notes
+- Frontend runs on 0.0.0.0:5000 (required for Replit proxy)
+- Backend runs on localhost:3001 (backend requirement)
+- Smart contracts use precompiled WASM files (Backend/fungible.wasm)
+- Uses Stellar testnet by default
