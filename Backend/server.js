@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const { Horizon, rpc } = require('@stellar/stellar-sdk');
+const { Horizon, rpc, StellarSdk, Keypair, TransactionBuilder, Operation, Asset, Contract } = require('@stellar/stellar-sdk');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 // Try to load config file, fallback to environment variables
@@ -126,22 +128,55 @@ app.post('/api/prepare-token-deploy', async (req, res) => {
       });
     }
 
-    // For now, return a placeholder response since actual deployment logic would be complex
-    // In a real implementation, this would prepare the token deployment transaction
+    console.log('🚀 Preparing real token deployment transaction');
+    console.log('📋 Token details:', { tokenName, tokenSymbol, userPublicKey });
+
+    // Load the fungible token WASM contract
+    const wasmPath = path.join(__dirname, 'fungible.wasm');
+    if (!fs.existsSync(wasmPath)) {
+      throw new Error('fungible.wasm contract file not found');
+    }
+    
+    const wasmBuffer = fs.readFileSync(wasmPath);
+    console.log('✅ Loaded fungible.wasm contract');
+
+    // Load the source account
+    const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+    console.log('✅ Loaded source account');
+
+    // Create the contract deployment transaction
+    const transaction = new TransactionBuilder(sourceAccount, {
+      fee: '10000000', // 10 XLM (high fee for contract deployment)
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+    .addOperation(Operation.uploadContractWasm({
+      wasm: wasmBuffer,
+    }))
+    .setTimeout(300)
+    .build();
+
+    const transactionXdr = transaction.toEnvelope().toXDR('base64');
+    console.log('✅ Generated real transaction XDR');
+    console.log('📋 XDR length:', transactionXdr.length);
+
     res.json({
       success: true,
-      message: 'Token deployment preparation endpoint - implementation needed',
-      transactionXdr: 'PLACEHOLDER_XDR_FOR_TOKEN_DEPLOYMENT',
+      message: 'Real token deployment transaction prepared',
+      transactionXdr: transactionXdr,
       userPublicKey,
       tokenName,
       tokenSymbol,
-      network: NETWORK_PASSPHRASE
+      network: NETWORK_PASSPHRASE,
+      fee: '10000000',
+      operations: 1,
+      type: 'contract_upload'
     });
   } catch (error) {
-    console.error('Error preparing token deployment:', error);
+    console.error('❌ Error preparing token deployment:', error);
     res.status(500).json({ 
       error: 'Failed to prepare token deployment',
-      message: error.message 
+      message: error.message,
+      details: error.stack
     });
   }
 });
@@ -157,20 +192,43 @@ app.post('/api/submit-transaction', async (req, res) => {
       });
     }
 
-    // For now, return a placeholder response since actual submission would use Stellar SDK
-    // In a real implementation, this would submit to the Stellar network
+    console.log('📡 Submitting real transaction to Stellar network');
+    console.log('📋 Signed XDR length:', signedTransactionXdr.length);
+
+    // Submit the transaction to Stellar network
+    const transaction = TransactionBuilder.fromXDR(signedTransactionXdr, NETWORK_PASSPHRASE);
+    const result = await horizonServer.submitTransaction(transaction);
+    
+    console.log('✅ Transaction submitted successfully');
+    console.log('📋 Transaction hash:', result.hash);
+    console.log('📋 Ledger:', result.ledger);
+
     res.json({
       success: true,
-      message: 'Transaction submission endpoint - implementation needed',
-      hash: 'PLACEHOLDER_TRANSACTION_HASH',
+      message: 'Transaction submitted to Stellar network',
+      hash: result.hash,
+      ledger: result.ledger,
       network: NETWORK_PASSPHRASE,
-      status: 'pending'
+      status: 'success',
+      result: result
     });
   } catch (error) {
-    console.error('Error submitting transaction:', error);
+    console.error('❌ Error submitting transaction:', error);
+    
+    // Handle specific Stellar errors
+    let errorMessage = error.message;
+    let errorCode = 'SUBMISSION_ERROR';
+    
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data.title || error.message;
+      errorCode = error.response.data.type || errorCode;
+    }
+
     res.status(500).json({ 
       error: 'Failed to submit transaction',
-      message: error.message 
+      message: errorMessage,
+      code: errorCode,
+      details: error.response?.data
     });
   }
 });
