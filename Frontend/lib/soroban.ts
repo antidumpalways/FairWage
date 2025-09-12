@@ -414,7 +414,7 @@ export const setContractId = (contractId: string): void => {
     }
 };
 
-export const getCurrentContractId = async (): Promise<string> => {
+export const getCurrentContractId = async (): Promise<string | null> => {
     return await getContractId();
 };
 
