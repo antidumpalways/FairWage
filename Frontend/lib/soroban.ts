@@ -896,9 +896,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
     try {
         const { publicKey } = await rabet.connect();
         
-        // Convert display amount (TBU) to raw amount (multiply by 10^7)
-        const rawAmount = (Math.floor(parseFloat(amount) * 10000000)).toString();
-        
+        // Send original amount - backend will handle conversion to stroops
         const response = await fetch('/api/partial-withdraw', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -906,7 +904,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
                 userPublicKey: publicKey,
                 fairWageContractId: fairWageContractId,
                 employeeAddress: publicKey,
-                amount: rawAmount
+                amount: amount  // Send original amount like "100"
             })
         });
 
