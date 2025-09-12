@@ -584,8 +584,19 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-    if (!signResult.xdr) throw new Error("Signing cancelled");
+    console.log('🔧 XDR to sign (withdraw all):', result.transactionXdr.substring(0, 50) + '...');
+    
+    // Validate XDR before signing
+    try {
+        StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
+    } catch (xdrError) {
+        throw new Error(`Invalid XDR format: ${xdrError.message}`);
+    }
+    
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+    if (signResult.error) {
+        throw new Error(`Signing failed: ${signResult.error}`);
+    }
 
     const submitResponse = await fetch('/api/submit-transaction', {
         method: 'POST',
@@ -896,7 +907,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
         const { publicKey } = await window.rabet.connect();
         
         // Send original amount - backend will handle conversion to stroops  
-        const response = await fetch('http://localhost:3001/api/partial-withdraw', {
+        const response = await fetch('/api/partial-withdraw', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
