@@ -24,10 +24,14 @@ const networkPassphrase = StellarSdk.Networks.TESTNET;
 const FRIENDBOT_URL = 'https://friendbot.stellar.org';
 
 // Get contract ID from backend or localStorage
-const getContractId = async (): Promise<string> => {
+const getContractId = async (): Promise<string | null> => {
     try {
-        // First try to get from backend
-        const response = await fetch('http://localhost:3001/api/get-current-contract');
+        // First try to get from backend - use dynamic backend URL for Replit
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 
+          (typeof window !== 'undefined' && window.location.hostname.includes('replit.dev') 
+            ? '/api/contracts' // Use Next.js proxy to avoid CORS
+            : 'http://localhost:3001/api/contracts');
+        const response = await fetch(backendUrl);
         if (response.ok) {
             const data = await response.json();
             if (data.contractId) {
@@ -52,7 +56,9 @@ const getContractId = async (): Promise<string> => {
     }
     }
 
-    throw new Error('No contract ID available. Please deploy a contract first.');
+    // Return null instead of throwing error - contracts can be deployed later
+    console.log('ℹ️ No contract ID found - app will work in deployment mode');
+    return null;
 };
 
 // Force TESTNET network type
@@ -149,9 +155,8 @@ export const healthCheck = async (): Promise<{ success: boolean; message?: strin
             console.log('✅ Soroban network healthy, ledger:', latestLedger.sequence);
         }
         
-        // Check backend API health - FIXED URL
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${backendUrl}/health`, {
+        // Check backend API health via Next.js proxy
+        const response = await fetch('/api/health', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -419,7 +424,7 @@ export const fetchAccruedBalance = async (employeeAddress: string): Promise<bigi
         console.log('💰 Fetching accrued balance for:', employeeAddress);
         
         const contractId = await getContractId();
-        const response = await fetch(api('/api/accrued-balance'), {
+        const response = await fetch('/api/accrued-balance', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -688,7 +693,7 @@ export async function listEmployees(fairWageContractId: string): Promise<string[
     try {
         console.log('📋 Listing employees...', { fairWageContractId });
 
-        const response = await fetch(api('/api/list-employees'), {
+        const response = await fetch('/api/list-employees', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1191,7 +1196,7 @@ export async function checkContractBalance(fairWageContractId: string): Promise<
         }
 
         // Use backend API instead of simulateTransaction
-        const response = await fetch(api('/api/check-contract-balance'), {
+        const response = await fetch('/api/check-contract-balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
