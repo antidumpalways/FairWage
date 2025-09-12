@@ -589,14 +589,12 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
     // Validate XDR before signing
     try {
         StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
-    } catch (xdrError) {
+    } catch (xdrError: any) {
         throw new Error(`Invalid XDR format: ${xdrError.message}`);
     }
     
     const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-    if (signResult.error) {
-        throw new Error(`Signing failed: ${signResult.error}`);
-    }
+    if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
         method: 'POST',
@@ -933,9 +931,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
         }
         
         const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-        if (signResult.error) {
-            throw new Error(`Signing failed: ${signResult.error}`);
-        }
+        if (!signResult.xdr) throw new Error("Signing cancelled");
         
         const submitResponse = await fetch('/api/submit-transaction', {
             method: 'POST',
