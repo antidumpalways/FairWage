@@ -455,7 +455,7 @@ const EmployeeManagementCard: React.FC = () => {
         throw new Error("Please deploy both contracts first");
       }
 
-      await initializeContract(fairWageContractId, 'fairwage', 'FairWage Company', 'FairWage Token', 'FAIRWAGE');
+      await initializeContract(fairWageContractId, tokenContractId);
       
       alert("Contract initialized successfully! You can now add employees.");
     } catch (error: any) {

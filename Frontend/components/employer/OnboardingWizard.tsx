@@ -73,7 +73,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       console.log('🔧 Starting FairWage initialization...');
       
       // Initialize FairWage contract
-      const initResult = await initializeContract(fairWageContractId, 'fairwage', companyName, tokenName, tokenSymbol, tokenContractId);
+      const initResult = await initializeContract(fairWageContractId, tokenContractId);
       console.log('✅ FairWage initialized successfully');
       
       setCurrentStep(4); // Updated step numbering
