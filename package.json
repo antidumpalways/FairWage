@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Rust CI](https://github.com/yourusername/FairWage/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/yourusername/FairWage/actions/workflows/rust-ci.yml) [![Next.js CI](https://github.com/yourusername/FairWage/actions/workflows/nextjs-ci.yml/badge.svg)](https://github.com/yourusername/FairWage/actions/workflows/nextjs-ci.yml)",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antidumpalways/FairWage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/antidumpalways/FairWage/issues"
+  },
+  "homepage": "https://github.com/antidumpalways/FairWage#readme",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^14.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.1"
+  }
+}
