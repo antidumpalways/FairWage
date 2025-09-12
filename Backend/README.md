@@ -28,22 +28,9 @@ LOG_LEVEL=info
 CORS_ORIGIN=http://localhost:3000
 ```
 
-### 2. Configuration File
+### 2. Direct Configuration in server.js
 
-Copy `config.example.js` to `config.js` and update the values:
-
-```javascript
-module.exports = {
-  port: 3001,
-  nodeEnv: 'development',
-  rpcUrl: 'https://soroban-testnet.stellar.org',
-  networkPassphrase: 'Test SDF Network ; September 2015',
-  fairwageContractId: 'YOUR_FAIRWAGE_CONTRACT_ID_HERE',
-  tokenContractId: 'YOUR_TOKEN_CONTRACT_ID_HERE',
-  logLevel: 'info',
-  corsOrigin: 'http://localhost:3000'
-};
-```
+The server uses environment variables by default. All configuration is handled through environment variables for better security and deployment flexibility.
 
 ## Getting Contract IDs
 

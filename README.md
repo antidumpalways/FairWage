@@ -1,10 +1,18 @@
-# 🏢 FairWage - Blockchain-Powered Payroll System
+# 🏢 FairWage - Blockchain Payroll System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Rust CI](https://github.com/yourusername/FairWage/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/yourusername/FairWage/actions/workflows/rust-ci.yml)
-[![Next.js CI](https://github.com/yourusername/FairWage/actions/workflows/nextjs-ci.yml/badge.svg)](https://github.com/yourusername/FairWage/actions/workflows/nextjs-ci.yml)
+[![Deployment Status](https://img.shields.io/badge/Deployment-Ready-green.svg)](https://replit.com)
+[![Stellar](https://img.shields.io/badge/Built%20on-Stellar%20Soroban-blue.svg)](https://soroban.stellar.org/)
 
 A decentralized payroll system built on Stellar Soroban enabling real-time wage accrual and instant withdrawals.
+
+## 🚀 **Current Status**
+- 🔧 **Development Ready**: Configured for local development and Replit environment
+- ✅ **Frontend**: Next.js 13 with TypeScript and Tailwind CSS
+- ✅ **Backend**: Node.js Express server with Stellar SDK integration
+- ✅ **Smart Contracts**: Fungible token contract (Rust/Soroban)
+- 📋 **In Progress**: Full FairWage payroll contract development
+- 🧪 **Testing**: Basic contract functionality tested on Stellar testnet
 
 ## 📋 Table of Contents
 - [Features](#-features)
@@ -46,16 +54,18 @@ graph TD
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+ 
-- Rust 1.70+
-- Freighter Wallet extension
-- Git
+### 🔧 **Replit Environment**
+The project is configured to run on Replit:
+
+1. **Frontend**: Next.js development server on port 5000
+2. **Backend**: Express API server on port 3001  
+3. **Smart Contracts**: Fungible token contract ready for deployment
+4. **Wallet**: Freighter wallet integration for Stellar testnet
 
 ### 🏆 **For Hackathon Participants**
-This project is designed to be easily deployable and testable for hackathon submissions. All commands use generic variable names (`test-key`, `$ADDRESS`, `$CONTRACT_ID`) that work for any user.
+This project is designed to be easily deployable and testable for hackathon submissions.
 
-### Installation
+### 💻 **Local Development Setup**
 
 1. **Clone the repository**
 ```bash
@@ -72,18 +82,27 @@ npm install
 3. **Install Backend Dependencies**
 ```bash
 cd ../Backend
-cargo build
+npm install
 ```
 
-4. **Start Development Server**
+4. **Build Smart Contracts** (Optional)
 ```bash
-cd ../Frontend
-npm run dev
+cargo build --target wasm32-unknown-unknown --release
 ```
 
-5. **Open in Browser**
+5. **Start Development**
+```bash
+# Frontend (port 5000)
+cd Frontend && npm run dev
+
+# Backend (port 3001)
+cd Backend && npm start
 ```
-http://localhost:3000
+
+6. **Access the Application**
+```
+Frontend: http://localhost:5000
+Backend API: http://localhost:3001/health
 ```
 
 ### **Quick Test Backend Features**
@@ -244,16 +263,22 @@ soroban contract invoke \
 ### Project Structure
 ```
 FairWage/
-├── .github/           # CI/CD workflows
 ├── Backend/
-│   ├── contracts/     # Smart contracts
-│   ├── tests/         # Contract test suite
-│   └── Cargo.toml    # Rust dependencies
+│   ├── contracts/     # Smart contracts (Rust/Soroban)
+│   ├── target/        # Compiled WASM files
+│   ├── server.js      # Express API server
+│   ├── package.json   # Node.js dependencies
+│   └── Cargo.toml     # Rust dependencies
 ├── Frontend/
-│   ├── app/           # Next.js app router
-│   ├── components/    # UI components
-│   └── lib/           # Blockchain utilities
-└── docs/             # Technical documentation
+│   ├── app/           # Next.js 13 app router
+│   ├── components/    # React UI components
+│   ├── lib/           # Blockchain utilities
+│   ├── .env.production # Production environment
+│   └── package.json   # Frontend dependencies
+├── LICENSE            # MIT License
+├── package.json       # Root package config
+├── README.md          # This file
+└── replit.md          # Project documentation
 ```
 
 ### Core Contract Functions
@@ -272,19 +297,19 @@ impl FairWage {
 }
 ```
 
-#### **FairWage Contract**
-- `initialize()` - Initialize contract with employer and token
-- `add_employee()` - Add new employee with wage rate
-- `update_wage_rate()` - Update employee wage rate
-- `remove_employee()` - Remove employee from system
-- `deposit()` - Employer deposits funds
-- `withdraw()` - Employee withdraws wages
-- `get_accrued_balance()` - Get current wage balance
+#### **Current Smart Contracts**
 
-#### **Token Contract**
-- Custom fungible tokens for each company
-- Configurable token name and symbol
-- Standard Stellar token functionality
+**Fungible Token Contract** (Available)
+- Standard Stellar Asset Contract (SAC) compatible
+- Token initialization with admin, decimal, name, symbol
+- Standard transfer, approve, balance functions
+- Located in `Backend/contracts/fungible/`
+
+**FairWage Payroll Contract** (In Development)
+- Real-time wage accrual system
+- Employee management functions
+- Withdrawal and deposit mechanisms
+- *Note: Full implementation in progress*
 
 ### **Environment Variables**
 
@@ -552,37 +577,51 @@ cargo build --target wasm32-unknown-unknown --release
 
 ## 🚀 Deployment
 
-### Smart Contract Deployment
+### 🌐 **Replit Deployment**
+The project can be deployed on Replit using the configured workflows:
+
 ```bash
-# Build optimized WASM
+# Current Workflows
+Frontend: npm run dev (port 5000)
+Backend: npm start (port 3001)
+Environment: Development/Testing
+```
+
+### 🏗️ **Smart Contract Deployment**
+
+Deploy the fungible token contract to Stellar testnet:
+```bash
+# Build the contract
 cd Backend
 cargo build --target wasm32-unknown-unknown --release
-soroban contract optimize --wasm target/wasm32-unknown-unknown/release/fair_wage_contract.wasm
 
-# Deploy to Testnet
+# Deploy to testnet (requires Soroban CLI and funded account)
 soroban contract install \
   --source-account test-key \
-  --wasm target/wasm32-unknown-unknown/release/fair_wage_contract.optimized.wasm \
-  --network testnet
-
-soroban contract deploy \
-  --source-account test-key \
-  --wasm-hash [WASM_HASH] \
+  --wasm target/wasm32-unknown-unknown/release/fungible.wasm \
   --network testnet
 ```
 
-### Frontend Hosting
-```bash
-cd Frontend
-npm run build && npm run start  # Production build
-# Deploy to Vercel/Netlify using their CLI
+### 📋 **Environment Variables**
+Create `.env.local` files for local development:
+
+**Frontend/.env.local:**
+```env
+NEXT_PUBLIC_RPC_URL=https://soroban-testnet.stellar.org
+NEXT_PUBLIC_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
+NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
+# For local development:
+NEXT_PUBLIC_API_URL=http://localhost:3001
+# For deployment, use relative paths or environment-specific URLs
 ```
 
-### **Environment Setup**
-1. Update environment variables for production
-2. Configure mainnet network settings
-3. Deploy contracts to mainnet
-4. Update contract IDs in environment
+**Backend/.env:**
+```env
+PORT=3001
+NODE_ENV=development
+RPC_URL=https://soroban-testnet.stellar.org
+NETWORK_PASSPHRASE=Test SDF Network ; September 2015
+```
 
 ## 🔒 Security Features
 
@@ -624,11 +663,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **OpenZeppelin** - For smart contract best practices
 - **shadcn/ui** - For the beautiful UI components
 
-## 📞 Support
+## 📞 Support & Links
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/FairWage/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/FairWage/discussions)
-- **Documentation**: [Project Wiki](https://github.com/yourusername/FairWage/wiki)
+- **Live Demo**: Available on Replit (Frontend port 5000)
+- **API Health**: `GET /health` endpoint on port 3001
+- **Stellar Network**: Testnet deployment with real contract interactions
+- **Wallet Integration**: Freighter wallet required for testing
 
 ## 🔮 Roadmap
 
