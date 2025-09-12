@@ -670,7 +670,7 @@ export const activateEmployee = async (fairWageContractId: string, employeeAddre
     return submitResult.transactionHash;
 };
 
-export const updateWageRate = async (fairWageContractId: string, employeeAddress: string, newWage: number): Promise<string> => {
+export const updateWageRate = async (fairWageContractId: string, employeeAddress: string, newWageRate: number): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
@@ -681,7 +681,7 @@ export const updateWageRate = async (fairWageContractId: string, employeeAddress
             userPublicKey: publicKey,
             fairWageContractId,
             employeeAddress,
-            newWage
+            newWageRate
         })
     });
 
