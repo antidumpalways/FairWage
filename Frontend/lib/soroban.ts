@@ -553,6 +553,55 @@ export const getAccruedBalance = async (employeeAddress: string): Promise<number
     return getEmployeeBalance(employeeAddress);
 };
 
+// Alias for employee dashboard compatibility
+export const fetchAccruedBalance = async (employeeAddress: string): Promise<bigint> => {
+    const balance = await getEmployeeBalance(employeeAddress);
+    return BigInt(balance);
+};
+
+// Employee withdrawal function
+export const withdrawEmployeeFunds = async (): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+    
+    const fairWageContractId = localStorage.getItem('fairWageContractId');
+    if (!fairWageContractId) throw new Error('Contract not found. Please connect to a FairWage contract first.');
+
+    const response = await fetch('/api/pay-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            employeeAddress: publicKey
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to withdraw funds: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
 export const removeEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();

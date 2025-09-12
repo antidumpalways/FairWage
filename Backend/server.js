@@ -844,15 +844,15 @@ app.post("/api/update-wage-rate", async (req, res) => {
 
 app.post("/api/pay-employee", async (req, res) => {
   try {
-    const { userPublicKey, fairWageContractId, employeeAddress, amount } =
+    const { userPublicKey, fairWageContractId, employeeAddress } =
       req.body;
 
-    if (!userPublicKey || !fairWageContractId || !employeeAddress || !amount) {
+    if (!userPublicKey || !fairWageContractId || !employeeAddress) {
       return res
         .status(400)
         .json({
           error:
-            "Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, amount",
+            "Missing required parameters: userPublicKey, fairWageContractId, employeeAddress",
         });
     }
 
@@ -879,8 +879,7 @@ app.post("/api/pay-employee", async (req, res) => {
       transactionXdr: preparedTx.toXDR(),
       fairWageContractId,
       employeeAddress,
-      amount,
-      message: "Pay all wages transaction prepared - ready for signing",
+      message: "Employee withdrawal transaction prepared - ready for signing",
     });
   } catch (error) {
     console.error("❌ Error paying employee:", error);
