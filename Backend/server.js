@@ -954,15 +954,19 @@ app.post("/api/partial-withdraw", async (req, res) => {
       ],
     });
 
+    console.log(`🔧 Building transaction for ${employeeAddress} withdrawing ${stroopsAmount} stroops`);
+
     const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
-      fee: "100000",
+      fee: StellarSdk.BASE_FEE,
       networkPassphrase,
     })
       .addOperation(op)
       .setTimeout(30)
       .build();
 
+    console.log(`🔧 Transaction built, preparing...`);
     const preparedTx = await server.prepareTransaction(tx);
+    console.log(`✅ Transaction prepared successfully`);
 
     res.json({
       success: true,

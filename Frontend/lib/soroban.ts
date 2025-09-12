@@ -890,14 +890,13 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
     const fairWageContractId = contractId || await getCurrentContractId();
     if (!fairWageContractId) throw new Error("Contract not found");
 
-    const rabet = (window as any).rabet;
-    if (!rabet) throw new Error("Rabet wallet not found");
+    if (!window.rabet) throw new Error("Rabet wallet not found");
 
     try {
-        const { publicKey } = await rabet.connect();
+        const { publicKey } = await window.rabet.connect();
         
-        // Send original amount - backend will handle conversion to stroops
-        const response = await fetch('/api/partial-withdraw', {
+        // Send original amount - backend will handle conversion to stroops  
+        const response = await fetch('http://localhost:3001/api/partial-withdraw', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -913,13 +912,25 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
             throw new Error(result.error || 'Failed to prepare partial withdrawal');
         }
 
-        const signedXDR = await rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        console.log('🔧 XDR to sign:', result.transactionXdr.substring(0, 50) + '...');
+        
+        // Validate XDR before signing
+        try {
+            StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
+        } catch (xdrError) {
+            throw new Error(`Invalid XDR format: ${xdrError.message}`);
+        }
+        
+        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+        if (signResult.error) {
+            throw new Error(`Signing failed: ${signResult.error}`);
+        }
         
         const submitResponse = await fetch('/api/submit-transaction', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                signedTransactionXdr: signedXDR.xdr
+                signedTransactionXdr: signResult.xdr
             })
         });
 
