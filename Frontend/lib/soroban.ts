@@ -588,12 +588,18 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
     
     // Validate XDR before signing
     try {
-        StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
+        const envelope = StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
+        const tx = new StellarSdk.Transaction(envelope, StellarSdk.Networks.TESTNET);
+        console.log('🔧 XDR source account:', tx.source);
+        console.log('🔧 Connected account:', publicKey);
+        if (tx.source !== publicKey) {
+            throw new Error(`XDR source mismatch: XDR source=${tx.source}, connected=${publicKey}`);
+        }
     } catch (xdrError: any) {
         throw new Error(`Invalid XDR format: ${xdrError.message}`);
     }
     
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -925,12 +931,18 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
         
         // Validate XDR before signing
         try {
-            StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
-        } catch (xdrError) {
+            const envelope = StellarSdk.xdr.TransactionEnvelope.fromXDR(result.transactionXdr, 'base64');
+            const tx = new StellarSdk.Transaction(envelope, StellarSdk.Networks.TESTNET);
+            console.log('🔧 XDR source account:', tx.source);
+            console.log('🔧 Connected account:', publicKey);
+            if (tx.source !== publicKey) {
+                throw new Error(`XDR source mismatch: XDR source=${tx.source}, connected=${publicKey}`);
+            }
+        } catch (xdrError: any) {
             throw new Error(`Invalid XDR format: ${xdrError.message}`);
         }
         
-        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
         if (!signResult.xdr) throw new Error("Signing cancelled");
         
         const submitResponse = await fetch('/api/submit-transaction', {
