@@ -869,6 +869,58 @@ export const listEmployees = async (fairWageContractId: string): Promise<any[]> 
     }
 };
 
+// Partial withdraw function for custom amount
+export const partialWithdraw = async (amount: string): Promise<string> => {
+    const contractId = await getCurrentContractId();
+    if (!contractId) throw new Error("Contract not found");
+
+    const rabet = (window as any).rabet;
+    if (!rabet) throw new Error("Rabet wallet not found");
+
+    try {
+        const { publicKey } = await rabet.connect();
+        
+        // Convert display amount (TBU) to raw amount (multiply by 10^7)
+        const rawAmount = (Math.floor(parseFloat(amount) * 10000000)).toString();
+        
+        const response = await fetch('/api/partial-withdraw', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userPublicKey: publicKey,
+                fairWageContractId: contractId,
+                employeeAddress: publicKey,
+                amount: rawAmount
+            })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Failed to prepare partial withdrawal');
+        }
+
+        const signedXDR = await rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        
+        const submitResponse = await fetch('/api/submit-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                signedTransactionXdr: signedXDR.xdr
+            })
+        });
+
+        const submitResult = await submitResponse.json();
+        if (!submitResponse.ok || !submitResult.success) {
+            throw new Error(submitResult.error || 'Failed to submit transaction');
+        }
+
+        return submitResult.transactionHash;
+    } catch (error) {
+        console.error('❌ Partial withdraw error:', error);
+        throw error;
+    }
+};
+
 // Export default
 export default {
     connectWallet,
@@ -883,5 +935,8 @@ export default {
     payAllWages,
     payAllEmployees,
     getEmployeeBalance,
-    listEmployees
+    listEmployees,
+    fetchAccruedBalance,
+    withdrawEmployeeFunds,
+    partialWithdraw
 };

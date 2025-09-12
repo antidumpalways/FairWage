@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import { ArrowUpCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { fetchAccruedBalance, withdrawEmployeeFunds } from "@/lib/soroban";
+import { fetchAccruedBalance, withdrawEmployeeFunds, partialWithdraw } from "@/lib/soroban";
 import { useWallet } from "@/contexts/WalletContext";
 
 const formatBigintTokens = (bi: bigint) => {
@@ -20,6 +21,8 @@ const WithdrawCard: React.FC = () => {
   const [availableBalance, setAvailableBalance] = useState<bigint>(0n);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [withdrawMode, setWithdrawMode] = useState<'full' | 'partial'>('full');
+  const [customAmount, setCustomAmount] = useState<string>('');
   const { publicKey, isWalletConnected } = useWallet();
 
   const ensureContractDetected = async (): Promise<boolean> => {
@@ -64,13 +67,41 @@ const WithdrawCard: React.FC = () => {
 
   const handleWithdraw = async () => {
     if (!isWalletConnected || !publicKey) return alert("Please connect your wallet first");
+    
+    // Validate partial withdrawal amount
+    if (withdrawMode === 'partial') {
+      const amount = parseFloat(customAmount);
+      if (!customAmount || isNaN(amount) || amount <= 0) {
+        setErrorMsg("Please enter a valid withdrawal amount");
+        return;
+      }
+      const maxAmount = Number(availableBalance) / 10000000; // Convert to display units
+      if (amount > maxAmount) {
+        setErrorMsg(`Amount exceeds available balance (${maxAmount.toFixed(7)} TBU)`);
+        return;
+      }
+    }
+    
     setIsLoading(true); setErrorMsg(null);
     try {
-      const pre = availableBalance;
-      await withdrawEmployeeFunds();
-      setLastWithdrawal({ amount: formatBigintTokens(pre).replace(" tokens",""), timestamp: new Date() });
+      let transactionHash: string;
+      let withdrawnAmount: bigint;
+      
+      if (withdrawMode === 'full') {
+        transactionHash = await withdrawEmployeeFunds();
+        withdrawnAmount = availableBalance;
+      } else {
+        transactionHash = await partialWithdraw(customAmount);
+        withdrawnAmount = BigInt(Math.floor(parseFloat(customAmount) * 10000000));
+        setCustomAmount(''); // Clear input after withdrawal
+      }
+      
+      setLastWithdrawal({ 
+        amount: formatBigintTokens(withdrawnAmount).replace(" tokens",""), 
+        timestamp: new Date() 
+      });
       await loadAvailableBalance();
-      alert(`Withdrawal successful! ${formatBigintTokens(pre)}`);
+      alert(`Withdrawal successful! ${formatBigintTokens(withdrawnAmount)} - Hash: ${transactionHash.substring(0, 10)}...`);
     } catch (e: any) {
       console.error(e); setErrorMsg(e?.message || "Unknown error");
       alert(`Withdrawal failed: ${e?.message || "Unknown error"}`);
@@ -96,10 +127,54 @@ const WithdrawCard: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <div className="text-center mb-1">
-            <div className="text-lg text-white mb-2">Withdraw All Accrued Wages</div>
-            <div className="text-sm text-gray-400">Withdraw all your earned wages at once</div>
+          {/* Withdrawal Mode Selection */}
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={withdrawMode === 'full' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setWithdrawMode('full')}
+              className="flex-1"
+            >
+              Withdraw All
+            </Button>
+            <Button
+              variant={withdrawMode === 'partial' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setWithdrawMode('partial')}
+              className="flex-1"
+            >
+              Custom Amount
+            </Button>
           </div>
+          
+          <div className="text-center mb-1">
+            <div className="text-lg text-white mb-2">
+              {withdrawMode === 'full' ? 'Withdraw All Accrued Wages' : 'Withdraw Custom Amount'}
+            </div>
+            <div className="text-sm text-gray-400">
+              {withdrawMode === 'full' ? 'Withdraw all your earned wages at once' : 'Enter the amount you want to withdraw'}
+            </div>
+          </div>
+          
+          {/* Custom Amount Input */}
+          {withdrawMode === 'partial' && (
+            <div className="space-y-2">
+              <label className="text-sm text-gray-300">Amount to withdraw (TBU):</label>
+              <Input
+                type="number"
+                step="0.0000001"
+                min="0"
+                max={Number(availableBalance) / 10000000}
+                value={customAmount}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                placeholder="Enter amount..."
+                className="bg-slate-700 border-slate-600 text-white"
+              />
+              <div className="text-xs text-gray-400">
+                Max: {(Number(availableBalance) / 10000000).toFixed(7)} TBU
+              </div>
+            </div>
+          )}
 
           <div className="text-sm text-gray-400 bg-slate-700 p-3 rounded-lg">
             <div className="flex justify-between mb-1">

@@ -887,6 +887,64 @@ app.post("/api/pay-employee", async (req, res) => {
   }
 });
 
+// Partial withdraw endpoint for employee custom amount
+app.post("/api/partial-withdraw", async (req, res) => {
+  try {
+    const { userPublicKey, fairWageContractId, employeeAddress, amount } =
+      req.body;
+
+    if (!userPublicKey || !fairWageContractId || !employeeAddress || !amount) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, amount",
+        });
+    }
+
+    // Validate amount as positive number
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Amount must be a valid positive number" });
+    }
+
+    const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+
+    const op = StellarSdk.Operation.invokeContractFunction({
+      contract: fairWageContractId,
+      function: "withdraw",
+      args: [
+        StellarSdk.Address.fromString(employeeAddress).toScVal(),
+        StellarSdk.nativeToScVal(amount, { type: 'i128' })
+      ],
+    });
+
+    const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
+      fee: "100000",
+      networkPassphrase,
+    })
+      .addOperation(op)
+      .setTimeout(30)
+      .build();
+
+    const preparedTx = await server.prepareTransaction(tx);
+
+    res.json({
+      success: true,
+      transactionXdr: preparedTx.toXDR(),
+      fairWageContractId,
+      employeeAddress,
+      amount,
+      message: "Partial withdrawal transaction prepared - ready for signing",
+    });
+  } catch (error) {
+    console.error("❌ Error preparing partial withdrawal:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.post("/api/remove-employee", async (req, res) => {
   try {
     const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
