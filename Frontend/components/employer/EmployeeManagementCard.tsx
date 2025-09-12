@@ -20,7 +20,7 @@ import {
   getAccruedBalance,
   getEmployeeInfo,
   // getContractBalance, // (unused)
-  payPartialByEmployer,
+  // payPartialByEmployer, // (unused)
   payAllEmployees as payAllEmployeesOnChain,
   listEmployees,
   freezeEmployee,
@@ -57,8 +57,20 @@ const EmployeeManagementCard: React.FC = () => {
   const [isUpdatingWage, setIsUpdatingWage] = useState(false);
   const [updatingEmployeeId, setUpdatingEmployeeId] = useState<string | null>(null);
   const [newWageRate, setNewWageRate] = useState("");
+  // Removed newWagePeriod - contract doesn't support period updates after creation
   const [isSyncing, setIsSyncing] = useState(false);
   const { publicKey, isWalletConnected } = useWallet();
+
+  // Convert period string to number (smart contract expects 0-3)
+  const periodToNumber = (period: "hour" | "day" | "week" | "month"): number => {
+    switch (period) {
+      case "hour": return 0;
+      case "day": return 1;
+      case "week": return 2;
+      case "month": return 3;
+      default: return 1; // default to day
+    }
+  };
 
   useEffect(() => {
     if (isWalletConnected && publicKey) {
@@ -124,7 +136,7 @@ const EmployeeManagementCard: React.FC = () => {
         employeeAddresses.map(async (address: string) => {
           try {
             const info: any = await getEmployeeInfo(fairWageContractId, address);
-            const accrued = await getAccruedBalance(fairWageContractId, address);
+            const accrued = await getAccruedBalance(address);
             const existing = employees.find((e) => e.address === address);
             return {
               id:
@@ -204,7 +216,7 @@ const EmployeeManagementCard: React.FC = () => {
         newEmployee.address,
         newEmployee.name,
         newEmployee.wageRate,
-        newEmployee.wagePeriod
+        periodToNumber(newEmployee.wagePeriod)
       );
 
       const employee: Employee = {
@@ -251,7 +263,7 @@ const EmployeeManagementCard: React.FC = () => {
           employee.address,
           employee.name,
           employee.wageRate,
-          employee.wagePeriod
+          periodToNumber(employee.wagePeriod)
         );
 
         setEmployees((prev) =>
@@ -393,11 +405,11 @@ const EmployeeManagementCard: React.FC = () => {
 
         await updateWageRate(fairWageContractId, employee.address, wageRate);
 
-        setEmployees((prev) =>
-          prev.map((emp) => (emp.id === employeeId ? { ...emp, wageRate: wageRate * 10000000 } : emp))
-        );
+        // Don't update local state - let blockchain sync handle it
         alert(`Wage rate updated successfully for ${employee.name}!`);
         setNewWageRate("");
+        // Sync from blockchain to get updated values
+        void syncEmployeesFromContract();
         setUpdatingEmployeeId(null);
       } catch (error: any) {
         console.error("❌ Failed to update wage rate:", error);
@@ -477,7 +489,7 @@ const EmployeeManagementCard: React.FC = () => {
       if (!fairWageContractId) throw new Error("FairWage Contract ID not found. Please complete setup first.");
 
       try {
-        await payEmployee(fairWageContractId, employee.address, employee.accruedWages || 0);
+        await payEmployee(fairWageContractId, employee.address);
         const paidAmount = employee.accruedWages || 0;
         setEmployees((prev) =>
           prev.map((emp) =>
@@ -531,7 +543,7 @@ const EmployeeManagementCard: React.FC = () => {
           for (const employee of employees) {
             if (employee.active) {
               try {
-                await payEmployee(fairWageContractId, employee.address, employee.accruedWages || 0);
+                await payEmployee(fairWageContractId, employee.address);
               } catch (err) {
                 console.error(`❌ Failed to pay ${employee.name}:`, err);
               }
@@ -597,7 +609,7 @@ const EmployeeManagementCard: React.FC = () => {
       const updated = await Promise.all(
         employees.map(async (employee) => {
           try {
-            const accrued = await getAccruedBalance(fairWageContractId, employee.address);
+            const accrued = await getAccruedBalance(employee.address);
             return { ...employee, accruedWages: accrued };
           } catch (error) {
             console.error(`❌ Failed to get accrued for ${employee.name}:`, error);
@@ -916,22 +928,33 @@ const EmployeeManagementCard: React.FC = () => {
                   {/* Update Wage Rate Section */}
                   {updatingEmployeeId === employee.id && (
                     <div className="bg-slate-600 p-3 rounded-lg mb-3">
-                      <div className="flex items-center space-x-2">
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">New Wage Rate</label>
                         <Input
                           type="number"
                           step="0.001"
-                          placeholder="New wage rate"
+                          placeholder="Enter new wage rate"
                           value={newWageRate}
                           onChange={(e) => setNewWageRate(e.target.value)}
                           className="bg-slate-500 border-slate-400 text-white"
                         />
+                        <div className="bg-yellow-900/30 border border-yellow-400/30 rounded p-2 mt-2">
+                          <p className="text-xs text-yellow-300">
+                            ⚠️ <strong>Pay period cannot be changed after creation</strong>
+                          </p>
+                          <p className="text-xs text-yellow-400 mt-1">
+                            Current period: <strong>{employee.wagePeriod}</strong>. To change period, remove and re-add the employee.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
                         <Button
                           onClick={() => void handleUpdateWageRate(employee.id)}
                           disabled={isUpdatingWage || !newWageRate}
                           size="sm"
                           className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700"
                         >
-                          {isUpdatingWage ? "Updating..." : "Update"}
+                          {isUpdatingWage ? "Updating..." : "Update Wage Rate"}
                         </Button>
                         <Button
                           onClick={() => {

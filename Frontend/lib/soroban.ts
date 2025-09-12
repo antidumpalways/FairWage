@@ -754,12 +754,12 @@ export const fundContract = async (fairWageContractId: string, tokenContractId: 
     return submitResult.transactionHash;
 };
 
-export const checkContractBalance = async (contractId: string): Promise<number> => {
+export const checkContractBalance = async (fairWageContractId: string, tokenContractId: string): Promise<number> => {
     try {
         const response = await fetch('/api/check-contract-balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contractId })
+            body: JSON.stringify({ fairWageContractId, tokenContractId })
         });
 
         if (!response.ok) {
