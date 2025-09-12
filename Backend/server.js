@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { Server } = require('@stellar/stellar-sdk');
+const { Horizon } = require('@stellar/stellar-sdk');
 require('dotenv').config();
 
 // Try to load config file, fallback to environment variables
@@ -37,10 +37,9 @@ const NETWORK_PASSPHRASE = config.networkPassphrase;
 const FAIRWAGE_CONTRACT_ID = config.fairwageContractId;
 const TOKEN_CONTRACT_ID = config.tokenContractId;
 
-// Initialize Stellar server
-const server = new Server(RPC_URL, {
-  allowHttp: true,
-  networkPassphrase: NETWORK_PASSPHRASE
+// Initialize Stellar Horizon server
+const server = new Horizon.Server(RPC_URL, {
+  allowHttp: true
 });
 
 // Health check endpoint
