@@ -939,6 +939,10 @@ app.post("/api/partial-withdraw", async (req, res) => {
         .json({ error: "Amount must be a valid positive number" });
     }
 
+    // Convert to proper stroops (7 decimal places)
+    const stroopsAmount = Math.floor(numAmount * 10000000);
+    console.log(`💰 Partial withdraw: ${amount} tokens = ${stroopsAmount} stroops`);
+
     const sourceAccount = await horizonServer.loadAccount(userPublicKey);
 
     const op = StellarSdk.Operation.invokeContractFunction({
@@ -946,7 +950,7 @@ app.post("/api/partial-withdraw", async (req, res) => {
       function: "withdraw",
       args: [
         StellarSdk.Address.fromString(employeeAddress).toScVal(),
-        StellarSdk.nativeToScVal(amount, { type: 'i128' })
+        StellarSdk.nativeToScVal(stroopsAmount, { type: 'i128' })
       ],
     });
 
