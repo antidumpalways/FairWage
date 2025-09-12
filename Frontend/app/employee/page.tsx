@@ -42,22 +42,22 @@ export default function EmployeePage() {
 
   if (!isWalletConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Users className="h-8 w-8 text-white" />
+          <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+            <Users className="h-10 w-10 text-white" />
           </div>
           
-          <h1 className="text-3xl font-bold text-white mb-4">Employee Dashboard</h1>
-          <p className="text-gray-400 mb-8">
-            Connect your wallet to view your real-time wage balance and withdraw earned funds.
+          <h1 className="text-4xl font-bold text-white mb-6">Employee Access</h1>
+          <p className="text-slate-400 mb-8 text-lg leading-relaxed">
+            Connect your wallet to access real-time wage tracking and instant withdrawal capabilities.
           </p>
           
           <Button
             onClick={connectWallet}
-            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-8 py-3"
+            className="bg-slate-600 hover:bg-slate-700 text-white px-10 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
           >
-            <Wallet className="w-5 h-5 mr-2" />
+            <Wallet className="w-5 h-5 mr-3" />
             Connect Wallet
           </Button>
         </div>
@@ -68,19 +68,21 @@ export default function EmployeePage() {
   // Show message if no contract ID is available
   if (hasContractId === false) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-white" />
+          <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+            <AlertCircle className="h-10 w-10 text-white" />
           </div>
           
-          <h1 className="text-3xl font-bold text-white mb-4">No Contract Found</h1>
-          <p className="text-gray-400 mb-8">
-            No FairWage contract has been deployed yet. Please ask your employer to deploy the contract first, or check if you're using the correct application.
+          <h1 className="text-4xl font-bold text-white mb-6">No Active Contract</h1>
+          <p className="text-slate-400 mb-8 text-lg leading-relaxed">
+            No payroll contract is currently available. Please contact your employer to deploy the FairWage system or verify your employment registration.
           </p>
           
-          <div className="text-sm text-gray-500">
-            Connected as: {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
+          <div className="bg-slate-800/50 px-4 py-3 rounded-lg border border-slate-600">
+            <div className="text-sm text-slate-400">
+              Connected as: <span className="text-blue-400 font-mono">{publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -90,15 +92,15 @@ export default function EmployeePage() {
   // Show loading while checking contract ID
   if (hasContractId === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Users className="h-8 w-8 text-white animate-spin" />
+          <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+            <Users className="h-10 w-10 text-white animate-spin" />
           </div>
           
-          <h1 className="text-3xl font-bold text-white mb-4">Loading...</h1>
-          <p className="text-gray-400">
-            Checking for available contracts...
+          <h1 className="text-4xl font-bold text-white mb-6">Initializing...</h1>
+          <p className="text-slate-400 text-lg">
+            Connecting to payroll system...
           </p>
         </div>
       </div>
@@ -106,19 +108,23 @@ export default function EmployeePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-12 text-center animate-slide-up">
-          <h1 className="text-6xl font-bold text-gradient-purple mb-4 animate-fade-in">
-            Employee Dashboard
-          </h1>
-          <p className="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
-            🎉 Welcome back! View your real-time earnings and withdraw your wages instantly with our blockchain-powered system.
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-16 text-center">
+          <div className="flex items-center justify-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-white">
+              Employee <span className="text-slate-400">Access</span>
+            </h1>
+          </div>
+          <p className="text-xl text-slate-400 mb-8 max-w-4xl mx-auto leading-relaxed">
+            Access your earned wage balance and manage instant withdrawals through our secure blockchain-powered platform.
           </p>
-          <div className="inline-flex items-center glass-card bg-slate-800/40 px-6 py-3 rounded-full border border-purple-500/30">
-            <span className="text-emerald-400 mr-2">🔗</span>
-            <span className="text-gray-300 font-medium">Connected as: </span>
-            <span className="text-white font-bold ml-2 text-gradient-blue">
+          <div className="inline-flex items-center bg-slate-800/50 px-6 py-3 rounded-xl border border-slate-600">
+            <span className="text-slate-300 font-medium">Connected as: </span>
+            <span className="text-white font-mono ml-2 text-slate-400">
               {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
             </span>
           </div>
@@ -154,24 +160,30 @@ export default function EmployeePage() {
           </div>
         )}
 
-        {/* Modern Feature Highlights */}
-        <div className="mt-12 grid md:grid-cols-3 gap-8">
-          <div className="glass-card card-hover bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-500/30 p-8 rounded-2xl text-center animate-slide-up">
-            <div className="text-4xl mb-4 animate-pulse-glow">⚡</div>
-            <div className="text-gradient-blue text-3xl font-bold mb-3">Real-Time</div>
-            <div className="text-gray-300 font-medium">Wages accrue by the second with blockchain precision</div>
+        {/* Professional Feature Highlights */}
+        <div className="mt-16 grid md:grid-cols-3 gap-8">
+          <div className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg p-8 rounded-2xl text-center backdrop-blur-sm">
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="text-white text-2xl font-bold">RT</div>
+            </div>
+            <div className="text-blue-400 text-2xl font-bold mb-4">Real-Time Accrual</div>
+            <div className="text-slate-400 leading-relaxed">Wages accumulate by the second with blockchain precision and transparency</div>
           </div>
           
-          <div className="glass-card card-hover bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-emerald-500/30 p-8 rounded-2xl text-center animate-slide-up" style={{animationDelay: '0.1s'}}>
-            <div className="text-4xl mb-4 animate-bounce-subtle">🚀</div>
-            <div className="text-gradient text-3xl font-bold mb-3">Instant</div>
-            <div className="text-gray-300 font-medium">Withdraw anytime, no delays or waiting periods</div>
+          <div className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg p-8 rounded-2xl text-center backdrop-blur-sm">
+            <div className="w-16 h-16 bg-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="text-white text-2xl font-bold">IW</div>
+            </div>
+            <div className="text-slate-300 text-2xl font-bold mb-4">Instant Withdrawals</div>
+            <div className="text-slate-400 leading-relaxed">Access earned wages 24/7 without delays or waiting periods</div>
           </div>
           
-          <div className="glass-card card-hover bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30 p-8 rounded-2xl text-center animate-slide-up" style={{animationDelay: '0.2s'}}>
-            <div className="text-4xl mb-4 animate-scale-pulse">🛡️</div>
-            <div className="text-gradient-purple text-3xl font-bold mb-3">Secure</div>
-            <div className="text-gray-300 font-medium">Blockchain-powered payroll with cryptographic security</div>
+          <div className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg p-8 rounded-2xl text-center backdrop-blur-sm">
+            <div className="w-16 h-16 bg-blue-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="text-white text-2xl font-bold">SS</div>
+            </div>
+            <div className="text-blue-400 text-2xl font-bold mb-4">Stellar Security</div>
+            <div className="text-slate-400 leading-relaxed">Enterprise-grade security with immutable blockchain records</div>
           </div>
         </div>
       </div>
