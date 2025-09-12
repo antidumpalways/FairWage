@@ -1,16 +1,33 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import BalanceCard from '@/components/employee/BalanceCard';
 import WithdrawCard from '@/components/employee/WithdrawCard';
 import EmployeeStatsCard from '@/components/employee/EmployeeStatsCard';
 import TransactionHistoryCard from '@/components/employee/TransactionHistoryCard';
 import { Button } from '@/components/ui/button';
-import { Wallet, Users } from 'lucide-react';
+import { Wallet, Users, AlertCircle } from 'lucide-react';
+import { getCurrentContractId } from '@/lib/soroban';
 
 export default function EmployeePage() {
   const { isWalletConnected, publicKey, connectWallet } = useWallet();
+  const [hasContractId, setHasContractId] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if contract ID is available
+    const checkContractId = async () => {
+      try {
+        await getCurrentContractId();
+        setHasContractId(true);
+      } catch (error) {
+        console.log('No contract ID available:', error);
+        setHasContractId(false);
+      }
+    };
+    
+    checkContractId();
+  }, []);
 
   if (!isWalletConnected) {
     return (
@@ -32,6 +49,46 @@ export default function EmployeePage() {
             <Wallet className="w-5 h-5 mr-2" />
             Connect Wallet
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no contract ID is available
+  if (hasContractId === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-white" />
+          </div>
+          
+          <h1 className="text-3xl font-bold text-white mb-4">No Contract Found</h1>
+          <p className="text-gray-400 mb-8">
+            No FairWage contract has been deployed yet. Please ask your employer to deploy the contract first, or check if you're using the correct application.
+          </p>
+          
+          <div className="text-sm text-gray-500">
+            Connected as: {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while checking contract ID
+  if (hasContractId === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="h-8 w-8 text-white animate-spin" />
+          </div>
+          
+          <h1 className="text-3xl font-bold text-white mb-4">Loading...</h1>
+          <p className="text-gray-400">
+            Checking for available contracts...
+          </p>
         </div>
       </div>
     );

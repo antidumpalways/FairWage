@@ -1,12 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { connectWallet as connectPublicWallet, healthCheck } from '@/lib/soroban';
 
 interface WalletContextType {
   isWalletConnected: boolean;
   publicKey: string | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  isBackendHealthy: boolean;
+  checkBackendHealth: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -22,22 +25,28 @@ export const useWallet = () => {
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [isBackendHealthy, setIsBackendHealthy] = useState(false);
 
   const connectWallet = async () => {
     try {
-      // REAL FREIGHTER WALLET CONNECTION - NO MORE MOCK!
-      const { connectWallet: connectRealWallet } = await import('@/lib/soroban');
-      const realPublicKey = await connectRealWallet();
+      console.log('🔗 Connecting wallet...');
       
-      setPublicKey(realPublicKey);
+      const publicKey = await connectPublicWallet();
+      
+      if (!publicKey) {
+        throw new Error('Failed to connect wallet');
+      }
+      
+      setPublicKey(publicKey);
       setIsWalletConnected(true);
       localStorage.setItem('walletConnected', 'true');
-      localStorage.setItem('publicKey', realPublicKey);
+      localStorage.setItem('publicKey', publicKey);
       
-      console.log('🎉 REAL WALLET CONNECTED:', realPublicKey);
-    } catch (error: any) {
-      console.error('Failed to connect REAL wallet:', error);
-      alert(`Wallet connection failed: ${error.message || 'Unknown error'}`);
+      console.log('🎉 Wallet connected successfully:', publicKey);
+    } catch (error) {
+      console.error('❌ Wallet connection failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Wallet connection failed: ${errorMessage}`);
     }
   };
 
@@ -46,15 +55,39 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setPublicKey(null);
     localStorage.removeItem('walletConnected');
     localStorage.removeItem('publicKey');
+    console.log('👋 Wallet disconnected');
+  };
+
+  const checkBackendHealth = async () => {
+    try {
+      console.log('🏥 Checking backend health...');
+      const result = await healthCheck();
+      
+      // Sesuaikan dengan format return healthCheck yang sebenarnya
+      if (result && (result.success !== false)) {
+        setIsBackendHealthy(true);
+        console.log('✅ Backend is healthy');
+      } else {
+        setIsBackendHealthy(false);
+        console.warn('⚠️ Backend health check failed');
+      }
+    } catch (error) {
+      console.error('❌ Backend health check error:', error);
+      setIsBackendHealthy(false);
+    }
   };
 
   useEffect(() => {
+    // Restore wallet connection from localStorage
     const connected = localStorage.getItem('walletConnected');
     const savedPublicKey = localStorage.getItem('publicKey');
     if (connected && savedPublicKey) {
       setIsWalletConnected(true);
       setPublicKey(savedPublicKey);
     }
+
+    // Check backend health on mount
+    checkBackendHealth();
   }, []);
 
   return (
@@ -62,7 +95,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       isWalletConnected,
       publicKey,
       connectWallet,
-      disconnectWallet
+      disconnectWallet,
+      isBackendHealthy,
+      checkBackendHealth
     }}>
       {children}
     </WalletContext.Provider>

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import OnboardingWizard from '@/components/employer/OnboardingWizard';
 import ContractInfoCard from '@/components/employer/ContractInfoCard';
-import DepositFundsCard from '@/components/employer/DepositFundsCard';
 import EmployeeManagementCard from '@/components/employer/EmployeeManagementCard';
 import CompanyFundsCard from '@/components/employer/CompanyFundsCard';
 import { Button } from '@/components/ui/button';
@@ -70,18 +69,17 @@ export default function EmployerPage() {
           <OnboardingWizard onComplete={handleOnboardingComplete} />
         ) : (
           <div className="space-y-8">
-            {/* Company Funds Overview */}
-            <CompanyFundsCard />
-            
-            {/* Contract Management */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="space-y-8">
-                <ContractInfoCard />
-                <DepositFundsCard />
+            {/* Main Content - Employee Management First */}
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Employee Management - Main Focus (2/3 width) */}
+              <div className="lg:col-span-2">
+                <EmployeeManagementCard />
               </div>
               
-              <div>
-                <EmployeeManagementCard />
+              {/* Sidebar - Contract Info & Summary (1/3 width) */}
+              <div className="space-y-6">
+                <ContractInfoCard />
+                <CompanyFundsCard />
               </div>
             </div>
           </div>

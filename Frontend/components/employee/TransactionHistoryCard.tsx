@@ -22,76 +22,47 @@ const TransactionHistoryCard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { publicKey, isWalletConnected } = useWallet();
 
-  // Mock transaction data generator
+  // Load real transaction data from blockchain
   useEffect(() => {
-    if (isWalletConnected && publicKey) {
-      // Generate realistic mock transaction data
-      const mockTransactions: Transaction[] = [
-        {
-          id: '1',
-          type: 'withdrawal',
-          amount: 150.00,
-          timestamp: '2024-01-15T14:30:00Z',
-          status: 'completed',
-          hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-          description: 'Withdrawal to wallet',
-          gasFee: 0.001
-        },
-        {
-          id: '2',
-          type: 'wage_accrual',
-          amount: 45.25,
-          timestamp: '2024-01-15T12:00:00Z',
-          status: 'completed',
-          hash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-          description: 'Wage accrual for 10.5 hours',
-          gasFee: 0.0005
-        },
-        {
-          id: '3',
-          type: 'withdrawal',
-          amount: 75.50,
-          timestamp: '2024-01-14T16:45:00Z',
-          status: 'completed',
-          hash: '0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234',
-          description: 'Partial withdrawal',
-          gasFee: 0.001
-        },
-        {
-          id: '4',
-          type: 'wage_accrual',
-          amount: 38.75,
-          timestamp: '2024-01-14T08:00:00Z',
-          status: 'completed',
-          hash: '0x890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567',
-          description: 'Wage accrual for 9 hours',
-          gasFee: 0.0005
-        },
-        {
-          id: '5',
-          type: 'withdrawal',
-          amount: 200.00,
-          timestamp: '2024-01-13T11:20:00Z',
-          status: 'completed',
-          hash: '0xdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abc',
-          description: 'Monthly withdrawal',
-          gasFee: 0.001
-        },
-        {
-          id: '6',
-          type: 'wage_accrual',
-          amount: 42.10,
-          timestamp: '2024-01-13T00:00:00Z',
-          status: 'completed',
-          hash: '0x234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12',
-          description: 'Wage accrual for 9.75 hours',
-          gasFee: 0.0005
-        }
-      ];
-      
-      setTransactions(mockTransactions);
-      setIsLoading(false);
-    }
+    const loadRealTransactions = async () => {
+      if (!isWalletConnected || !publicKey) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 Loading REAL transaction history for:', publicKey);
+        
+        // Import real transaction functions
+        const { getAccountTransactions } = await import('@/lib/soroban');
+        
+        // Get real transactions from blockchain
+        const realTransactions = await getAccountTransactions(publicKey, 50);
+        console.log('✅ Real transactions loaded:', realTransactions);
+        
+        // Convert blockchain transactions to our format
+        const formattedTransactions: Transaction[] = realTransactions.map((tx: any, index: number) => ({
+          id: tx.id || `tx-${index}`,
+          type: tx.type || 'wage_accrual',
+          amount: parseFloat(tx.amount || '0'),
+          timestamp: tx.created_at || new Date().toISOString(),
+          status: tx.status || 'completed',
+          hash: tx.hash || `0x${Math.random().toString(16).substr(2, 64)}`,
+          description: tx.description || 'Blockchain transaction',
+          gasFee: parseFloat(tx.fee_charged || '0.001')
+        }));
+        
+        setTransactions(formattedTransactions);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('❌ Failed to load real transactions:', error);
+        // Show empty state instead of mock data
+        setTransactions([]);
+        setIsLoading(false);
+      }
+    };
+
+    loadRealTransactions();
   }, [isWalletConnected, publicKey]);
 
   const formatTokens = (amount: number) => {
@@ -125,7 +96,9 @@ const TransactionHistoryCard: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status?: string) => {
+    if (!status) return <Clock className="w-4 h-4 text-gray-400" />;
+    
     switch (status) {
       case 'completed':
         return <CheckCircle className="w-4 h-4 text-green-400" />;
@@ -138,7 +111,9 @@ const TransactionHistoryCard: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
+    if (!status) return <Badge variant="outline" className="text-xs">Unknown</Badge>;
+    
     switch (status) {
       case 'completed':
         return <Badge variant="default" className="text-xs">Completed</Badge>;
@@ -190,52 +165,57 @@ const TransactionHistoryCard: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="bg-slate-700 p-4 rounded-lg border border-slate-600"
-            >
+          {transactions.map((tx) => {
+            // Add null check for transaction object
+            if (!tx) return null;
+            
+            return (
+              <div
+                key={tx.id || 'unknown'}
+                className="bg-slate-700 p-4 rounded-lg border border-slate-600"
+              >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  {getTransactionIcon(tx.type)}
+                  {getTransactionIcon(tx?.type || 'unknown')}
                   <div>
                     <h4 className="text-white font-semibold capitalize">
-                      {tx.type.replace('_', ' ')}
+                      {(tx?.type || 'unknown').replace('_', ' ')}
                     </h4>
-                    <p className="text-sm text-gray-400">{tx.description}</p>
+                    <p className="text-sm text-gray-400">{tx?.description || 'No description'}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-white">
-                    {tx.type === 'withdrawal' ? '-' : '+'}{formatTokens(tx.amount)}
+                    {(tx?.type || 'unknown') === 'withdrawal' ? '-' : '+'}{formatTokens(tx?.amount || 0)}
                   </div>
-                  {getStatusBadge(tx.status)}
+                  {getStatusBadge(tx?.status || 'unknown')}
                 </div>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <p className="text-gray-400">Time</p>
-                  <p className="text-white">{formatDateTime(tx.timestamp)}</p>
+                  <p className="text-white">{formatDateTime(tx?.timestamp || new Date().toISOString())}</p>
                 </div>
                 <div>
                   <p className="text-gray-400">Status</p>
                   <div className="flex items-center">
-                    {getStatusIcon(tx.status)}
-                    <span className="text-white ml-1 capitalize">{tx.status}</span>
+                    {getStatusIcon(tx?.status || 'unknown')}
+                    <span className="text-white ml-1 capitalize">{tx?.status || 'unknown'}</span>
                   </div>
                 </div>
                 <div>
                   <p className="text-gray-400">Gas Fee</p>
-                  <p className="text-white">{formatTokens(tx.gasFee)}</p>
+                  <p className="text-white">{formatTokens(tx?.gasFee || 0)}</p>
                 </div>
                 <div>
                   <p className="text-gray-400">Transaction Hash</p>
-                  <p className="text-white font-mono text-xs">{formatHash(tx.hash)}</p>
+                  <p className="text-white font-mono text-xs">{formatHash(tx?.hash || '0x000000...000000')}</p>
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         
         {transactions.length === 0 && (

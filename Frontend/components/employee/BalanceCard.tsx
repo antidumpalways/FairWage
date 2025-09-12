@@ -17,18 +17,29 @@ const BalanceCard: React.FC = () => {
     }
     
     try {
+      console.log('🔍 Loading real balance for:', publicKey);
       // Call REAL contract function
       const realBalance = await fetchAccruedBalance(publicKey);
+      console.log('✅ Real balance loaded:', realBalance);
+      
+      // Validate the response
+      if (typeof realBalance !== 'bigint' && typeof realBalance !== 'number') {
+        console.error('❌ Invalid balance response type:', typeof realBalance, realBalance);
+        throw new Error('Invalid balance response type');
+      }
       
       // Convert from BigInt (with 6 decimal places) to number
       const balanceInTokens = Number(realBalance) / 1000000;
+      console.log('✅ Balance in tokens:', balanceInTokens);
       return balanceInTokens;
     } catch (error) {
-      console.log('Using mock balance for demonstration');
-      // Mock balance that increases over time for demo
-      const baseBalance = 197.65;
-      const timeMultiplier = Date.now() / 1000000; // Increases over time
-      return baseBalance + (timeMultiplier * 0.0012); // 0.0012 tokens per second
+      console.error('❌ Failed to load real balance:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
+      // Return 0 instead of mock data
+      return 0;
     }
   };
 

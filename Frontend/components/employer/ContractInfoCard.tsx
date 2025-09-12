@@ -9,6 +9,9 @@ const ContractInfoCard: React.FC = () => {
   const [contractInfo, setContractInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { publicKey, isWalletConnected } = useWallet();
+  const [tokenContractId, setTokenContractId] = useState<string | null>(null);
+  const [fairWageContractId, setFairWageContractId] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState<string | null>(null);
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
@@ -17,21 +20,51 @@ const ContractInfoCard: React.FC = () => {
     return `${address.slice(0, 8)}...${address.slice(-6)}`;
   };
 
-  // Load real contract info
+  // Load contract info from localStorage
   useEffect(() => {
-    const loadContractInfo = async () => {
+    const loadContractInfo = () => {
       try {
         if (!isWalletConnected || !publicKey) {
+          console.log('⚠️ Wallet not connected, skipping contract info load');
           setIsLoading(false);
           return;
         }
         
-        console.log('🔍 Loading REAL contract info...');
-        const info = await getContractInfo();
-        setContractInfo(info);
+        console.log('🔍 Loading contract info from localStorage...');
+        
+        // Load from localStorage
+        const savedTokenId = localStorage.getItem('tokenContractId');
+        const savedFairWageId = localStorage.getItem('fairWageContractId');
+        const savedCompanyName = localStorage.getItem('companyName');
+        const savedTokenName = localStorage.getItem('tokenName');
+        const savedTokenSymbol = localStorage.getItem('tokenSymbol');
+        
+        setTokenContractId(savedTokenId);
+        setFairWageContractId(savedFairWageId);
+        setCompanyName(savedCompanyName);
+        
+        if (savedTokenId && savedFairWageId) {
+          const contractInfo = {
+            companyName: savedCompanyName || 'N/A',
+            tokenName: savedTokenName || 'N/A',
+            tokenSymbol: savedTokenSymbol || 'N/A',
+            tokenContractId: savedTokenId,
+            fairWageContractId: savedFairWageId,
+            network: 'Stellar Testnet',
+            networkType: 'testnet',
+            rpcUrl: 'https://soroban-testnet.stellar.org'
+          };
+          setContractInfo(contractInfo);
+          console.log('✅ Contract info loaded from localStorage:', contractInfo);
+        } else {
+          console.log('⚠️ No contract IDs found in localStorage');
+          setContractInfo(null);
+        }
+        
         setIsLoading(false);
       } catch (error) {
-        console.error('❌ Failed to load REAL contract info:', error);
+        console.error('❌ Failed to load contract info:', error);
+        setContractInfo(null);
         setIsLoading(false);
       }
     };
@@ -41,69 +74,66 @@ const ContractInfoCard: React.FC = () => {
 
   return (
     <Card className="bg-slate-800 border-slate-700">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          Contract Information
-          <ExternalLink className="w-5 h-5 ml-2 text-gray-400" />
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-white text-lg">Contract Info</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-16 bg-slate-700 rounded"></div>
-            <div className="h-16 bg-slate-700 rounded"></div>
-            <div className="h-16 bg-slate-700 rounded"></div>
+          <div className="animate-pulse space-y-2">
+            <div className="h-8 bg-slate-700 rounded"></div>
+            <div className="h-8 bg-slate-700 rounded"></div>
+            <div className="h-8 bg-slate-700 rounded"></div>
           </div>
         ) : contractInfo ? (
           <>
-            <div>
-              <div className="text-sm text-gray-400 mb-1">Employer Address</div>
-              <div className="flex items-center justify-between bg-slate-700 p-3 rounded-lg">
-                <span className="text-white font-mono text-sm">{formatAddress(publicKey || '')}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Company:</span>
+              <span className="text-white text-sm font-medium">{contractInfo.companyName}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Token:</span>
+              <span className="text-white text-sm font-medium">{contractInfo.tokenSymbol}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Token ID:</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-white text-xs font-mono">{formatAddress(contractInfo.tokenContractId)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => copyToClipboard(publicKey || '')}
-                  className="text-gray-400 hover:text-white"
+                  onClick={() => copyToClipboard(contractInfo.tokenContractId)}
+                  className="text-gray-400 hover:text-white p-1 h-auto"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-3 h-3" />
                 </Button>
               </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-400 mb-1">Contract ID</div>
-              <div className="flex items-center justify-between bg-slate-700 p-3 rounded-lg">
-                <span className="text-white font-mono text-sm">{formatAddress(contractInfo.contractId)}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">FairWage ID:</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-white text-xs font-mono">{formatAddress(contractInfo.fairWageContractId)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => copyToClipboard(contractInfo.contractId)}
-                  className="text-gray-400 hover:text-white"
+                  onClick={() => copyToClipboard(contractInfo.fairWageContractId)}
+                  className="text-gray-400 hover:text-white p-1 h-auto"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-3 h-3" />
                 </Button>
               </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-400 mb-1">Network</div>
-              <div className="flex items-center justify-between bg-slate-700 p-3 rounded-lg">
-                <span className="text-white font-mono text-sm">{contractInfo.network}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => copyToClipboard(contractInfo.network)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Network:</span>
+              <span className="text-white text-xs font-medium">{contractInfo.network}</span>
             </div>
           </>
         ) : (
-          <div className="text-center text-gray-400 py-8">
-            {isWalletConnected ? 'Failed to load contract info' : 'Connect wallet to view contract info'}
+          <div className="text-center text-gray-400 py-4">
+            <div className="text-sm">No contract info</div>
           </div>
         )}
       </CardContent>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { deployTokenContract, deployFairWageContract } from '@/lib/soroban';
+import { deployTokenContract, deployFairWageContract, initializeContract } from '@/lib/soroban';
 
 interface OnboardingWizardProps {
   onComplete: (tokenContractId: string, fairWageContractId: string) => void;
@@ -15,31 +15,34 @@ interface OnboardingWizardProps {
 
 const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [companyName, setCompanyName] = useState('');
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
   const [tokenContractId, setTokenContractId] = useState('');
+  const [fairWageContractId, setFairWageContractId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDeployToken = async () => {
-    if (!tokenName || !tokenSymbol) return;
+    if (!companyName || !tokenName || !tokenSymbol) return;
     
     setIsLoading(true);
     try {
-      console.log('🚀 Starting REAL token deployment...');
+      console.log('🚀 Starting SAC token deployment...');
       
-      // REAL deployment to Soroban
+      // Deploy SAC (Stellar Asset Contract) - no initialization needed
       const realTokenId = await deployTokenContract(tokenName, tokenSymbol);
-      console.log('✅ Token deployed successfully:', realTokenId);
+      console.log('✅ SAC Token deployed successfully:', realTokenId);
+      console.log('ℹ️ SAC tokens have unlimited supply and ready to use immediately');
       
       setTokenContractId(realTokenId);
-      setCurrentStep(2);
-                    } catch (error: any) {
-                  console.error('❌ Failed to deploy token!');
-                  console.error('🔍 Error details:', error);
-                  console.error('🔍 Error message:', error.message);
-                  console.error('🔍 Error cause:', error.cause);
-                  alert(`Token deployment failed: ${error.message || 'Unknown error'}`);
-                } finally {
+      setCurrentStep(2); // Skip to FairWage deployment
+    } catch (error: any) {
+      console.error('❌ Failed to deploy SAC token!');
+      console.error('🔍 Error details:', error);
+      console.error('🔍 Error message:', error.message);
+      console.error('🔍 Error cause:', error.cause);
+      alert(`SAC Token deployment failed: ${error.message || 'Unknown error'}`);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -47,28 +50,47 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
   const handleDeployFairWage = async () => {
     setIsLoading(true);
     try {
-      console.log('🚀 Starting REAL FairWage deployment...');
+      console.log('🚀 Starting FairWage deployment...');
       
-      // REAL deployment to Soroban
+      // Deploy FairWage contract
       const realFairWageId = await deployFairWageContract(tokenContractId);
       console.log('✅ FairWage deployed successfully:', realFairWageId);
       
-      onComplete(tokenContractId, realFairWageId);
-                    } catch (error: any) {
-                  console.error('❌ Failed to deploy FairWage contract!');
-                  console.error('🔍 Error details:', error);
-                  console.error('🔍 Error message:', error.message);
-                  console.error('🔍 Error cause:', error.cause);
-                  alert(`FairWage deployment failed: ${error.message || 'Unknown error'}`);
-                } finally {
+      setFairWageContractId(realFairWageId);
+      setCurrentStep(3); // Updated step numbering
+    } catch (error: any) {
+      console.error('❌ Failed to deploy FairWage contract!');
+      console.error('🔍 Error details:', error);
+      alert(`FairWage deployment failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInitializeFairWage = async () => {
+    setIsLoading(true);
+    try {
+      console.log('🔧 Starting FairWage initialization...');
+      
+      // Initialize FairWage contract
+      const initResult = await initializeContract(fairWageContractId, 'fairwage', companyName, tokenName, tokenSymbol, tokenContractId);
+      console.log('✅ FairWage initialized successfully');
+      
+      setCurrentStep(4); // Updated step numbering
+    } catch (error: any) {
+      console.error('❌ Failed to initialize FairWage!');
+      console.error('🔍 Error details:', error);
+      alert(`FairWage initialization failed: ${error.message || 'Unknown error'}`);
+    } finally {
       setIsLoading(false);
     }
   };
 
   const steps = [
-    { id: 1, title: 'Create Payroll Token', icon: Coins },
-    { id: 2, title: 'Deploy FairWage Contract', icon: FileText },
-    { id: 3, title: 'Complete Setup', icon: CheckCircle }
+    { id: 1, title: 'Deploy SAC Token', icon: Coins },
+    { id: 2, title: 'Deploy FairWage', icon: FileText },
+    { id: 3, title: 'Initialize FairWage', icon: FileText },
+    { id: 4, title: 'Complete Setup', icon: CheckCircle }
   ];
 
   return (
@@ -94,16 +116,36 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         </div>
       </div>
 
-      {/* Step 1: Create Token */}
+      {/* Step 1: Create SAC Token */}
       {currentStep === 1 && (
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">Create Your Payroll Token</CardTitle>
+            <CardTitle className="text-white text-2xl">Create Your SAC Payroll Token</CardTitle>
             <p className="text-gray-400">
-              First, we'll create a custom token that will be used for payroll payments
+              We'll deploy a Stellar Asset Contract (SAC) with unlimited supply for payroll payments
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="bg-blue-900 border border-blue-700 p-4 rounded-lg">
+              <h3 className="text-blue-300 font-semibold mb-2">ℹ️ About SAC Tokens:</h3>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• Unlimited supply - create tokens when needed</li>
+                <li>• No initialization required - ready immediately</li>
+                <li>• Transfer tokens to employees for withdrawal</li>
+              </ul>
+            </div>
+            
+            <div>
+              <Label htmlFor="companyName" className="text-gray-300">Company Name</Label>
+              <Input
+                id="companyName"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="e.g., Acme Corporation"
+                className="bg-slate-700 border-slate-600 text-white mt-2"
+              />
+            </div>
+            
             <div>
               <Label htmlFor="tokenName" className="text-gray-300">Token Name</Label>
               <Input
@@ -129,16 +171,16 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
 
             <Button
               onClick={handleDeployToken}
-              disabled={!tokenName || !tokenSymbol || isLoading}
+              disabled={!companyName || !tokenName || !tokenSymbol || isLoading}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white w-full"
             >
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
-                  Creating & Deploying Token...
+                  Deploying SAC Token... (1/3)
                 </>
               ) : (
-                'Create & Deploy Token'
+                'Deploy SAC Token (1/3)'
               )}
             </Button>
           </CardContent>
@@ -149,40 +191,117 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       {currentStep === 2 && (
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">Deploy Your FairWage Contract</CardTitle>
+            <CardTitle className="text-white text-2xl">Deploy FairWage Contract</CardTitle>
             <p className="text-gray-400">
               Now we'll deploy the smart contract that manages your payroll system
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-slate-700 p-4 rounded-lg">
-              <div className="text-sm text-gray-400 mb-1">Token Contract ID</div>
-              <div className="text-white font-mono text-sm break-all">{tokenContractId}</div>
+            <div className="bg-green-900 border border-green-700 p-4 rounded-lg">
+              <h3 className="text-green-300 font-semibold mb-2">✅ SAC Token Deployed:</h3>
+              <p className="text-gray-300">Company: {companyName}</p>
+              <p className="text-gray-300">Token: {tokenName} ({tokenSymbol})</p>
+              <p className="text-gray-300 font-mono text-sm break-all">{tokenContractId}</p>
+              <p className="text-green-300 text-sm mt-2">Ready to use - unlimited supply available!</p>
             </div>
-
-            <div className="text-gray-300">
-              <p>Your token has been successfully created! Now we'll deploy the FairWage contract that will:</p>
-              <ul className="list-disc list-inside mt-3 space-y-1 text-sm">
-                <li>Manage employee wage rates and accruals</li>
-                <li>Handle automatic wage calculations</li>
-                <li>Enable instant wage withdrawals</li>
-                <li>Provide transparent payroll tracking</li>
-              </ul>
-            </div>
-
+            
             <Button
               onClick={handleDeployFairWage}
               disabled={isLoading}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white w-full"
+              className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white w-full"
             >
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
-                  Deploying & Initializing...
+                  Deploying FairWage... (2/3)
                 </>
               ) : (
-                'Deploy & Initialize'
+                'Deploy FairWage (2/3)'
               )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 3: Initialize FairWage Contract */}
+      {currentStep === 3 && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white text-2xl">Initialize FairWage Contract</CardTitle>
+            <p className="text-gray-400">
+              Finally, we'll initialize your FairWage contract to connect it with your token
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-slate-700 p-4 rounded-lg">
+              <h3 className="text-white font-semibold mb-2">Contract Details:</h3>
+              <p className="text-gray-300">Company: {companyName}</p>
+              <p className="text-gray-300">Employer: You</p>
+              <p className="text-gray-300">Token Contract: {tokenContractId}</p>
+              <p className="text-gray-300">FairWage Contract: {fairWageContractId}</p>
+            </div>
+            
+            <Button
+              onClick={handleInitializeFairWage}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white w-full"
+            >
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Initializing FairWage... (3/3)
+                </>
+              ) : (
+                'Initialize FairWage (3/3)'
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Complete Setup */}
+      {currentStep === 4 && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white text-2xl">Setup Complete! 🎉</CardTitle>
+            <p className="text-gray-400">
+              Your FairWage payroll system is now ready to use
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-green-900 border border-green-700 p-4 rounded-lg">
+              <h3 className="text-green-300 font-semibold mb-2">✅ All Contracts Deployed & Initialized:</h3>
+              <p className="text-gray-300">Company: {companyName}</p>
+              <p className="text-gray-300">Token: {tokenName} ({tokenSymbol}) - SAC</p>
+              <p className="text-gray-300">Token Contract: {tokenContractId}</p>
+              <p className="text-gray-300">FairWage Contract: {fairWageContractId}</p>
+            </div>
+            
+            <div className="bg-blue-900 border border-blue-700 p-4 rounded-lg">
+              <h3 className="text-blue-300 font-semibold mb-2">📋 Next Steps:</h3>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• Add employees to your payroll system</li>
+                <li>• Set hourly rates and working hours</li>
+                <li>• Transfer tokens to employees when they request withdrawal</li>
+                <li>• Monitor payroll transactions and balances</li>
+              </ul>
+            </div>
+            
+            <Button
+              onClick={() => {
+                // Save all data to localStorage
+                localStorage.setItem('tokenContractId', tokenContractId);
+                localStorage.setItem('fairWageContractId', fairWageContractId);
+                localStorage.setItem('companyName', companyName);
+                localStorage.setItem('tokenName', tokenName);
+                localStorage.setItem('tokenSymbol', tokenSymbol);
+                
+                console.log('✅ All data saved to localStorage');
+                onComplete(tokenContractId, fairWageContractId);
+              }}
+              className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white w-full"
+            >
+              Start Using FairWage
             </Button>
           </CardContent>
         </Card>

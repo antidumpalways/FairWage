@@ -1,12 +1,42 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Building2, Users, ArrowRight, DollarSign, Clock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import CompanySelector from '@/components/CompanySelector';
+import { getCurrentContractId } from '@/lib/soroban';
 
 export default function HomePage() {
+  const [hasContract, setHasContract] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const contractId = getCurrentContractId();
+    setHasContract(!!contractId);
+    setIsLoading(false);
+  }, []);
+
+  const handleCompanySelected = (contractId: string) => {
+    setHasContract(true);
+    // Redirect to appropriate dashboard based on user role
+    // For now, redirect to employee dashboard
+    window.location.href = '/employee';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!hasContract) {
+    return <CompanySelector onCompanySelected={handleCompanySelected} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Section */}

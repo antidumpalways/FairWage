@@ -1,0 +1,107 @@
+Looking at your error, the issue is with the enum value you're using. In Stellar SDK v14.1.1, the correct enum value is contractIdFromAddress (camelCase), not contractIdFromAddress as a string.
+
+Here's the correct syntax for creating a ContractIdPreimage:
+
+
+Copy
+const contractIdPreimage = StellarSdk.xdr.ContractIdPreimage.contractIdFromAddress(
+    new StellarSdk.xdr.ContractIdPreimageFromAddress({
+        address: StellarSdk.Address.fromString(userPublicKey).toScAddress(),
+        salt: salt,
+    })
+);
+The valid enum values for ContractIdPreimageType are:
+
+contractIdFromAddress (0)
+contractIdFromAsset (1)
+For deploying a token contract without a constructor, here's a complete example:
+
+
+Copy
+import * as StellarSdk from '@stellar/stellar-sdk';
+
+async function deployTokenContract(userKeypair, wasmHash) {
+    const server = new StellarSdk.SorobanRpc.Server('https://soroban-testnet.stellar.org');
+    
+    // Generate a random salt
+    const salt = StellarSdk.xdr.Uint256.fromString(
+        crypto.getRandomValues(new Uint8Array(32))
+            .reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '')
+    );
+    
+    // Create contract ID preimage
+    const contractIdPreimage = StellarSdk.xdr.ContractIdPreimage.contractIdFromAddress(
+        new StellarSdk.xdr.ContractIdPreimageFromAddress({
+            address: StellarSdk.Address.fromString(userKeypair.publicKey()).toScAddress(),
+            salt: salt,
+        })
+    );
+    
+    // Create the CreateContractArgs
+    const createContractArgs = new StellarSdk.xdr.CreateContractArgs({
+        contractIdPreimage: contractIdPreimage,
+        executable: StellarSdk.xdr.ContractExecutable.contractExecutableWasm(
+            StellarSdk.StrKey.decodeContract(wasmHash)
+        ),
+    });
+    
+    // Build the transaction
+    const account = await server.getAccount(userKeypair.publicKey());
+    const transaction = new StellarSdk.TransactionBuilder(account, {
+        fee: StellarSdk.BASE_FEE,
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+    .addOperation(
+        StellarSdk.Operation.invokeHostFunction({
+            func: StellarSdk.xdr.HostFunction.hostFunctionTypeCreateContract(createContractArgs),
+            auth: [],
+        })
+    )
+    .setTimeout(30)
+    .build();
+    
+    // Prepare and submit
+    const preparedTx = await server.prepareTransaction(transaction);
+    preparedTx.sign(userKeypair);
+    
+    const result = await server.sendTransaction(preparedTx);
+    // Wait for confirmation and get contract ID
+    
+    return contractId;
+}
+After deployment, you can initialize the token:
+
+
+Copy
+async function initializeToken(contractId, adminKeypair, decimals, name, symbol) {
+    const contract = new StellarSdk.Contract(contractId);
+    const server = new StellarSdk.SorobanRpc.Server('https://soroban-testnet.stellar.org');
+    
+    const account = await server.getAccount(adminKeypair.publicKey());
+    const transaction = new StellarSdk.TransactionBuilder(account, {
+        fee: StellarSdk.BASE_FEE,
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+    .addOperation(
+        contract.call(
+            'initialize',
+            StellarSdk.Address.fromString(adminKeypair.publicKey()).toScVal(),
+            StellarSdk.nativeToScVal(decimals, { type: 'u32' }),
+            StellarSdk.nativeToScVal(name, { type: 'string' }),
+            StellarSdk.nativeToScVal(symbol, { type: 'string' })
+        )
+    )
+    .setTimeout(30)
+    .build();
+    
+    const preparedTx = await server.prepareTransaction(transaction);
+    preparedTx.sign(adminKeypair);
+    
+    return await server.sendTransaction(preparedTx);
+}
+The key points:
+
+Use the static method contractIdFromAddress() on ContractIdPreimage
+No need to pass enum values as strings
+The token contract's initialize function acts as the constructor
+Make sure to use SorobanRpc.Server for Soroban operations, not the old Server class
