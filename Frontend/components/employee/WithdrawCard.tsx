@@ -136,33 +136,42 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   }, [isWalletConnected, publicKey, selectedContract]);
 
   return (
-    <Card className="bg-slate-800 border-slate-700">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <ArrowUpCircle className="w-5 h-5 mr-2 text-blue-400" />
-          Withdraw Wages
+    <Card className="glass-card card-hover bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-600/50 animate-slide-up">
+      <CardHeader className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 animate-shimmer"></div>
+        <CardTitle className="text-white flex items-center relative z-10">
+          <ArrowUpCircle className="w-6 h-6 mr-3 text-emerald-400 animate-bounce-subtle" />
+          <span className="text-gradient-blue text-xl font-bold">Withdraw Wages</span>
         </CardTitle>
-        <p className="text-gray-400 text-sm">Instantly withdraw your earned wages to your wallet</p>
+        <p className="text-gray-300 text-sm relative z-10">Instantly withdraw your earned wages to your wallet with zero delays</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           {/* Withdrawal Mode Selection */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-3 mb-6">
             <Button
               variant={withdrawMode === 'full' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setWithdrawMode('full')}
-              className="flex-1"
+              className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
+                withdrawMode === 'full' 
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25' 
+                  : 'bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:border-emerald-400/50'
+              }`}
             >
-              Withdraw All
+              💰 Withdraw All
             </Button>
             <Button
               variant={withdrawMode === 'partial' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setWithdrawMode('partial')}
-              className="flex-1"
+              className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
+                withdrawMode === 'partial' 
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/25' 
+                  : 'bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:border-purple-400/50'
+              }`}
             >
-              Custom Amount
+              🎯 Custom Amount
             </Button>
           </div>
           
@@ -195,25 +204,25 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
             </div>
           )}
 
-          <div className="text-sm text-gray-400 bg-slate-700 p-3 rounded-lg">
-            <div className="flex justify-between mb-1">
-              <span>Available Balance:</span>
-              <span className="text-white">
+          <div className="glass-card bg-gradient-to-br from-slate-700/30 to-slate-800/30 p-4 rounded-xl border border-slate-600/30">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-gray-300 font-medium">💎 Available Balance:</span>
+              <span className="text-emerald-400 font-bold text-lg">
                 {isLoadingBalance ? <LoadingSpinner size="sm" className="inline" /> : formatBigintTokens(availableBalance)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Estimated Gas Fee:</span>
-              <span className="text-white">~0.001 tokens</span>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300 font-medium">⚡ Estimated Gas Fee:</span>
+              <span className="text-blue-400 font-semibold">~0.001 tokens</span>
             </div>
-            {!isWalletConnected && <div className="text-yellow-400 text-xs mt-2">⚠️ Please connect your wallet to view balance and withdraw</div>}
-            {errorMsg && <div className="text-red-400 text-xs mt-2">⚠️ {errorMsg}</div>}
+            {!isWalletConnected && <div className="text-yellow-400 text-sm mt-3 p-2 bg-yellow-400/10 rounded-lg border border-yellow-400/20">🔗 Please connect your wallet to view balance and withdraw</div>}
+            {errorMsg && <div className="text-red-400 text-sm mt-3 p-2 bg-red-400/10 rounded-lg border border-red-400/20">⚠️ {errorMsg}</div>}
           </div>
 
           <Button
             onClick={handleWithdraw}
             disabled={!isWalletConnected || isLoading || availableBalance === 0n || !!errorMsg || (withdrawMode === 'partial' && !customAmount)}
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+            className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-lg py-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/25 disabled:hover:scale-100 disabled:hover:shadow-none"
           >
             {isLoading ? (
               <>

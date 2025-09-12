@@ -108,13 +108,19 @@ export default function EmployeePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Employee Dashboard</h1>
-          <p className="text-gray-400">
-            Welcome back! View your real-time earnings and withdraw your wages instantly.
+        <div className="mb-12 text-center animate-slide-up">
+          <h1 className="text-6xl font-bold text-gradient-purple mb-4 animate-fade-in">
+            Employee Dashboard
+          </h1>
+          <p className="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
+            🎉 Welcome back! View your real-time earnings and withdraw your wages instantly with our blockchain-powered system.
           </p>
-          <div className="mt-2 text-sm text-gray-500">
-            Connected as: {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
+          <div className="inline-flex items-center glass-card bg-slate-800/40 px-6 py-3 rounded-full border border-purple-500/30">
+            <span className="text-emerald-400 mr-2">🔗</span>
+            <span className="text-gray-300 font-medium">Connected as: </span>
+            <span className="text-white font-bold ml-2 text-gradient-blue">
+              {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
+            </span>
           </div>
         </div>
 
@@ -148,21 +154,24 @@ export default function EmployeePage() {
           </div>
         )}
 
-        {/* Additional Info Section */}
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
-            <div className="text-2xl font-bold text-blue-400 mb-2">Real-Time</div>
-            <div className="text-sm text-gray-400">Wages accrue by the second</div>
+        {/* Modern Feature Highlights */}
+        <div className="mt-12 grid md:grid-cols-3 gap-8">
+          <div className="glass-card card-hover bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-500/30 p-8 rounded-2xl text-center animate-slide-up">
+            <div className="text-4xl mb-4 animate-pulse-glow">⚡</div>
+            <div className="text-gradient-blue text-3xl font-bold mb-3">Real-Time</div>
+            <div className="text-gray-300 font-medium">Wages accrue by the second with blockchain precision</div>
           </div>
           
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
-            <div className="text-2xl font-bold text-green-400 mb-2">Instant</div>
-            <div className="text-sm text-gray-400">Withdraw anytime, no delays</div>
+          <div className="glass-card card-hover bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-emerald-500/30 p-8 rounded-2xl text-center animate-slide-up" style={{animationDelay: '0.1s'}}>
+            <div className="text-4xl mb-4 animate-bounce-subtle">🚀</div>
+            <div className="text-gradient text-3xl font-bold mb-3">Instant</div>
+            <div className="text-gray-300 font-medium">Withdraw anytime, no delays or waiting periods</div>
           </div>
           
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-2">Secure</div>
-            <div className="text-sm text-gray-400">Blockchain-powered payroll</div>
+          <div className="glass-card card-hover bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30 p-8 rounded-2xl text-center animate-slide-up" style={{animationDelay: '0.2s'}}>
+            <div className="text-4xl mb-4 animate-scale-pulse">🛡️</div>
+            <div className="text-gradient-purple text-3xl font-bold mb-3">Secure</div>
+            <div className="text-gray-300 font-medium">Blockchain-powered payroll with cryptographic security</div>
           </div>
         </div>
       </div>

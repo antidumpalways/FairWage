@@ -158,14 +158,15 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
   }
 
   return (
-    <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-700/50">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <Building2 className="w-6 h-6 mr-2 text-purple-400" />
-          Select Your Employer
+    <Card className="glass-card card-hover bg-gradient-to-br from-purple-900/30 via-blue-900/20 to-indigo-900/30 border-purple-500/30 animate-slide-up">
+      <CardHeader className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-indigo-500/10 animate-shimmer"></div>
+        <CardTitle className="text-white flex items-center relative z-10">
+          <Building2 className="w-7 h-7 mr-3 text-purple-400 animate-float" />
+          <span className="text-gradient-purple text-2xl font-bold">Select Your Employer</span>
         </CardTitle>
-        <p className="text-gray-400 text-sm">
-          Choose which company's wages you want to view and manage
+        <p className="text-gray-300 text-sm relative z-10">
+          🏢 Choose which company's wages you want to view and manage
         </p>
       </CardHeader>
       <CardContent>
@@ -178,19 +179,19 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
               value={selectedContract?.contractId || ""}
               onValueChange={handleContractSelect}
             >
-              <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Choose an employer..." />
+              <SelectTrigger className="w-full glass-card bg-slate-700/50 border-purple-500/30 text-white hover:border-purple-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 py-3">
+                <SelectValue placeholder="🏢 Choose an employer..." />
               </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-600">
+              <SelectContent className="glass-card bg-slate-700/95 border-purple-500/30 backdrop-blur-xl">
                 {contracts.map((contract) => (
                   <SelectItem 
                     key={contract.contractId} 
                     value={contract.contractId}
-                    className="text-white hover:bg-slate-600"
+                    className="text-white hover:bg-purple-600/20 hover:text-purple-200 transition-all duration-200 cursor-pointer"
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-semibold">{contract.companyName}</span>
-                      <span className="text-sm text-gray-400 ml-2">
+                    <div className="flex items-center justify-between w-full py-2">
+                      <span className="font-bold text-lg">🏢 {contract.companyName}</span>
+                      <span className="text-sm text-purple-300 ml-2 font-semibold px-2 py-1 bg-purple-500/20 rounded-full">
                         {contract.tokenSymbol}
                       </span>
                     </div>
@@ -201,38 +202,46 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
           </div>
 
           {selectedContract && (
-            <div className="bg-slate-700/50 p-4 rounded-lg">
-              <div className="text-white font-semibold mb-2">
-                Selected: {selectedContract.companyName}
+            <div className="glass-card bg-gradient-to-br from-purple-800/20 to-blue-800/20 p-5 rounded-xl border border-purple-500/30 animate-fade-in">
+              <div className="text-white font-bold mb-4 flex items-center">
+                <span className="text-emerald-400 mr-2">✅</span>
+                <span className="text-gradient-purple text-lg">Selected: {selectedContract.companyName}</span>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-gray-400">Token Symbol</div>
-                  <div className="text-white">{selectedContract.tokenSymbol}</div>
+              <div className="grid grid-cols-2 gap-6 text-sm">
+                <div className="space-y-2">
+                  <div className="text-purple-300 font-medium">💎 Token Symbol</div>
+                  <div className="text-white font-bold text-lg bg-purple-500/20 px-3 py-2 rounded-lg">
+                    {selectedContract.tokenSymbol}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-gray-400">Network</div>
-                  <div className="text-white capitalize">{selectedContract.network || 'testnet'}</div>
+                <div className="space-y-2">
+                  <div className="text-blue-300 font-medium">🌐 Network</div>
+                  <div className="text-white font-bold text-lg bg-blue-500/20 px-3 py-2 rounded-lg capitalize">
+                    {selectedContract.network || 'testnet'}
+                  </div>
                 </div>
               </div>
-              <div className="mt-2">
-                <div className="text-gray-400 text-xs">Contract ID</div>
-                <div className="text-white text-xs font-mono">
+              <div className="mt-4 space-y-2">
+                <div className="text-gray-300 text-sm font-medium">📋 Contract ID</div>
+                <div className="text-purple-200 text-sm font-mono bg-slate-800/50 px-3 py-2 rounded-lg border border-purple-500/20">
                   {selectedContract.contractId.slice(0, 8)}...{selectedContract.contractId.slice(-6)}
                 </div>
               </div>
             </div>
           )}
 
-          <div className="flex justify-between items-center text-xs text-gray-400">
-            <span>Last updated: {new Date().toLocaleTimeString()}</span>
+          <div className="flex justify-between items-center text-sm text-gray-300 pt-4 border-t border-purple-500/20">
+            <span className="flex items-center">
+              <span className="text-green-400 mr-2">🕐</span>
+              Last updated: {new Date().toLocaleTimeString()}
+            </span>
             <Button 
               onClick={discoverContracts}
               variant="ghost" 
               size="sm"
-              className="text-purple-400 hover:text-purple-300 p-0"
+              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 px-3 py-2 rounded-lg transition-all duration-300 font-semibold"
             >
-              Refresh
+              🔄 Refresh
             </Button>
           </div>
         </div>
