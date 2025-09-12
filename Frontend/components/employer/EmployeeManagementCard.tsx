@@ -305,7 +305,11 @@ const EmployeeManagementCard: React.FC = () => {
         );
       } catch (error: any) {
         console.error("Freeze failed:", error);
-        alert(`Freeze failed: ${error.message}`);
+        if (error.message?.includes("trustline entry is missing")) {
+          alert(`❌ Cannot freeze ${employee.name}: Employee needs to create a trustline first to receive their final payment.`);
+        } else {
+          alert(`Freeze failed: ${error.message}`);
+        }
       } finally {
         setIsLoading(false);
       }
