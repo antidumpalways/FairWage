@@ -146,11 +146,11 @@ const EmployeeManagementCard: React.FC = () => {
               name: existing?.name || `Employee ${address.slice(0, 8)}...`,
               wageRate: Number(info.wage_rate || info.wageRate || 0),
               wagePeriod:
-                (info.wage_period || info.wagePeriod) === 0
+                (info.wage_period ?? info.wagePeriod ?? 0) === 0
                   ? "hour"
-                  : (info.wage_period || info.wagePeriod) === 1
+                  : (info.wage_period ?? info.wagePeriod ?? 0) === 1
                   ? "day"
-                  : (info.wage_period || info.wagePeriod) === 2
+                  : (info.wage_period ?? info.wagePeriod ?? 0) === 2
                   ? "week"
                   : "month",
               active: Boolean(info.active),
