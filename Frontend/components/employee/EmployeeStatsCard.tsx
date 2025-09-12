@@ -31,7 +31,18 @@ const formatTokens = (n: number) => `${n.toFixed(7)} tokens`;
 const formatDate = (d: string|number|Date) => new Date(d).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
 const formatDateTime = (d: string|number|Date) => new Date(d).toLocaleString("en-US",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
 
-const EmployeeStatsCard: React.FC = () => {
+interface Contract {
+  contractId: string;
+  companyName: string;
+  tokenSymbol: string;
+  tokenContract: string;
+}
+
+interface EmployeeStatsCardProps {
+  selectedContract?: Contract;
+}
+
+const EmployeeStatsCard: React.FC<EmployeeStatsCardProps> = ({ selectedContract }) => {
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

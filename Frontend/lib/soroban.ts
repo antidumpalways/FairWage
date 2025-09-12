@@ -554,8 +554,8 @@ export const getAccruedBalance = async (employeeAddress: string): Promise<number
 };
 
 // Alias for employee dashboard compatibility
-export const fetchAccruedBalance = async (employeeAddress: string): Promise<bigint> => {
-    const balance = await getEmployeeBalance(employeeAddress);
+export const fetchAccruedBalance = async (employeeAddress: string, contractId?: string): Promise<bigint> => {
+    const balance = await getEmployeeBalance(employeeAddress, contractId);
     return BigInt(balance);
 };
 

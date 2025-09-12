@@ -15,7 +15,18 @@ const formatBigintTokens = (bi: bigint) => {
   return `${s.slice(0, -7)}.${s.slice(-7)} tokens`;
 };
 
-const WithdrawCard: React.FC = () => {
+interface Contract {
+  contractId: string;
+  companyName: string;
+  tokenSymbol: string;
+  tokenContract: string;
+}
+
+interface WithdrawCardProps {
+  selectedContract?: Contract;
+}
+
+const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastWithdrawal, setLastWithdrawal] = useState<{ amount: string; timestamp: Date } | null>(null);
   const [availableBalance, setAvailableBalance] = useState<bigint>(0n);
@@ -44,7 +55,7 @@ const WithdrawCard: React.FC = () => {
   };
 
   const loadAvailableBalance = async () => {
-    if (!isWalletConnected || !publicKey) return;
+    if (!isWalletConnected || !publicKey || !selectedContract) return;
     setIsLoadingBalance(true);
     setErrorMsg(null);
     try {

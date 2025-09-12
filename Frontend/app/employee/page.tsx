@@ -6,13 +6,24 @@ import BalanceCard from '@/components/employee/BalanceCard';
 import WithdrawCard from '@/components/employee/WithdrawCard';
 import EmployeeStatsCard from '@/components/employee/EmployeeStatsCard';
 import TransactionHistoryCard from '@/components/employee/TransactionHistoryCard';
+import CompanySelector from '@/components/employee/CompanySelector';
 import { Button } from '@/components/ui/button';
 import { Wallet, Users, AlertCircle } from 'lucide-react';
 import { getCurrentContractId } from '@/lib/soroban';
 
+interface Contract {
+  contractId: string;
+  companyName: string;
+  tokenSymbol: string;
+  tokenContract: string;
+  lastChecked?: string;
+  network?: string;
+}
+
 export default function EmployeePage() {
   const { isWalletConnected, publicKey, connectWallet } = useWallet();
   const [hasContractId, setHasContractId] = useState<boolean | null>(null);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
 
   useEffect(() => {
     // Check if contract ID is available
@@ -107,21 +118,35 @@ export default function EmployeePage() {
           </div>
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
-          <BalanceCard />
-          <WithdrawCard />
+        {/* Company Selection */}
+        <div className="mb-8">
+          <CompanySelector 
+            onContractSelected={setSelectedContract}
+            selectedContract={selectedContract}
+          />
         </div>
 
-        {/* Employee Statistics */}
-        <div className="mb-8">
-          <EmployeeStatsCard />
-        </div>
+        {/* Main Dashboard Grid - Only show if contract selected */}
+        {selectedContract && (
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <BalanceCard selectedContract={selectedContract} />
+            <WithdrawCard selectedContract={selectedContract} />
+          </div>
+        )}
 
-        {/* Transaction History */}
-        <div className="mb-8">
-          <TransactionHistoryCard />
-        </div>
+        {/* Employee Statistics - Only show if contract selected */}
+        {selectedContract && (
+          <div className="mb-8">
+            <EmployeeStatsCard selectedContract={selectedContract} />
+          </div>
+        )}
+
+        {/* Transaction History - Only show if contract selected */}
+        {selectedContract && (
+          <div className="mb-8">
+            <TransactionHistoryCard selectedContract={selectedContract} />
+          </div>
+        )}
 
         {/* Additional Info Section */}
         <div className="mt-12 grid md:grid-cols-3 gap-6">

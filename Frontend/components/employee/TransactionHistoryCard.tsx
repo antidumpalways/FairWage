@@ -17,7 +17,18 @@ interface Transaction {
   gasFee: number;
 }
 
-const TransactionHistoryCard: React.FC = () => {
+interface Contract {
+  contractId: string;
+  companyName: string;
+  tokenSymbol: string;
+  tokenContract: string;
+}
+
+interface TransactionHistoryCardProps {
+  selectedContract?: Contract;
+}
+
+const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selectedContract }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { publicKey, isWalletConnected } = useWallet();

@@ -6,20 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchAccruedBalance } from '@/lib/soroban';
 import { useWallet } from '@/contexts/WalletContext';
 
-const BalanceCard: React.FC = () => {
+interface Contract {
+  contractId: string;
+  companyName: string;
+  tokenSymbol: string;
+  tokenContract: string;
+}
+
+interface BalanceCardProps {
+  selectedContract?: Contract;
+}
+
+const BalanceCard: React.FC<BalanceCardProps> = ({ selectedContract }) => {
   const [balance, setBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { publicKey, isWalletConnected } = useWallet();
 
   const loadRealBalance = async (): Promise<number> => {
-    if (!publicKey || !isWalletConnected) {
-      throw new Error('Wallet not connected');
+    if (!publicKey || !isWalletConnected || !selectedContract) {
+      throw new Error('Wallet not connected or no contract selected');
     }
     
     try {
-      console.log('🔍 Loading real balance for:', publicKey);
-      // Call REAL contract function
-      const realBalance = await fetchAccruedBalance(publicKey);
+      console.log('🔍 Loading real balance for:', publicKey, 'from contract:', selectedContract.contractId);
+      // Call REAL contract function with selected contract
+      const realBalance = await fetchAccruedBalance(publicKey, selectedContract.contractId);
       console.log('✅ Real balance loaded:', realBalance);
       
       // Validate the response
@@ -46,7 +57,7 @@ const BalanceCard: React.FC = () => {
   useEffect(() => {
     const updateBalance = async () => {
       try {
-        if (!publicKey || !isWalletConnected) {
+        if (!publicKey || !isWalletConnected || !selectedContract) {
           setIsLoading(false);
           return;
         }
@@ -67,7 +78,7 @@ const BalanceCard: React.FC = () => {
     const interval = setInterval(updateBalance, 10000);
 
     return () => clearInterval(interval);
-  }, [publicKey, isWalletConnected]);
+  }, [publicKey, isWalletConnected, selectedContract]);
 
   return (
     <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-700/50">
