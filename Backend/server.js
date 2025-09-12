@@ -17,7 +17,7 @@ try {
     fairwageContractId: process.env.FAIRWAGE_CONTRACT_ID,
     tokenContractId: process.env.TOKEN_CONTRACT_ID,
     logLevel: process.env.LOG_LEVEL || 'info',
-    corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+    corsOrigin: process.env.CORS_ORIGIN || process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'
   };
 }
 
@@ -127,9 +127,9 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 FairWage Backend Server running on port ${PORT}`);
+// Start server on localhost (backend requirement)
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`🚀 FairWage Backend Server running on localhost:${PORT}`);
   console.log(`📡 RPC URL: ${RPC_URL}`);
   console.log(`🌐 Network: ${NETWORK_PASSPHRASE}`);
   console.log(`📋 FairWage Contract ID: ${FAIRWAGE_CONTRACT_ID || 'Not configured'}`);
