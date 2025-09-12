@@ -16,12 +16,21 @@ A decentralized payroll system built on Stellar Soroban enabling real-time wage 
 - **Blockchain**: Stellar Soroban smart contracts for payroll management
 - **Wallet**: Freighter wallet integration for user authentication
 
-## Recent Changes (Import Setup)
+## Recent Changes 
+### Import Setup
 - Configured Next.js for Replit proxy environment (removed invalid config properties)
 - Fixed Stellar SDK imports in backend (changed from Server to Horizon.Server)
 - Set up CORS configuration for cross-origin requests
 - Configured deployment for autoscale target
 - Established proper port configuration (frontend: 5000, backend: 3001)
+
+### Deployment Configuration Fix (Sep 12, 2025)
+- Fixed deployment failure caused by missing `wasm32-unknown-unknown` Rust target
+- Updated deployment build command to only build frontend (avoiding contract compilation)
+- Updated deployment run command to explicitly serve on port 5000
+- Modified root package.json build scripts to prevent accidental contract builds
+- Changed default "build" to frontend-only, added "build:all" for full pipeline
+- Successfully tested deployment configuration with working frontend/backend workflows
 
 ## User Preferences
 - None recorded yet
