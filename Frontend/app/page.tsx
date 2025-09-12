@@ -38,29 +38,36 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-slate-900/20"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Fair<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Wage</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Revolutionary earned wage access platform powered by blockchain technology. 
-              Pay employees in real-time, give workers instant access to their earned wages.
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <span className="text-white text-2xl font-bold">FW</span>
+              </div>
+              <h1 className="text-5xl md:text-6xl font-bold text-white">
+                Fair<span className="text-blue-400">Wage</span>
+              </h1>
+            </div>
+            <p className="text-xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+              Professional earned wage access platform powered by Stellar blockchain. 
+              Streamline payroll operations with real-time wage accrual and instant withdrawals.
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
               <Link href="/employer">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 text-lg w-full sm:w-auto"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 text-lg font-semibold w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 >
-                  <Building2 className="w-5 h-5 mr-2" />
-                  For Employers
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <Building2 className="w-5 h-5 mr-3" />
+                  Employer Portal
+                  <ArrowRight className="w-5 h-5 ml-3" />
                 </Button>
               </Link>
               
@@ -68,11 +75,11 @@ export default function HomePage() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white px-8 py-4 text-lg w-full sm:w-auto"
+                  className="border-2 border-slate-400 text-slate-300 hover:bg-slate-700 hover:text-white px-10 py-5 text-lg font-semibold w-full sm:w-auto hover:border-slate-300 transition-all duration-300"
                 >
-                  <Users className="w-5 h-5 mr-2" />
-                  For Employees
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <Users className="w-5 h-5 mr-3" />
+                  Employee Access
+                  <ArrowRight className="w-5 h-5 ml-3" />
                 </Button>
               </Link>
             </div>
@@ -81,47 +88,47 @@ export default function HomePage() {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-4">How FairWage Works</h2>
-          <p className="text-lg text-gray-400">
-            Streamlined payroll management with real-time wage access
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-6">Enterprise-Grade Payroll Solution</h2>
+          <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+            Built on Stellar blockchain for secure, transparent, and efficient payroll management
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <Card className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="h-6 w-6 text-white" />
+          <Card className="bg-slate-800/50 border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <DollarSign className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Real-Time Payments</h3>
-              <p className="text-gray-400">
-                Employees earn wages by the second, with instant access to their accumulated earnings
+              <h3 className="text-2xl font-semibold text-white mb-4">Real-Time Accrual</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Wages accumulate by the second with blockchain precision, providing employees immediate access to earned compensation
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-6 w-6 text-white" />
+          <Card className="bg-slate-800/50 border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Clock className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Flexible Access</h3>
-              <p className="text-gray-400">
-                Workers can withdraw their earned wages anytime, improving financial flexibility
+              <h3 className="text-2xl font-semibold text-white mb-4">Instant Withdrawals</h3>
+              <p className="text-slate-400 leading-relaxed">
+                24/7 access to earned wages without waiting periods, improving employee financial wellness and satisfaction
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-white" />
+          <Card className="bg-slate-800/50 border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-blue-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Blockchain Security</h3>
-              <p className="text-gray-400">
-                Smart contracts ensure transparent, secure, and automated payroll management
+              <h3 className="text-2xl font-semibold text-white mb-4">Stellar Security</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Enterprise-grade security with immutable blockchain records and transparent smart contract operations
               </p>
             </CardContent>
           </Card>
@@ -129,51 +136,78 @@ export default function HomePage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="bg-slate-800/50 py-16 mt-16">
+      <div className="bg-slate-900/80 py-20 mt-20 border-t border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-white mb-6">For Employers</h2>
-              <ul className="space-y-4 text-gray-300">
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  Reduce payroll administration costs
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  Improve employee satisfaction and retention
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  Automated wage calculations and payments
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  Complete transparency in payroll operations
-                </li>
-              </ul>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-6">Built for Modern Workforces</h2>
+            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+              Enhance your payroll operations with cutting-edge blockchain technology
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                  <Building2 className="w-8 h-8 text-blue-500 mr-3" />
+                  For Employers
+                </h3>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Reduce Operational Costs</h4>
+                      <p className="text-slate-400">Automate payroll processes and eliminate manual administration overhead</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Enhance Employee Retention</h4>
+                      <p className="text-slate-400">Offer competitive benefits with instant wage access capabilities</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Complete Transparency</h4>
+                      <p className="text-slate-400">Immutable blockchain records provide full audit trails and compliance</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <div>
-              <h2 className="text-3xl font-bold text-white mb-6">For Employees</h2>
-              <ul className="space-y-4 text-gray-300">
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                  Access earned wages instantly, anytime
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                  No more waiting for payday
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                  Better financial planning and cash flow
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                  Secure blockchain-based wage tracking
-                </li>
-              </ul>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                  <Users className="w-8 h-8 text-slate-500 mr-3" />
+                  For Employees
+                </h3>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-slate-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Financial Flexibility</h4>
+                      <p className="text-slate-400">Access earned wages anytime without payday constraints or borrowing</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-slate-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Real-Time Earnings</h4>
+                      <p className="text-slate-400">Watch your wages grow in real-time with second-by-second accrual</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-3 h-3 bg-slate-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">Secure Platform</h4>
+                      <p className="text-slate-400">Enterprise-grade security with blockchain-powered wage protection</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
