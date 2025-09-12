@@ -118,6 +118,34 @@ app.post("/api/set-contract-id", (req, res) => {
   }
 });
 
+// API: Discover employee contracts
+app.post("/api/discover-employee-contracts", async (req, res) => {
+  try {
+    const { employeeAddress } = req.body;
+    if (!employeeAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Missing employeeAddress" 
+      });
+    }
+    
+    console.log('🔍 Discovering contracts for employee:', employeeAddress);
+    const contracts = await discoverEmployeeContracts(employeeAddress, server, horizonServer, networkPassphrase);
+    
+    res.json({
+      success: true,
+      contracts,
+      message: `Found ${contracts.length} contracts for employee`
+    });
+  } catch (error) {
+    console.error('❌ Error discovering contracts:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 app.get("/api/get-current-contract", (req, res) => {
   try {
     const fair = getFairWageContractId();

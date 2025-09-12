@@ -1,7 +1,7 @@
 // Contract Discovery System for Multi-Company Support
 // This helps employees find all contracts where they are registered
 
-const StellarSdk = require("stellar-sdk");
+const StellarSdk = require("@stellar/stellar-sdk");
 
 // Known contract registry (In production, this could be stored in database)
 let knownContracts = [
@@ -22,7 +22,7 @@ let knownContracts = [
  * @param {string} networkPassphrase - Network passphrase for transactions
  * @returns {Array} List of contracts where employee is registered
  */
-async function discoverEmployeeContracts(employeeAddress, server, networkPassphrase) {
+async function discoverEmployeeContracts(employeeAddress, rpcServer, horizonServer, networkPassphrase) {
   const employeeContracts = [];
 
   for (const contract of knownContracts) {
@@ -33,7 +33,8 @@ async function discoverEmployeeContracts(employeeAddress, server, networkPassphr
       const isRegistered = await checkEmployeeRegistration(
         employeeAddress, 
         contract.id, 
-        server, 
+        rpcServer,
+        horizonServer, 
         networkPassphrase
       );
 
@@ -41,7 +42,8 @@ async function discoverEmployeeContracts(employeeAddress, server, networkPassphr
         // Get additional contract info
         const contractInfo = await getContractInfo(
           contract.id, 
-          server, 
+          rpcServer,
+          horizonServer, 
           networkPassphrase
         );
 
@@ -64,9 +66,10 @@ async function discoverEmployeeContracts(employeeAddress, server, networkPassphr
 /**
  * Check if an employee is registered in a specific contract
  */
-async function checkEmployeeRegistration(employeeAddress, contractId, server, networkPassphrase) {
+async function checkEmployeeRegistration(employeeAddress, contractId, rpcServer, horizonServer, networkPassphrase) {
   try {
-    const account = await server.getAccount("GAIRBPN3XHCKBTRN5QHSJQHX2GWJQGFNUDLSKJFKHTQY6ZTYONXNMVTB");
+    const SIMULATION_ACCOUNT = "GBIFUPL4MOPI5XHPFKYO4SWTKKLSK63GZVMQ5A2FX3TLCS74NJ55QAZD";
+    const account = await horizonServer.loadAccount(SIMULATION_ACCOUNT);
     
     const op = StellarSdk.Operation.invokeContractFunction({
       contract: contractId,
@@ -82,7 +85,7 @@ async function checkEmployeeRegistration(employeeAddress, contractId, server, ne
       .setTimeout(30)
       .build();
 
-    const simulation = await server.simulateTransaction(tx);
+    const simulation = await rpcServer.simulateTransaction(tx);
     
     // If simulation is successful and returns data, employee exists
     if (!simulation.error && simulation.result?.retval) {
@@ -104,7 +107,7 @@ async function checkEmployeeRegistration(employeeAddress, contractId, server, ne
 /**
  * Get additional contract information
  */
-async function getContractInfo(contractId, server, networkPassphrase) {
+async function getContractInfo(contractId, rpcServer, horizonServer, networkPassphrase) {
   try {
     // This could fetch additional contract metadata in the future
     return {
