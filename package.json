@@ -1,0 +1,45 @@
+{
+  "name": "fairwage-monorepo",
+  "version": "1.0.0",
+  "description": "FairWage - Blockchain Payroll System monorepo",
+  "private": true,
+  "workspaces": [
+    "Frontend",
+    "Backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd Frontend && npm run dev",
+    "dev:backend": "cd Backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:contracts",
+    "build:frontend": "cd Frontend && npm install && npm run build",
+    "build:contracts": "cd Backend && cargo build --target wasm32-unknown-unknown --release",
+    "start": "npm run start:frontend",
+    "start:frontend": "cd Frontend && npm start",
+    "start:backend": "cd Backend && npm start",
+    "install:all": "npm install && cd Frontend && npm install && cd ../Backend && npm install",
+    "clean": "cd Frontend && rm -rf .next out node_modules && cd ../Backend && rm -rf target node_modules && rm -rf node_modules",
+    "test": "cd Frontend && npm run lint",
+    "lint": "cd Frontend && npm run lint",
+    "deploy:contracts": "cd Backend && cargo build --target wasm32-unknown-unknown --release",
+    "deploy:frontend": "cd Frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "blockchain",
+    "stellar",
+    "soroban",
+    "payroll",
+    "fairwage",
+    "nextjs",
+    "rust"
+  ],
+  "author": "FairWage Team",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
