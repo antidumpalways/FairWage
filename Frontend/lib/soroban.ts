@@ -520,6 +520,257 @@ export const payAllWages = async (
 // Export alias for EmployeeManagementCard
 export const payAllEmployees = payAllWages;
 
+// Add alias for compatibility
+export const initializeContract = initializeFairWageContract;
+
+// Missing functions for EmployeeManagementCard compatibility
+export const getEmployeeInfo = async (fairWageContractId: string, employeeAddress: string): Promise<any> => {
+    try {
+        const response = await fetch('/api/get-employee-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fairWageContractId, employeeAddress })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Failed to get employee info');
+            return null;
+        }
+
+        const result = await response.json();
+        return result.employeeInfo || null;
+    } catch (error) {
+        console.warn('⚠️ Failed to get employee info:', error);
+        return null;
+    }
+};
+
+export const getAccruedBalance = async (employeeAddress: string): Promise<number> => {
+    return getEmployeeBalance(employeeAddress);
+};
+
+export const removeEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+
+    const response = await fetch('/api/remove-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            employeeAddress
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to remove employee: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+export const freezeEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+
+    const response = await fetch('/api/freeze-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            employeeAddress
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to freeze employee: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+export const activateEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+
+    const response = await fetch('/api/activate-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            employeeAddress
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to activate employee: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+export const updateWageRate = async (fairWageContractId: string, employeeAddress: string, newWage: number): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+
+    const response = await fetch('/api/update-wage-rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            employeeAddress,
+            newWage
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to update wage rate: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+export const payEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
+    return payAllWages(fairWageContractId, employeeAddress);
+};
+
+export const fundContract = async (fairWageContractId: string, tokenContractId: string, amount: number): Promise<string> => {
+    if (!window.rabet) throw new Error("Rabet wallet not found.");
+    const { publicKey } = await window.rabet.connect();
+
+    const response = await fetch('/api/fund-contract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userPublicKey: publicKey,
+            fairWageContractId,
+            tokenContractId,
+            amount
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to fund contract: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
+    });
+
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+export const checkContractBalance = async (contractId: string): Promise<number> => {
+    try {
+        const response = await fetch('/api/check-contract-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contractId })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Failed to check contract balance');
+            return 0;
+        }
+
+        const result = await response.json();
+        return result.balance || 0;
+    } catch (error) {
+        console.warn('⚠️ Failed to check contract balance:', error);
+        return 0;
+    }
+};
+
 // Get employee balance
 export const getEmployeeBalance = async (employeeAddress: string): Promise<number> => {
     try {
