@@ -200,11 +200,8 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         
         // Sign the transaction with Rabet
         console.log('🔐 Signing transaction with Rabet...');
-        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-        
-        if (signResult.error) {
-            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
-        }
+        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+        if (!signResult.xdr) throw new Error("Signing cancelled");
         
         console.log('✅ Transaction signed successfully');
         
@@ -277,11 +274,8 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
         
         // Sign the FairWage transaction with Rabet
         console.log('🔐 Signing FairWage transaction with Rabet...');
-        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-        
-        if (signResult.error) {
-            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
-        }
+        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+        if (!signResult.xdr) throw new Error("Signing cancelled");
         
         console.log('✅ FairWage transaction signed successfully');
         
@@ -351,11 +345,8 @@ export const initializeFairWageContract = async (fairWageContractId: string, tok
         console.log('✅ Got initialization transaction XDR from backend');
         
         // Sign the transaction with Rabet
-        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
-        
-        if (signResult.error) {
-            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
-        }
+        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+        if (!signResult.xdr) throw new Error("Signing cancelled");
         
         console.log('✅ Initialization transaction signed successfully');
         
@@ -460,7 +451,7 @@ export const addEmployee = async (
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -503,7 +494,7 @@ export const payAllWages = async (
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -638,7 +629,7 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -677,7 +668,7 @@ export const freezeEmployee = async (fairWageContractId: string, employeeAddress
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -716,7 +707,7 @@ export const activateEmployee = async (fairWageContractId: string, employeeAddre
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -756,7 +747,7 @@ export const updateWageRate = async (fairWageContractId: string, employeeAddress
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {
@@ -800,7 +791,7 @@ export const fundContract = async (fairWageContractId: string, tokenContractId: 
 
     const result = await response.json();
 
-    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
     const submitResponse = await fetch('/api/submit-transaction', {

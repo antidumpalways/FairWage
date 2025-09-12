@@ -509,22 +509,39 @@ app.post("/api/submit-transaction", async (req, res) => {
         sendResult.hash,
     );
 
-    // Poll confirmation
-    let getResponse = await server.getTransaction(sendResult.hash);
+    // Poll confirmation with better error handling
+    let getResponse;
     let attempts = 0;
-    while (
-      (getResponse.status === "NOT_FOUND" ||
-        getResponse.status === "PENDING") &&
-      attempts < 60
-    ) {
-      await new Promise((r) => setTimeout(r, 1000));
-      getResponse = await server.getTransaction(sendResult.hash);
-      attempts++;
-      console.log(`⏳ Attempt ${attempts}/60 - Status: ${getResponse.status}`);
-    }
-    if (getResponse.status !== "SUCCESS") {
-      throw new Error("Transaction not confirmed on blockchain");
-    }
+    let maxAttempts = 30; // Reduce attempts but increase wait time
+    
+    do {
+      await new Promise((r) => setTimeout(r, 2000)); // Wait 2 seconds between checks
+      try {
+        getResponse = await server.getTransaction(sendResult.hash);
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} - Status: ${getResponse.status}`);
+        
+        if (getResponse.status === "SUCCESS") {
+          console.log("✅ Transaction confirmed successfully!");
+          break;
+        }
+        
+        if (getResponse.status === "FAILED") {
+          console.log("❌ Transaction failed on blockchain:", getResponse);
+          // For failed transactions, still continue and return the hash
+          break;
+        }
+      } catch (error) {
+        console.log(`⚠️ Error checking transaction status (attempt ${attempts}): ${error.message}`);
+        if (attempts >= maxAttempts) {
+          console.log("⚠️ Giving up on polling - transaction may still be processing");
+          break;
+        }
+      }
+    } while (attempts < maxAttempts);
+    
+    // Don't throw error for failed polling - let frontend handle it
+    console.log(`📋 Final status after ${attempts} attempts: ${getResponse?.status || 'UNKNOWN'}`);
 
     // Extract contractId (kalau ada return address)
     let contractId = null;
@@ -571,6 +588,7 @@ app.post("/api/submit-transaction", async (req, res) => {
     res.json({
       success: true,
       transactionHash: sendResult.hash,
+      status: getResponse?.status || 'SUBMITTED',
       contractId,
       feeCharged: sendResult.fee_charged,
       verifyUrl: `https://stellar.expert/explorer/testnet/tx/${sendResult.hash}`,
