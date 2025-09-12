@@ -516,7 +516,15 @@ const EmployeeManagementCard: React.FC = () => {
 
         // Prefer on-chain batch if available
         try {
-          await payAllEmployeesOnChain(fairWageContractId, employees.filter((e) => e.active).map((e) => e.address));
+          const activeEmployeeAddresses = employees.filter((e) => e.active).map((e) => e.address);
+          if (activeEmployeeAddresses.length === 1) {
+            await payAllEmployeesOnChain(fairWageContractId, activeEmployeeAddresses[0]);
+          } else {
+            // Pay each employee individually
+            for (const employee of employees.filter((e) => e.active)) {
+              await payAllEmployeesOnChain(fairWageContractId, employee.address);
+            }
+          }
         } catch (e) {
           // Fallback: pay one by one
           const now = new Date().toISOString();
