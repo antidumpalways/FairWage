@@ -144,7 +144,7 @@ const EmployeeManagementCard: React.FC = () => {
                 `${Date.now().toString()}_${Math.random().toString(36).slice(2, 9)}`,
               address,
               name: existing?.name || `Employee ${address.slice(0, 8)}...`,
-              wageRate: info.wage_rate || info.wageRate,
+              wageRate: Number(info.wage_rate || info.wageRate || 0),
               wagePeriod:
                 (info.wage_period || info.wagePeriod) === 0
                   ? "hour"

@@ -1463,8 +1463,7 @@ app.post("/api/get-employee-info", async (req, res) => {
       try {
         const native = StellarSdk.scValToNative(simulation.result.retval);
         employeeInfo = {
-          wage_rate:
-            native.wage_rate?.toString?.() ?? String(native.wage_rate || "0"),
+          wage_rate: Number(native.wage_rate || 0),
           accrued_balance:
             native.accrued_balance?.toString?.() ??
             String(native.accrued_balance || "0"),
