@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import BalanceCard from '@/components/employee/BalanceCard';
 import WithdrawCard from '@/components/employee/WithdrawCard';
-import EmployeeStatsCard from '@/components/employee/EmployeeStatsCard';
 import TransactionHistoryCard from '@/components/employee/TransactionHistoryCard';
 import CompanySelector from '@/components/employee/CompanySelector';
 import { Button } from '@/components/ui/button';
@@ -146,12 +145,6 @@ export default function EmployeePage() {
           </div>
         )}
 
-        {/* Employee Statistics - Only show if contract selected */}
-        {selectedContract && (
-          <div className="mb-8">
-            <EmployeeStatsCard selectedContract={selectedContract} />
-          </div>
-        )}
 
         {/* Transaction History - Only show if contract selected */}
         {selectedContract && (
