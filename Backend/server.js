@@ -115,6 +115,96 @@ app.get('/api/contract/:contractId/state', async (req, res) => {
     }
 });
 
+// Token deployment endpoint
+app.post('/api/prepare-token-deploy', async (req, res) => {
+  try {
+    const { userPublicKey, tokenName, tokenSymbol } = req.body;
+    
+    if (!userPublicKey || !tokenName || !tokenSymbol) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: userPublicKey, tokenName, tokenSymbol' 
+      });
+    }
+
+    // For now, return a placeholder response since actual deployment logic would be complex
+    // In a real implementation, this would prepare the token deployment transaction
+    res.json({
+      success: true,
+      message: 'Token deployment preparation endpoint - implementation needed',
+      transactionXdr: 'PLACEHOLDER_XDR_FOR_TOKEN_DEPLOYMENT',
+      userPublicKey,
+      tokenName,
+      tokenSymbol,
+      network: NETWORK_PASSPHRASE
+    });
+  } catch (error) {
+    console.error('Error preparing token deployment:', error);
+    res.status(500).json({ 
+      error: 'Failed to prepare token deployment',
+      message: error.message 
+    });
+  }
+});
+
+// Transaction submission endpoint
+app.post('/api/submit-transaction', async (req, res) => {
+  try {
+    const { signedTransactionXdr } = req.body;
+    
+    if (!signedTransactionXdr) {
+      return res.status(400).json({ 
+        error: 'Missing required field: signedTransactionXdr' 
+      });
+    }
+
+    // For now, return a placeholder response since actual submission would use Stellar SDK
+    // In a real implementation, this would submit to the Stellar network
+    res.json({
+      success: true,
+      message: 'Transaction submission endpoint - implementation needed',
+      hash: 'PLACEHOLDER_TRANSACTION_HASH',
+      network: NETWORK_PASSPHRASE,
+      status: 'pending'
+    });
+  } catch (error) {
+    console.error('Error submitting transaction:', error);
+    res.status(500).json({ 
+      error: 'Failed to submit transaction',
+      message: error.message 
+    });
+  }
+});
+
+// FairWage deployment endpoint
+app.post('/api/prepare-fairwage-deploy', async (req, res) => {
+  try {
+    const { userPublicKey, tokenContractId } = req.body;
+    
+    if (!userPublicKey || !tokenContractId) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: userPublicKey, tokenContractId' 
+      });
+    }
+
+    // For now, return a placeholder response since actual deployment logic would be complex
+    // In a real implementation, this would prepare the FairWage contract deployment
+    res.json({
+      success: true,
+      message: 'FairWage deployment preparation endpoint - implementation needed',
+      transactionXdr: 'PLACEHOLDER_XDR_FOR_FAIRWAGE_DEPLOYMENT',
+      userPublicKey,
+      tokenContractId,
+      network: NETWORK_PASSPHRASE
+    });
+  } catch (error) {
+    console.error('Error preparing FairWage deployment:', error);
+    res.status(500).json({ 
+      error: 'Failed to prepare FairWage deployment',
+      message: error.message 
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);

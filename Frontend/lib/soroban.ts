@@ -205,8 +205,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         const publicKey = await connectWallet();
         
         // Get REAL transaction from backend
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${backendUrl}/api/prepare-token-deploy`, {
+        const response = await fetch('/api/prepare-token-deploy', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -248,7 +247,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         
         // Submit the REAL signed transaction to Stellar network
         console.log('📡 Submitting to Stellar network...');
-        const submitResponse = await fetch(`${backendUrl}/api/submit-transaction`, {
+        const submitResponse = await fetch('/api/submit-transaction', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -296,8 +295,7 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
         console.log('📋 Token Contract ID:', tokenContractId);
         
         // Use backend API for FairWage deployment
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${backendUrl}/api/prepare-fairwage-deploy`, {
+        const response = await fetch('/api/prepare-fairwage-deploy', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -334,7 +332,7 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
         
         // Submit the signed transaction to backend
         console.log('📡 Submitting FairWage transaction to backend...');
-        const submitResponse = await fetch(`${backendUrl}/api/submit-transaction`, {
+        const submitResponse = await fetch('/api/submit-transaction', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
