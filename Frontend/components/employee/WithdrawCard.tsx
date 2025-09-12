@@ -96,10 +96,38 @@ const WithdrawCard: React.FC = () => {
         setCustomAmount(''); // Clear input after withdrawal
       }
       
-      setLastWithdrawal({ 
+      const withdrawalRecord = {
         amount: formatBigintTokens(withdrawnAmount).replace(" tokens",""), 
-        timestamp: new Date() 
-      });
+        timestamp: new Date()
+      };
+      setLastWithdrawal(withdrawalRecord);
+
+      // Save transaction to localStorage for history
+      if (publicKey) {
+        try {
+          const newTransaction = {
+            id: `withdrawal-${Date.now()}`,
+            type: withdrawMode === 'full' ? 'withdrawal' : 'withdrawal',
+            amount: Number(withdrawnAmount) / 10000000, // Convert to display units
+            timestamp: new Date().toISOString(),
+            status: 'completed',
+            hash: transactionHash,
+            description: withdrawMode === 'full' ? 'Full withdrawal of accrued wages' : `Partial withdrawal of ${customAmount} TBU`,
+            gasFee: 0.001 // Estimated gas fee
+          };
+          
+          const storageKey = `fairWage_transactions_${publicKey}`;
+          const existingTransactions = localStorage.getItem(storageKey);
+          const transactions = existingTransactions ? JSON.parse(existingTransactions) : [];
+          transactions.unshift(newTransaction); // Add to beginning
+          transactions.splice(10); // Keep only last 10 transactions
+          localStorage.setItem(storageKey, JSON.stringify(transactions));
+          console.log('✅ Transaction saved to history:', newTransaction);
+        } catch (error) {
+          console.warn('⚠️ Failed to save transaction to history:', error);
+        }
+      }
+
       await loadAvailableBalance();
       alert(`Withdrawal successful! ${formatBigintTokens(withdrawnAmount)} - Hash: ${transactionHash.substring(0, 10)}...`);
     } catch (e: any) {
@@ -193,10 +221,23 @@ const WithdrawCard: React.FC = () => {
 
           <Button
             onClick={handleWithdraw}
-            disabled={!isWalletConnected || isLoading || availableBalance === 0n || !!errorMsg}
+            disabled={!isWalletConnected || isLoading || availableBalance === 0n || !!errorMsg || (withdrawMode === 'partial' && !customAmount)}
             className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
           >
-            {isLoading ? (<><LoadingSpinner size="sm" className="mr-2" />Processing Withdrawal...</>) : (<><ArrowUpCircle className="w-5 h-5 mr-2" />Withdraw All Wages</>)}
+            {isLoading ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                {withdrawMode === 'full' ? 'Processing Full Withdrawal...' : 'Processing Partial Withdrawal...'}
+              </>
+            ) : (
+              <>
+                <ArrowUpCircle className="w-5 h-5 mr-2" />
+                {withdrawMode === 'full' 
+                  ? 'Withdraw All Wages' 
+                  : `Withdraw ${customAmount || '0'} TBU`
+                }
+              </>
+            )}
           </Button>
         </div>
 

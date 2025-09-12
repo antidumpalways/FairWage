@@ -108,18 +108,18 @@ export default function EmployeePage() {
         </div>
 
         {/* Main Dashboard Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
           <BalanceCard />
           <WithdrawCard />
         </div>
 
         {/* Employee Statistics */}
-        <div className="mt-12">
+        <div className="mb-8">
           <EmployeeStatsCard />
         </div>
 
         {/* Transaction History */}
-        <div className="mt-12">
+        <div className="mb-8">
           <TransactionHistoryCard />
         </div>
 
