@@ -778,10 +778,11 @@ export const checkContractBalance = async (fairWageContractId: string, tokenCont
 // Get employee balance
 export const getEmployeeBalance = async (employeeAddress: string): Promise<number> => {
     try {
+        const contractId = localStorage.getItem("fairWageContractId");
         const response = await fetch('/api/get-employee-balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeAddress })
+            body: JSON.stringify({ employeeAddress, contractId })
         });
 
         if (!response.ok) {
