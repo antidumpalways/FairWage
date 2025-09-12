@@ -128,29 +128,21 @@ app.post('/api/prepare-token-deploy', async (req, res) => {
       });
     }
 
-    console.log('🚀 Preparing real token deployment transaction');
+    console.log('🚀 Preparing SAC token deployment transaction');
     console.log('📋 Token details:', { tokenName, tokenSymbol, userPublicKey });
-
-    // Load the fungible token WASM contract
-    const wasmPath = path.join(__dirname, 'fungible.wasm');
-    if (!fs.existsSync(wasmPath)) {
-      throw new Error('fungible.wasm contract file not found');
-    }
-    
-    const wasmBuffer = fs.readFileSync(wasmPath);
-    console.log('✅ Loaded fungible.wasm contract');
 
     // Load the source account
     const sourceAccount = await horizonServer.loadAccount(userPublicKey);
     console.log('✅ Loaded source account');
 
-    // Create the contract deployment transaction
+    // Create SAC token deployment transaction (correct flow)
+    // Step 1: Create the Stellar Asset Contract (SAC) deployment
     const transaction = new TransactionBuilder(sourceAccount, {
-      fee: '10000000', // 10 XLM (high fee for contract deployment)
+      fee: '1000000', // 1 XLM (standard fee for SAC deployment)
       networkPassphrase: NETWORK_PASSPHRASE,
     })
-    .addOperation(Operation.uploadContractWasm({
-      wasm: wasmBuffer,
+    .addOperation(Operation.createStellarAsset({
+      asset: new Asset(tokenSymbol, userPublicKey), // Create asset with user as issuer
     }))
     .setTimeout(300)
     .build();
