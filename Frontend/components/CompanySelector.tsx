@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,21 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
     const [contractId, setContractIdInput] = useState('');
     const [isValidating, setIsValidating] = useState(false);
     const [validationError, setValidationError] = useState('');
+    const [currentContractId, setCurrentContractId] = useState<string | null>(null);
+
+    // Load current contract ID on component mount
+    useEffect(() => {
+        const loadCurrentContractId = async () => {
+            try {
+                const current = await getCurrentContractId();
+                setCurrentContractId(current);
+            } catch (error) {
+                console.warn('Failed to load current contract ID:', error);
+                setCurrentContractId(null);
+            }
+        };
+        loadCurrentContractId();
+    }, []);
 
     const handleJoinCompany = async () => {
         if (!contractId.trim()) {
@@ -123,13 +138,13 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                 </div>
 
                 {/* Current Contract Info */}
-                {getCurrentContractId() && (
+                {currentContractId && (
                     <Card className="bg-slate-800/30 border-slate-600">
                         <CardContent className="pt-6">
                             <div className="text-center">
                                 <p className="text-sm text-gray-300 mb-2">Current Company:</p>
                                 <code className="text-xs bg-slate-700 px-2 py-1 rounded text-green-400">
-                                    {getCurrentContractId()}
+                                    {currentContractId}
                                 </code>
                             </div>
                         </CardContent>
