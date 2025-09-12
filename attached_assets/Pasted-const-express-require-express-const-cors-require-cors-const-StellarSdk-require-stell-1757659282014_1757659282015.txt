@@ -1,0 +1,1470 @@
+const express = require('express');
+const cors = require('cors');
+const StellarSdk = require('@stellar/stellar-sdk');
+const { Keypair, TransactionBuilder, Networks, Asset, BASE_FEE } = StellarSdk;
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// PERBAIKAN: GUNAKAN Networks.TESTNET YANG KONSISTEN
+const serverUrl = 'https://soroban-testnet.stellar.org';
+const networkPassphrase = Networks.TESTNET;
+const server = new StellarSdk.rpc.Server(serverUrl);
+
+// TAMBAHAN: Horizon Server untuk load account
+const horizonUrl = 'https://horizon-testnet.stellar.org';
+const horizonServer = new StellarSdk.Horizon.Server(horizonUrl);
+
+console.log('🌐 Network Passphrase:', networkPassphrase);
+console.log('🔗 RPC URL:', serverUrl);
+console.log('🔗 Horizon URL:', horizonUrl);
+
+// Token contract WASM hash (fungible)
+const TOKEN_WASM_HASH = '0e3264fc7e36890543b75d7ae0625607d1f22d8eceaf4f1a91429af194d05e63';
+
+// FairWage contract WASM hash (main contract) - UPDATED WITH NEW VERSION
+const FAIRWAGE_WASM_HASH = '0f30513aae94a48b9be939f0897dbeea81f11b817bcbeb42e5019a4c68bbe117';
+
+// API Endpoint untuk mendapatkan WASM hash
+app.get('/api/wasm-hash', (req, res) => {
+    console.log('📦 Serving TOKEN WASM hash:', TOKEN_WASM_HASH);
+    res.json({ 
+        wasmHash: TOKEN_WASM_HASH,
+        success: true 
+    });
+});
+
+// API Endpoint untuk prepare unsigned transaction (deploy token contract)
+app.post('/api/prepare-token-deploy', async (req, res) => {
+    try {
+        const { userPublicKey, tokenName, tokenSymbol } = req.body;
+        
+        console.log('🚀 Preparing REAL token deployment for:', userPublicKey);
+        console.log('📋 Token Name:', tokenName, 'Symbol:', tokenSymbol);
+        
+        if (!userPublicKey || !tokenName || !tokenSymbol) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: userPublicKey, tokenName, tokenSymbol' 
+            });
+        }
+
+        // Load user account dari Horizon (fallback approach)
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        console.log('✅ User account loaded from Horizon');
+        
+        console.log('🔧 Creating SAC Token deployment...');
+        
+        // Create Stellar Asset Contract (SAC) - unlimited supply, no initialization needed
+        const asset = new StellarSdk.Asset(tokenSymbol, userPublicKey);
+        const deployOp = StellarSdk.Operation.createStellarAssetContract({ asset });
+        
+        console.log('🔧 Building transaction...');
+        
+        // Build transaction dengan sourceAccount dari Horizon
+        const transaction = new TransactionBuilder(sourceAccount, {
+            fee: '1000000', // 1 XLM fee untuk testnet yang sibuk
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(deployOp)
+        .setTimeout(30)
+        .build();
+        
+        console.log('🔧 Preparing transaction for Soroban...');
+        
+        // CRITICAL: Prepare must succeed for Soroban ops
+        let preparedTx;
+        try {
+            preparedTx = await server.prepareTransaction(transaction);
+            console.log('✅ Transaction prepared successfully');
+        } catch (prepareError) {
+            console.error('❌ Prepare failed:', prepareError);
+            console.error('❌ Error details:', prepareError.message);
+            console.error('❌ Error stack:', prepareError.stack);
+            // Don't continue! This transaction will fail
+            throw new Error('Cannot submit unprepared Soroban transaction: ' + prepareError.message);
+        }
+        
+        console.log('✅ Transaction prepared successfully');
+        
+        // Return the prepared transaction XDR for Rabet to sign
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            wasmHash: TOKEN_WASM_HASH,
+            tokenName,
+            tokenSymbol,
+            message: 'SAC Token deployment ready - unlimited supply, no initialization needed'
+        });
+        
+    } catch (error) {
+        console.error('❌ REAL deployment preparation failed:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false,
+            details: 'This is a real Soroban deployment error, not a demo'
+        });
+    }
+});
+
+// DEPLOY FairWage Contract
+app.post('/api/prepare-fairwage-deploy', async (req, res) => {
+    try {
+        const { userPublicKey, tokenContractId, companyName } = req.body;
+        
+        console.log('🏢 Preparing FairWage DEPLOYMENT for:', userPublicKey);
+        console.log('📋 Token Contract ID:', tokenContractId);
+        
+        if (!userPublicKey || !tokenContractId || !companyName) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: userPublicKey, tokenContractId, companyName' 
+            });
+        }
+
+        // Load user account dari Horizon
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // DEPLOY FairWage contract
+        const salt = require('crypto').randomBytes(32);
+        const deployOp = StellarSdk.Operation.createCustomContract({
+            address: StellarSdk.Address.fromString(userPublicKey),
+            wasmHash: Buffer.from(FAIRWAGE_WASM_HASH, 'hex'),
+            salt: salt
+        });
+        
+        // Build transaction
+        const transaction = new TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(deployOp)
+        .setTimeout(30)
+        .build();
+        
+        console.log('🔧 Preparing FairWage deployment transaction for Soroban...');
+        
+        // CRITICAL: Prepare must succeed for Soroban ops
+        let preparedTx;
+        try {
+            preparedTx = await server.prepareTransaction(transaction);
+            console.log('✅ FairWage deployment transaction prepared successfully');
+        } catch (prepareError) {
+            console.error('❌ FairWage deployment prepare failed:', prepareError);
+            console.error('❌ Error details:', prepareError.message);
+            console.error('❌ Error stack:', prepareError.stack);
+            throw new Error('Cannot submit unprepared Soroban transaction: ' + prepareError.message);
+        }
+        
+        // Return the prepared transaction XDR for Rabet to sign
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            wasmHash: FAIRWAGE_WASM_HASH,
+            metadata: {
+                companyName,
+                tokenContractId
+            },
+            message: 'FairWage deployment transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error preparing FairWage deployment:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// INITIALIZE FairWage Contract (not deploy!)
+app.post('/api/prepare-fairwage-initialize', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, tokenContractId, companyName } = req.body;
+        
+        console.log('🏢 Preparing FairWage INITIALIZATION for:', userPublicKey);
+        console.log('📋 FairWage Contract ID:', fairWageContractId);
+        console.log('📋 Token Contract ID:', tokenContractId);
+        
+        if (!userPublicKey || !fairWageContractId || !tokenContractId || !companyName) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: userPublicKey, fairWageContractId, tokenContractId, companyName' 
+            });
+        }
+
+        // Load user account dari Horizon
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // INITIALIZE FairWage contract (not deploy!)
+        const initializeOp = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId, // Use FairWage contract ID
+            function: 'initialize',
+            args: [
+                StellarSdk.Address.fromString(userPublicKey).toScVal(), // employer
+                StellarSdk.Address.fromString(tokenContractId).toScVal() // token_address
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new TransactionBuilder(sourceAccount, {
+            fee: '100000', // 0.01 XLM fee
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(initializeOp)
+        .setTimeout(30)
+        .build();
+        
+        console.log('🔧 Preparing FairWage transaction for Soroban...');
+        
+        // CRITICAL: Prepare must succeed for Soroban ops
+        let preparedTx;
+        try {
+            preparedTx = await server.prepareTransaction(transaction);
+            console.log('✅ FairWage transaction prepared successfully');
+        } catch (prepareError) {
+            console.error('❌ FairWage prepare failed:', prepareError);
+            console.error('❌ Error details:', prepareError.message);
+            console.error('❌ Error stack:', prepareError.stack);
+            // Don't continue! This transaction will fail
+            throw new Error('Cannot submit unprepared Soroban transaction: ' + prepareError.message);
+        }
+        
+        // Return the prepared transaction XDR for Rabet to sign
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            tokenContractId: tokenContractId,
+            metadata: {
+                companyName,
+                fairWageContractId,
+                tokenContractId
+            },
+            message: 'FairWage initialization transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error preparing FairWage initialization:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// INITIALIZE Contract (untuk frontend)
+app.post('/api/initialize-contract', async (req, res) => {
+    try {
+        const { contractId, contractType, userPublicKey, tokenContractId, companyName } = req.body;
+        
+        console.log('🔧 Initializing contract:', { contractId, contractType, userPublicKey, tokenContractId, companyName });
+        
+        if (!contractId || !contractType || !userPublicKey) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: contractId, contractType, userPublicKey' 
+            });
+        }
+        
+        // Load account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        if (contractType === 'token') {
+            // SAC doesn't need initialization - it's ready immediately
+            return res.json({
+                success: true,
+                message: 'SAC Token is ready - no initialization needed',
+                contractId: contractId,
+                type: 'SAC',
+                ready: true
+            });
+        } 
+        
+        if (contractType === 'fairwage') {
+            if (!tokenContractId) {
+                return res.status(400).json({ 
+                    error: 'tokenContractId required for FairWage initialization' 
+                });
+            }
+            
+            // Initialize FairWage contract
+            const operation = StellarSdk.Operation.invokeContractFunction({
+                contract: contractId,
+                function: 'initialize',
+                args: [
+                    StellarSdk.Address.fromString(userPublicKey).toScVal(), // employer
+                    StellarSdk.Address.fromString(tokenContractId).toScVal() // token_address
+                ]
+            });
+            
+            // Build transaction
+            const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+                fee: '100000',
+                networkPassphrase: networkPassphrase,
+            })
+            .addOperation(operation)
+            .setTimeout(30)
+            .build();
+            
+            // Prepare transaction
+            const preparedTx = await server.prepareTransaction(transaction);
+            
+            res.json({
+                success: true,
+                transactionXdr: preparedTx.toXDR(),
+                contractId: contractId,
+                contractType: contractType,
+                message: 'FairWage initialization ready'
+            });
+        } else {
+            return res.status(400).json({ 
+                error: 'Invalid contract type. Must be "token" or "fairwage"' 
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ Initialization failed:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// API Endpoint untuk submit signed transaction
+app.post('/api/submit-transaction', async (req, res) => {
+    try {
+        const { signedTransactionXdr } = req.body;
+        
+        console.log('📤 Submitting signed transaction...');
+        
+        if (!signedTransactionXdr) {
+            return res.status(400).json({ 
+                error: 'Missing signedTransactionXdr' 
+            });
+        }
+
+        // Parse and verify transaction is signed
+        const transaction = StellarSdk.TransactionBuilder.fromXDR(
+            signedTransactionXdr, 
+            networkPassphrase
+        );
+        
+        console.log('🔍 Transaction signatures count:', transaction.signatures.length);
+        
+        if (transaction.signatures.length === 0) {
+            return res.status(400).json({ 
+                error: 'Transaction not signed! Please sign with your wallet first.' 
+            });
+        }
+        
+        console.log('✅ Transaction is properly signed, submitting to REAL blockchain...');
+        
+        // ✅ REAL SUBMISSION ke blockchain menggunakan Soroban RPC (not Horizon!)
+        const result = await server.sendTransaction(transaction);
+        
+        console.log('✅ Transaction submitted to blockchain:', result.hash);
+        console.log('🔗 Verify at: https://stellar.expert/explorer/testnet/tx/' + result.hash);
+        
+        // Poll for actual inclusion
+        console.log('🔍 Waiting for transaction confirmation...');
+        let getResponse = await server.getTransaction(result.hash);
+        let attempts = 0;
+        const maxAttempts = 60; // 60 seconds timeout
+        
+        while ((getResponse.status === "NOT_FOUND" || getResponse.status === "PENDING") && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            getResponse = await server.getTransaction(result.hash);
+            attempts++;
+            console.log(`⏳ Attempt ${attempts}/${maxAttempts} - Status: ${getResponse.status}`);
+        }
+        
+        if (getResponse.status === "SUCCESS") {
+            console.log('✅ Transaction confirmed on-chain!');
+            console.log('💰 Fee charged:', getResponse.feeCharged);
+        } else {
+            console.error('❌ Transaction failed or timeout:', getResponse);
+            throw new Error('Transaction not confirmed on blockchain');
+        }
+        
+        // Extract contract ID for Soroban contracts - CORRECT METHOD
+        let contractId = null;
+        
+        // Get the final transaction result with return value
+        const finalResult = await server.getTransaction(result.hash);
+        console.log('🔍 Final transaction result status:', finalResult.status);
+        
+        if (finalResult.status === "SUCCESS") {
+            try {
+                // METHOD 1: Direct from return value (simplest and most reliable)
+                if (finalResult.returnValue) {
+                    console.log('🔍 Return value type:', typeof finalResult.returnValue);
+                    console.log('🔍 Return value:', finalResult.returnValue);
+                    
+                    // Extract contract ID from ScAddress
+                    if (finalResult.returnValue._switch.name === 'scvAddress') {
+                        // This is an ScAddress, extract the contract ID
+                        const scAddress = finalResult.returnValue._value;
+                        if (scAddress._switch.name === 'scAddressTypeContract') {
+                            // Convert contract ID buffer to Stellar contract address format
+                            const contractIdBuffer = scAddress._value;
+                            const contractAddress = StellarSdk.Address.contract(contractIdBuffer);
+                            contractId = contractAddress.toString();
+                            console.log('🔍 Contract ID buffer (hex):', contractIdBuffer.toString('hex'));
+                            console.log('🔍 Contract ID (Stellar format):', contractId);
+                        }
+                    } else {
+                        // Fallback: Convert ScVal to Address
+                        const address = StellarSdk.Address.fromScVal(finalResult.returnValue);
+                        contractId = address.toString();
+                    }
+                    console.log('✅ Contract ID from returnValue:', contractId);
+                } else {
+                    // METHOD 2: Parse from result meta as fallback
+                    if (finalResult.resultMetaXdr) {
+                        const meta = StellarSdk.xdr.TransactionMeta.fromXDR(finalResult.resultMetaXdr, 'base64');
+                        console.log('🔍 Parsing transaction meta for contract ID...');
+                        
+                        if (meta.v3() && meta.v3().sorobanMeta()) {
+                            const sorobanMeta = meta.v3().sorobanMeta();
+                            const returnScVal = sorobanMeta.returnValue();
+                            
+                            if (returnScVal) {
+                                const address = StellarSdk.Address.fromScVal(returnScVal);
+                                contractId = address.toString();
+                                console.log('✅ Contract ID from meta:', contractId);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Failed to extract contract ID:', e.message);
+            }
+        }
+        
+        res.json({
+            success: true,
+            transactionHash: result.hash,
+            contractId: contractId,
+            feeCharged: result.fee_charged,
+            verifyUrl: `https://stellar.expert/explorer/testnet/tx/${result.hash}`,
+            result: result
+        });
+        
+    } catch (error) {
+        console.error('❌ Error submitting transaction:', error);
+        
+        // Handle specific Horizon errors
+        if (error.response && error.response.data) {
+            console.error('❌ Horizon error details:', error.response.data);
+            return res.status(400).json({ 
+                error: error.response.data.title || error.message,
+                details: error.response.data.detail,
+                success: false 
+            });
+        }
+        
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Contract info endpoint
+app.get('/api/contract-info', async (req, res) => {
+    try {
+        const { contractId } = req.query;
+        
+        if (!contractId) {
+            return res.status(400).json({ 
+                error: 'Missing contractId parameter' 
+            });
+        }
+        
+        console.log('🔍 Getting contract info for:', contractId);
+        
+        // Get contract info from Soroban RPC
+        console.log('🔍 Attempting to get contract data for:', contractId);
+        
+        // Try different methods to get contract info
+        let contractInfo = null;
+        try {
+            // Method 1: Try getContractData
+            contractInfo = await server.getContractData(contractId);
+            console.log('✅ Contract data retrieved via getContractData');
+        } catch (error1) {
+            console.log('❌ getContractData failed:', error1.message);
+            
+            try {
+                // Method 2: Try getLedgerEntries
+                const contractAddress = StellarSdk.Address.fromString(contractId);
+                const contractDataKey = StellarSdk.xdr.LedgerKey.contractData(
+                    new StellarSdk.xdr.LedgerKeyContractData({
+                        contract: contractAddress.toScAddress(),
+                        key: StellarSdk.xdr.ScVal.scvLedgerKeyContractInstance(),
+                        durability: StellarSdk.xdr.ContractDataDurability.persistent()
+                    })
+                );
+                
+                const ledgerEntries = await server.getLedgerEntries(contractDataKey);
+                contractInfo = ledgerEntries;
+                console.log('✅ Contract data retrieved via getLedgerEntries');
+            } catch (error2) {
+                console.log('❌ getLedgerEntries failed:', error2.message);
+                throw new Error(`Both methods failed: getContractData (${error1.message}), getLedgerEntries (${error2.message})`);
+            }
+        }
+        
+        console.log('✅ Contract info retrieved:', contractInfo);
+        
+        // Parse contract data for frontend
+        let parsedContractInfo = {
+            contractId: contractId,
+            latestLedger: contractInfo.latestLedger,
+            entries: []
+        };
+        
+        if (contractInfo.entries && contractInfo.entries.length > 0) {
+            contractInfo.entries.forEach((entry, index) => {
+                try {
+                    const parsedEntry = {
+                        lastModifiedLedgerSeq: entry.lastModifiedLedgerSeq,
+                        liveUntilLedgerSeq: entry.liveUntilLedgerSeq,
+                        key: entry.key ? entry.key.toString() : 'N/A',
+                        val: entry.val ? entry.val.toString() : 'N/A'
+                    };
+                    parsedContractInfo.entries.push(parsedEntry);
+                } catch (parseError) {
+                    console.log(`❌ Error parsing entry ${index}:`, parseError.message);
+                    parsedContractInfo.entries.push({
+                        lastModifiedLedgerSeq: entry.lastModifiedLedgerSeq,
+                        liveUntilLedgerSeq: entry.liveUntilLedgerSeq,
+                        key: 'Parse Error',
+                        val: 'Parse Error'
+                    });
+                }
+            });
+        }
+        
+        res.json({
+            success: true,
+            contractId: contractId,
+            contractInfo: parsedContractInfo,
+            message: 'Contract info retrieved and parsed successfully'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error getting contract info:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// ========================================
+// EMPLOYEE MANAGEMENT ENDPOINTS
+// ========================================
+
+// Add Employee to FairWage Contract
+app.post('/api/add-employee', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress, employeeName, wageRate, wagePeriod } = req.body;
+        
+        console.log('👤 Adding employee to FairWage contract:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress, 
+            employeeName, 
+            wageRate, 
+            wagePeriod 
+        });
+        
+        // DEBUG WAGE PERIOD
+        console.log('🔍 DEBUG BACKEND WAGE PERIOD:');
+        console.log('📋 Raw wagePeriod:', wagePeriod);
+        console.log('📋 wagePeriod type:', typeof wagePeriod);
+        console.log('📋 parseInt(wagePeriod):', parseInt(wagePeriod));
+        console.log('📋 isNaN(parseInt(wagePeriod)):', isNaN(parseInt(wagePeriod)));
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress || !employeeName || !wageRate) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, employeeName, wageRate' 
+            });
+        }
+        
+        // Validate wage period
+        if (wagePeriod === undefined || wagePeriod === null || isNaN(parseInt(wagePeriod))) {
+            console.log('❌ Invalid wagePeriod, defaulting to 1 (day)');
+            wagePeriod = 1; // Default to day
+        }
+        
+        const wagePeriodInt = parseInt(wagePeriod);
+        if (wagePeriodInt < 0 || wagePeriodInt > 3) {
+            console.log('❌ Invalid wagePeriod range, defaulting to 1 (day)');
+            wagePeriod = 1; // Default to day
+        }
+        
+        console.log('📋 Final wagePeriodInt:', wagePeriodInt);
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Add employee operation
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'add_employee',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal(), // employee_address
+                StellarSdk.xdr.ScVal.scvI128(new StellarSdk.xdr.Int128Parts({
+                    lo: StellarSdk.xdr.Uint64.fromString(wageRate.toString()),
+                    hi: StellarSdk.xdr.Int64.fromString('0')
+                })), // wage_rate
+                StellarSdk.xdr.ScVal.scvU32(wagePeriodInt) // wage_period (0=Hour, 1=Day, 2=Week, 3=Month)
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            message: 'Add employee transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error adding employee:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Set Employee Salary
+app.post('/api/set-salary', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress, wageRate } = req.body;
+        
+        console.log('💰 Setting employee salary:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress, 
+            wageRate 
+        });
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress || !wageRate) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, wageRate' 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Set salary operation
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'set_salary',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal(), // employee_address
+                StellarSdk.xdr.ScVal.scvI128(new StellarSdk.xdr.Int128Parts({
+                    lo: StellarSdk.xdr.Uint64.fromString(wageRate.toString()),
+                    hi: StellarSdk.xdr.Int64.fromString('0')
+                })) // wage_rate
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            message: 'Set salary transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error setting salary:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Update Employee Wage Rate
+app.post('/api/update-wage-rate', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress, newWageRate } = req.body;
+        
+        console.log('💰 Updating wage rate for employee:', { 
+            userPublicKey,
+            fairWageContractId,
+            employeeAddress,
+            newWageRate
+        });
+
+        // Validation
+        if (!userPublicKey || !fairWageContractId || !employeeAddress || !newWageRate) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, newWageRate',
+                success: false 
+            });
+        }
+
+        if (newWageRate <= 0) {
+            return res.status(400).json({ 
+                error: 'Wage rate must be greater than 0',
+                success: false 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Update wage rate operation
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'update_wage_rate',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal(), // employee_address
+                StellarSdk.xdr.ScVal.scvI128(new StellarSdk.xdr.Int128Parts({
+                    lo: StellarSdk.xdr.Uint64.fromString(newWageRate.toString()),
+                    hi: StellarSdk.xdr.Int64.fromString('0')
+                })) // new_wage_rate
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            newWageRate: newWageRate,
+            message: 'Update wage rate transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error updating wage rate:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Pay Employee
+app.post('/api/pay-employee', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress, amount } = req.body;
+        
+        console.log('💸 Paying employee:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress, 
+            amount 
+        });
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress || !amount) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, amount' 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Pay employee operation (use payday_sweep to pay all wages)
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'payday_sweep',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal() // employee_address
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            amount: amount,
+            message: 'Pay all wages transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error paying employee:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Remove Employee from FairWage Contract
+app.post('/api/remove-employee', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
+        
+        console.log('🗑️ Removing employee from FairWage contract:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress 
+        });
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress' 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Remove employee operation
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'remove_employee',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal() // employee_address
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            message: 'Remove employee transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error removing employee:', error);
+        
+        // Check for specific error types
+        let errorMessage = error.message;
+        if (error.message.includes('Error(Contract, #10)')) {
+            errorMessage = 'Cannot remove employee: Employee has unpaid wages. Please pay all outstanding wages first.';
+        } else if (error.message.includes('Error(Contract, #4)')) {
+            errorMessage = 'Employee not found in the contract.';
+        }
+        
+        res.status(500).json({ 
+            error: errorMessage,
+            success: false 
+        });
+    }
+});
+
+// Pay All Wages for Employee
+app.post('/api/pay-all-wages', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
+        
+        console.log('💰 Paying all wages for employee:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress 
+        });
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress' 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Pay all wages operation (payday_sweep)
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'payday_sweep',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal() // employee_address
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            message: 'Pay all wages transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error paying all wages:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Fund contract endpoint - transfer tokens from employer to contract
+app.post('/api/fund-contract', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, tokenContractId, amount } = req.body;
+        
+        if (!userPublicKey || !fairWageContractId || !tokenContractId || !amount) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, tokenContractId, amount',
+                success: false 
+            });
+        }
+
+        console.log('💰 Funding contract:', {
+            userPublicKey,
+            fairWageContractId,
+            tokenContractId,
+            amount
+        });
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Transfer tokens from employer to contract
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: tokenContractId,
+            function: 'transfer',
+            args: [
+                StellarSdk.Address.fromString(userPublicKey).toScVal(), // from (employer)
+                StellarSdk.Address.fromString(fairWageContractId).toScVal(), // to (contract)
+                StellarSdk.xdr.ScVal.scvI128(new StellarSdk.xdr.Int128Parts({
+                    lo: StellarSdk.xdr.Uint64.fromString(amount.toString()),
+                    hi: StellarSdk.xdr.Int64.fromString('0')
+                })) // amount
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            tokenContractId: tokenContractId,
+            amount: amount,
+            message: 'Fund contract transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error funding contract:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Fix employee timestamp endpoint
+app.post('/api/fix-employee-timestamp', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
+        
+        console.log('🔧 Fixing employee timestamp:', { 
+            userPublicKey, 
+            fairWageContractId, 
+            employeeAddress 
+        });
+        
+        if (!userPublicKey || !fairWageContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress' 
+            });
+        }
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Fix employee timestamp operation
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'fix_employee_timestamp',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal() // employee_address
+            ]
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+        
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            fairWageContractId: fairWageContractId,
+            employeeAddress: employeeAddress,
+            message: 'Fix employee timestamp transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error fixing employee timestamp:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Check contract balance endpoint (read-only, no signing needed)
+app.post('/api/check-contract-balance', async (req, res) => {
+    try {
+        const { fairWageContractId, tokenContractId } = req.body;
+        
+        if (!fairWageContractId || !tokenContractId) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: fairWageContractId, tokenContractId',
+                success: false 
+            });
+        }
+
+        console.log('💰 Checking contract balance (read-only):', {
+            fairWageContractId,
+            tokenContractId
+        });
+
+        // Use simulateTransaction for read-only operations
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: tokenContractId,
+            function: 'balance',
+            args: [
+                StellarSdk.Address.fromString(fairWageContractId).toScVal() // contract address
+            ]
+        });
+        
+        // Build transaction for simulation
+        const sourceAccount = await horizonServer.loadAccount('GBIFUPL4MOPI5XHPFKYO4SWTKKLSK63GZVMQ5A2FX3TLCS74NJ55QAZD');
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+        // Simulate transaction (read-only)
+        const simulation = await server.simulateTransaction(transaction);
+        
+        if (simulation.error) {
+            throw new Error(`Simulation failed: ${simulation.error.message}`);
+        }
+
+        console.log('📊 Simulation result:', JSON.stringify(simulation, null, 2));
+        
+        let balance = 0;
+        
+        // Parse balance from simulation result
+        if (simulation.result && simulation.result.retval) {
+            const retval = simulation.result.retval;
+            console.log('📊 Retval:', retval);
+            
+            // Use StellarSdk.scValToNative to convert ScVal to native value
+            try {
+                const balanceBigInt = StellarSdk.scValToNative(retval);
+                balance = parseInt(balanceBigInt.toString());
+                console.log('💰 Balance (BigInt):', balanceBigInt.toString());
+            } catch (error) {
+                console.error('❌ Error parsing ScVal:', error);
+                balance = 0;
+            }
+        }
+        
+        console.log('💰 Final balance:', balance);
+        
+        res.json({
+            success: true,
+            balance: balance,
+            fairWageContractId: fairWageContractId,
+            tokenContractId: tokenContractId,
+            message: 'Contract balance retrieved successfully'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error checking contract balance:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Create trustline endpoint
+app.post('/api/create-trustline', async (req, res) => {
+    try {
+        const { userPublicKey, tokenContractId, employeeAddress } = req.body;
+        
+        if (!userPublicKey || !tokenContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, tokenContractId, employeeAddress',
+                success: false 
+            });
+        }
+
+        console.log('🔗 Creating trustline:', {
+            userPublicKey,
+            tokenContractId,
+            employeeAddress
+        });
+
+        // Load user account
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Create trustline operation
+        const operation = StellarSdk.Operation.changeTrust({
+            asset: StellarSdk.Asset.fromContract(tokenContractId),
+            limit: '922337203685.4775807' // Max limit
+        });
+        
+        // Build transaction
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+        // Prepare transaction
+        const preparedTx = await server.prepareTransaction(transaction);
+        
+        res.json({
+            success: true,
+            transactionXdr: preparedTx.toXDR(),
+            tokenContractId: tokenContractId,
+            employeeAddress: employeeAddress,
+            message: 'Create trustline transaction prepared - ready for signing'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error creating trustline:', error);
+        res.status(500).json({ 
+            error: error.message,
+            success: false 
+        });
+    }
+});
+
+// Endpoint untuk pay partial by employer
+app.post('/api/pay-partial-employer', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddress, amount } = req.body;
+
+        if (!userPublicKey || !fairWageContractId || !employeeAddress || !amount) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddress, amount' 
+            });
+        }
+
+        console.log('💰 Paying partial by employer...', { userPublicKey, fairWageContractId, employeeAddress, amount });
+
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'pay_partial_by_employer',
+            args: [
+                StellarSdk.Address.fromString(employeeAddress).toScVal(),
+                StellarSdk.xdr.ScVal.scvI128(new StellarSdk.xdr.Int128Parts({
+                    lo: StellarSdk.xdr.Uint64.fromString(amount.toString()),
+                    hi: StellarSdk.xdr.Int64.fromString('0')
+                }))
+            ]
+        });
+
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+        const preparedTx = await server.prepareTransaction(transaction);
+
+        res.json({ 
+            success: true, 
+            transactionXdr: preparedTx.toXDR(),
+            message: 'Pay partial by employer transaction prepared successfully' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error paying partial by employer:', error);
+        res.status(500).json({ 
+            error: 'Failed to pay partial by employer', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint untuk payday sweep many
+app.post('/api/payday-sweep-many', async (req, res) => {
+    try {
+        const { userPublicKey, fairWageContractId, employeeAddresses } = req.body;
+
+        if (!userPublicKey || !fairWageContractId || !employeeAddresses || !Array.isArray(employeeAddresses)) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: userPublicKey, fairWageContractId, employeeAddresses (array)' 
+            });
+        }
+
+        console.log('💰 Paying all employees...', { userPublicKey, fairWageContractId, employeeAddresses });
+
+        const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+        
+        // Convert addresses to ScVal array
+        const addressArray = employeeAddresses.map(addr => 
+            StellarSdk.Address.fromString(addr).toScVal()
+        );
+        
+        const operation = StellarSdk.Operation.invokeContractFunction({
+            contract: fairWageContractId,
+            function: 'payday_sweep_many',
+            args: [StellarSdk.xdr.ScVal.scvVec(StellarSdk.xdr.ScVec.fromXdr(addressArray))]
+        });
+
+        const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100000',
+            networkPassphrase: networkPassphrase,
+        })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+        const preparedTx = await server.prepareTransaction(transaction);
+
+        res.json({ 
+            success: true, 
+            transactionXdr: preparedTx.toXDR(),
+            message: 'Payday sweep many transaction prepared successfully' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error paying all employees:', error);
+        res.status(500).json({ 
+            error: 'Failed to pay all employees', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint untuk get accrued balance
+app.post('/api/get-accrued-balance', async (req, res) => {
+    try {
+        const { fairWageContractId, employeeAddress } = req.body;
+
+        if (!fairWageContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: fairWageContractId, employeeAddress' 
+            });
+        }
+
+        console.log('📊 Getting accrued balance...', { fairWageContractId, employeeAddress });
+
+        const result = await server.callContract({
+            contractAddress: fairWageContractId,
+            function: 'get_accrued_balance',
+            args: [StellarSdk.Address.fromString(employeeAddress).toScVal()]
+        });
+
+        const balance = StellarSdk.scValToNative(result);
+
+        res.json({ 
+            success: true, 
+            balance: balance,
+            message: 'Accrued balance retrieved successfully' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error getting accrued balance:', error);
+        res.status(500).json({ 
+            error: 'Failed to get accrued balance', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint untuk get employee info
+app.post('/api/get-employee-info', async (req, res) => {
+    try {
+        const { fairWageContractId, employeeAddress } = req.body;
+
+        if (!fairWageContractId || !employeeAddress) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: fairWageContractId, employeeAddress' 
+            });
+        }
+
+        console.log('👤 Getting employee info...', { fairWageContractId, employeeAddress });
+
+        const result = await server.callContract({
+            contractAddress: fairWageContractId,
+            function: 'get_employee_info',
+            args: [StellarSdk.Address.fromString(employeeAddress).toScVal()]
+        });
+
+        const employeeInfo = StellarSdk.scValToNative(result);
+
+        res.json({ 
+            success: true, 
+            employeeInfo: employeeInfo,
+            message: 'Employee info retrieved successfully' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error getting employee info:', error);
+        res.status(500).json({ 
+            error: 'Failed to get employee info', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint untuk get contract balance
+app.post('/api/get-contract-balance', async (req, res) => {
+    try {
+        const { fairWageContractId } = req.body;
+
+        if (!fairWageContractId) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters: fairWageContractId' 
+            });
+        }
+
+        console.log('💰 Getting contract balance...', { fairWageContractId });
+
+        const result = await server.callContract({
+            contractAddress: fairWageContractId,
+            function: 'get_contract_balance',
+            args: []
+        });
+
+        const balance = StellarSdk.scValToNative(result);
+
+        res.json({ 
+            success: true, 
+            balance: balance,
+            message: 'Contract balance retrieved successfully' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error getting contract balance:', error);
+        res.status(500).json({ 
+            error: 'Failed to get contract balance', 
+            details: error.message 
+        });
+    }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        tokenWasmHash: TOKEN_WASM_HASH,
+        fairWageWasmHash: FAIRWAGE_WASM_HASH
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`🚀 FairWage Backend API Server running on port ${PORT}`);
+    console.log(`📦 Token WASM Hash: ${TOKEN_WASM_HASH}`);
+    console.log(`📦 FairWage WASM Hash: ${FAIRWAGE_WASM_HASH}`);
+    console.log(`🌐 Network: ${networkPassphrase}`);
+    console.log(`🔗 RPC URL: ${serverUrl}`);
+});
+
+module.exports = app;

@@ -1,1151 +1,582 @@
 // File: frontend/lib/soroban.ts
-// Rabet-based Soroban helpers (TESTNET) untuk Employer & Employee Dashboard
-// - Tanpa ENV (semua fetch -> api('...') dengan base http://localhost:3001)
-// - Auto-detect contract saat employee connect wallet
-// - Konsisten pakai Stellar Official SDK
+// Updated to use Rabet Wallet (NO npm package needed)
 
-// ==============================
-// Rabet Types
-// ==============================
+// Declare Rabet types
 declare global {
-    interface Window {
-        rabet?: {
-            connect(): Promise<{ publicKey: string; error?: string }>;
-            sign(
-                xdr: string,
-                network: string,
-            ): Promise<{ xdr: string; error?: string }>;
-            disconnect(): Promise<void>;
-            isUnlocked(): Promise<boolean>;
-            close(): Promise<void>;
-            on(event: string, handler: Function): void;
-        };
-    }
+  interface Window {
+    rabet?: {
+      connect(): Promise<{ publicKey: string; error?: string }>;
+      sign(xdr: string, network: string): Promise<{ xdr: string; error?: string }>;
+      disconnect(): Promise<void>;
+      isUnlocked(): Promise<boolean>;
+      close(): Promise<void>;
+      on(event: string, handler: Function): void;
+    };
+  }
 }
 
-// ==============================
-// Single import (Official SDK)
-// ==============================
+// HANYA SATU import statement - hapus yang duplikat
 import * as StellarSdk from "@stellar/stellar-sdk";
 
-// ==============================
-// Config (TESTNET)
-// ==============================
-const serverUrl = "https://soroban-testnet.stellar.org";
+// Configuration - Using Official Stellar SDK
+const serverUrl = 'https://soroban-testnet.stellar.org';
 const networkPassphrase = StellarSdk.Networks.TESTNET;
-const networkType: "TESTNET" | "PUBLIC" = "TESTNET";
-const horizonUrl = "https://horizon-testnet.stellar.org";
+const FRIENDBOT_URL = 'https://friendbot.stellar.org';
 
-// ==============================
-// Backend base (tanpa ENV)
-// ==============================
-// Use API proxy routes instead of direct backend access
-const BACKEND = "";
-const api = (path: string) => `${BACKEND}${path}`;
+// Get contract ID from localStorage or environment - NOT THROWING ERROR
+const getContractId = (): string | null => {
+    if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('fairWageContractId');
+        if (stored) return stored;
+    }
+    return process.env.NEXT_PUBLIC_FAIRWAGE_CONTRACT_ID || null;
+};
 
-// ==============================
-// Server init (safe)
-// ==============================
+// Force TESTNET network type
+const networkType: 'TESTNET' | 'PUBLIC' = 'TESTNET';
+
+// Function to generate realistic mock contract IDs
+const generateRealisticContractId = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let result = '';
+    for (let i = 0; i < 56; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+// Initialize servers with proper error handling
 let server: any = null;
 let horizon: StellarSdk.Horizon.Server | null = null;
 
+// Initialize servers safely
 const initializeServers = () => {
     try {
         if (!server) {
-            console.log("🔧 Initializing Soroban Server...");
+            console.log('🔧 Initializing Soroban Server...');
             server = new (StellarSdk as any).SorobanRpc.Server(serverUrl);
-            console.log("✅ Soroban Server initialized");
+            console.log('✅ Soroban Server initialized');
         }
-        if (!horizon && typeof window !== "undefined") {
-            console.log("🔧 Initializing Horizon Server...");
-            horizon = new StellarSdk.Horizon.Server(horizonUrl);
-            console.log("✅ Horizon Server initialized");
+        
+        if (!horizon && typeof window !== 'undefined') {
+            console.log('🔧 Initializing Horizon Server...');
+            horizon = new StellarSdk.Horizon.Server('https://horizon-testnet.stellar.org');
+            console.log('✅ Horizon Server initialized');
         }
     } catch (error) {
-        console.error("❌ Server initialization error:", error);
+        console.error('❌ Server initialization error:', error);
     }
 };
-if (typeof window !== "undefined") initializeServers();
 
-console.log("✅ Stellar SDK loaded (TESTNET)");
+// Initialize on module load (only in browser)
+if (typeof window !== 'undefined') {
+    initializeServers();
+}
 
-// ==============================
-// Wallet
-// ==============================
+console.log('✅ Stellar SDK module loaded');
+console.log('🌐 Network: TESTNET');
+
+// Wallet connection function
 export const connectWallet = async (): Promise<string> => {
-    if (typeof window === "undefined") throw new Error("Rabet not available");
-    if (!window.rabet) throw new Error("Rabet wallet is not installed!");
-    const res = await window.rabet.connect();
-    if (res.error) throw new Error(res.error);
-    console.log("🎉 Rabet connected:", res.publicKey);
-    return res.publicKey;
-};
-
-// ==============================
-// Helpers: Contracts
-// ==============================
-type CurrentContracts = {
-    success: boolean;
-    contractId?: string | null;
-    fairWageContractId?: string | null;
-    tokenContractId?: string | null;
-};
-
-export const getBothContractIds = async (): Promise<{
-    fairWageContractId: string | null;
-    tokenContractId: string | null;
-}> => {
     try {
-        const r = await fetch(api("/api/get-current-contract"));
-        const j: CurrentContracts = await r.json();
-        if (j.success) {
-            return {
-                fairWageContractId:
-                    j.fairWageContractId || j.contractId || null,
-                tokenContractId: j.tokenContractId || null,
-            };
+        console.log('🔍 Checking Rabet wallet...');
+        
+        if (typeof window === 'undefined') {
+            throw new Error("Rabet wallet is not available in this environment");
         }
-        return {
-            fairWageContractId: null,
-            tokenContractId: j.tokenContractId || null,
-        };
-    } catch (e) {
-        console.warn("getBothContractIds error:", e);
-        return { fairWageContractId: null, tokenContractId: null };
+        
+        // Check if Rabet extension is installed
+        if (!window.rabet) {
+            throw new Error("Rabet wallet is not installed! Please install Rabet extension first.");
+        }
+        
+        console.log('✅ Rabet is installed');
+
+        // Connect to Rabet
+        const result = await window.rabet.connect();
+        
+        if (result.error) {
+            throw new Error(`Failed to connect to Rabet: ${result.error}`);
+        }
+        
+        const publicKey = result.publicKey;
+        console.log("🎉 Rabet connected:", publicKey);
+        
+        return publicKey;
+        
+    } catch (error) {
+        console.error("❌ Error connecting to Rabet wallet:", error);
+        throw error;
     }
 };
 
-// Sumber kebenaran = backend get-current-contract
-const getContractId = async (): Promise<string> => {
-    const { fairWageContractId } = await getBothContractIds();
-    if (fairWageContractId) return fairWageContractId;
-    throw new Error("No contract ID found! Please deploy & initialize first.");
-};
-
-export const setContractId = (contractId: string): void => {
-    if (typeof window !== "undefined")
-        localStorage.setItem("fairWageContractId", contractId);
-};
-
-export const getStoredContractIds = (): {
-    tokenContractId?: string;
-    fairWageContractId?: string;
-} => {
-    if (typeof window === "undefined") return {};
-    return {
-        tokenContractId: localStorage.getItem("tokenContractId") || undefined,
-        fairWageContractId:
-            localStorage.getItem("fairWageContractId") || undefined,
-    };
-};
-
-export const getCurrentContractId = async (): Promise<string> => {
-    return await getContractId();
-};
-
-// ==============================
-// Employee context (auto-detect)
-// ==============================
-export const ensureEmployeeContext = async () => {
-    const employeeAddress = await connectWallet();
-    const { fairWageContractId, tokenContractId } = await getBothContractIds();
-    if (!fairWageContractId) {
-        return {
-            ok: false,
-            reason: "NO_CONTRACT",
-            message: "FairWage contract is not configured yet.",
-            employeeAddress,
-            fairWageContractId: null,
-            tokenContractId: tokenContractId || null,
-            isRegistered: false,
-        };
-    }
-
-    // Cek apakah wallet adalah employee di kontrak
-    const list = await listEmployees(fairWageContractId).catch(() => [] as string[]);
-    const isRegistered = list.includes(employeeAddress);
-
-    let employeeInfo: any = null;
-    let accruedBalance: bigint = BigInt(0);
-
-    if (isRegistered) {
-        try {
-            employeeInfo = await getEmployeeInfo(
-                fairWageContractId,
-                employeeAddress,
-            );
-        } catch {}
-        try {
-            const b = await fetchAccruedBalance(employeeAddress);
-            accruedBalance = BigInt(b);
-        } catch {}
-    }
-
-    return {
-        ok: true,
-        employeeAddress,
-        fairWageContractId,
-        tokenContractId: tokenContractId || null,
-        isRegistered,
-        employeeInfo,
-        accruedBalance,
-    };
-};
-
-// ==============================
-// Health
-// ==============================
-export const healthCheck = async (): Promise<{
-    success: boolean;
-    message?: string;
-}> => {
+// Health check function
+export const healthCheck = async (): Promise<{ success: boolean; message?: string }> => {
     try {
-        if (!server) initializeServers();
+        console.log('🏥 Checking backend health...');
+        
+        // Initialize servers if not already done
+        if (!server) {
+            initializeServers();
+        }
+        
+        // Check Soroban network health
         if (server) {
             const latestLedger = await server.getLatestLedger();
-            console.log("✅ Soroban healthy, ledger:", latestLedger.sequence);
+            console.log('✅ Soroban network healthy, ledger:', latestLedger.sequence);
         }
-        const r = await fetch(api("/health"));
-        if (r.ok) {
-            const j = await r.json();
-            console.log("✅ Backend health:", j);
-            return { success: true, message: "Backend is healthy" };
+        
+        // Check backend API health - Use API proxy
+        const response = await fetch('/api/health', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Backend health:', data);
+            return { success: true, message: 'Backend is healthy' };
+        } else {
+            console.warn('⚠️ Backend health check failed with status:', response.status);
+            return { success: false, message: `Backend returned status ${response.status}` };
         }
-        return { success: false, message: `Backend returned ${r.status}` };
-    } catch (e: any) {
-        return { success: false, message: e?.message || "Unknown error" };
+    } catch (error) {
+        console.error('❌ Backend health check error:', error);
+        return { success: false, message: error instanceof Error ? error.message : 'Unknown error' };
     }
 };
 
-// ==============================
-// Keypair (via Rabet)
-// ==============================
+// Generate keypair from Rabet (UPDATED - no more Freighter)
 export const generateKeypairFromRabet = async () => {
-    const publicKey = await connectWallet();
-    return { publicKey, useRabetSigning: true };
-};
-
-// ==============================
-// Deploy / Initialize
-// ==============================
-export const deployTokenContract = async (
-    tokenName: string,
-    tokenSymbol: string,
-): Promise<string> => {
-    const publicKey = await connectWallet();
-    const r = await fetch(api("/api/prepare-token-deploy"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            tokenName,
-            tokenSymbol,
-        }),
-    });
-    if (!r.ok)
-        throw new Error(
-            (await r.json()).error || "prepare-token-deploy failed",
-        );
-    const j = await r.json();
-
-    if (!window.rabet) throw new Error("Rabet wallet not available");
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (sign.error) throw new Error(sign.error);
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            signedTransactionXdr: sign.xdr,
-            contractType: "token",
-        }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    const contractId = s.contractId;
-    if (!contractId) throw new Error("No token contractId returned");
-    if (typeof window !== "undefined")
-        localStorage.setItem("tokenContractId", contractId);
-    return contractId;
-};
-
-export const deployFairWageContract = async (
-    tokenContractId: string,
-): Promise<string> => {
-    const publicKey = await connectWallet();
-    const r = await fetch(api("/api/prepare-fairwage-deploy"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            tokenContractId,
-            companyName: "FairWage Company",
-        }),
-    });
-    if (!r.ok)
-        throw new Error(
-            (await r.json()).error || "prepare-fairwage-deploy failed",
-        );
-    const j = await r.json();
-
-    if (!window.rabet) throw new Error("Rabet wallet not available");
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (sign.error) throw new Error(sign.error);
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            signedTransactionXdr: sign.xdr,
-            contractType: "fairwage",
-        }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    const contractId = s.contractId;
-    if (!contractId) throw new Error("No fairwage contractId returned");
-    if (typeof window !== "undefined")
-        localStorage.setItem("fairWageContractId", contractId);
-    return contractId;
-};
-
-export const initializeContract = async (
-    contractId: string,
-    contractType: "token" | "fairwage",
-    companyName: string,
-    tokenName?: string,
-    tokenSymbol?: string,
-    tokenContractId?: string,
-): Promise<string> => {
-    const publicKey = await connectWallet();
-    const r = await fetch(api("/api/initialize-contract"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contractId,
-            contractType,
-            userPublicKey: publicKey,
-            tokenContractId,
-            companyName,
-            tokenName,
-            tokenSymbol,
-        }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "initialize-contract failed");
-    const j = await r.json();
-
-    if (contractType === "token") return contractId; // SAC no init needed
-
-    if (!window.rabet) throw new Error("Rabet wallet not available");
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (sign.error) throw new Error(sign.error);
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr, contractType }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    return contractId;
-};
-
-// Simple alias (compat)
-export const initializeContractSimple = async (
-    fairWageContractId: string,
-    tokenContractId: string,
-) =>
-    initializeContract(
-        fairWageContractId,
-        "fairwage",
-        "FairWage Company",
-        undefined,
-        undefined,
-        tokenContractId,
-    );
-
-// ==============================
-// Read-only helpers
-// ==============================
-export const getContractInfo = async (): Promise<any> => {
-    const contractId = await getContractId();
-    const r = await fetch(api(`/api/contract-info?contractId=${contractId}`));
-    if (!r.ok) throw new Error(`Failed to get contract info: ${r.status}`);
-    return r.json();
-};
-
-export const fetchAccruedBalance = async (
-    employeeAddress: string,
-): Promise<bigint> => {
-    const r = await fetch(api("/api/accrued-balance"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            employeeAddress,
-            contractId: await getContractId(),
-        }),
-    });
-    if (!r.ok) throw new Error(`Failed to fetch balance: ${r.status}`);
-    const j = await r.json();
-    return BigInt(j.balance || 0);
-};
-
-export async function getAccruedBalance(
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<number> {
-    const r = await fetch(api("/api/get-accrued-balance"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fairWageContractId, employeeAddress }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "get-accrued-balance failed");
-    const j = await r.json();
-    return j.balance || 0;
-}
-
-export async function listEmployees(
-    fairWageContractId: string,
-): Promise<string[]> {
-    const r = await fetch(api("/api/list-employees"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fairWageContractId }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "list-employees failed");
-    const j = await r.json();
-    return j.employees || [];
-}
-
-export async function getEmployeeInfo(
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<any> {
-    const r = await fetch(api("/api/get-employee-info"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fairWageContractId, employeeAddress }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "get-employee-info failed");
-    const j = await r.json();
-    return j.employeeInfo || {};
-}
-
-// ==============================
-// Employee actions
-// ==============================
-export const withdrawEmployeeFunds = async (): Promise<void> => {
-    const fairWageContractId = await getContractId();
-    const publicKey = await connectWallet();
-
-    const r = await fetch(api("/api/employee-withdraw"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            amount: 0,
-        }),
-    });
-    if (!r.ok) throw new Error((await r.json()).error || `HTTP ${r.status}`);
-    const j = await r.json();
-    if (!j.success) throw new Error(j.error || "Failed to prepare withdrawal");
-
-    if (!window.rabet) throw new Error("Rabet not available");
-    const signed = await window.rabet.sign(j.transactionXdr, networkPassphrase);
-    if (signed.error) throw new Error(signed.error);
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: signed.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error(
-            (await submit.json()).error || `Submit failed ${submit.status}`,
-        );
-    const s = await submit.json();
-    if (!s.success) throw new Error(s.error || "Withdrawal submission failed");
-    console.log("🎉 Withdrawal tx:", s.transactionHash);
-};
-
-// ==============================
-// Employer actions
-// ==============================
-export async function addEmployee(
-    fairWageContractId: string,
-    employeeAddress: string,
-    name: string,
-    wageRate: number,
-    wagePeriod: string,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-    const periodMap: Record<string, number> = {
-        hour: 0,
-        day: 1,
-        week: 2,
-        month: 3,
-    };
-    const wagePeriodInt = periodMap[wagePeriod] ?? 1;
-    const wageRateRaw = Math.floor(wageRate * 1_0000_000); // 1e6 or 1e7? gunakan sama seperti backend (1e7)
-    const wageRateRaw_1e7 = Math.floor(wageRate * 10_000_000);
-
-    const r = await fetch(api("/api/add-employee")), // backend expect raw int (I128 parts)
-        body = {
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-            employeeName: name,
-            wageRate: wageRateRaw_1e7,
-            wagePeriod: wagePeriodInt,
+    try {
+        const publicKey = await connectWallet(); // Uses Rabet now
+        
+        console.log('✅ Using Rabet signing API for deployment');
+        console.log('🔐 Rabet will handle transaction signing securely');
+        
+        return {
+            publicKey: publicKey,
+            useRabetSigning: true
         };
+    } catch (error) {
+        console.error('Failed to generate keypair:', error);
+        throw error;
+    }
+};
 
-    // fix POST body: TS trick for editor highlighting
-    await 0;
+// Simplified Token Contract Deployment
+export const deployTokenContract = async (tokenName: string, tokenSymbol: string): Promise<string> => {
+    try {
+        console.log('🚀 Starting SAC token deployment...');
+        console.log('📋 Token Name:', tokenName, 'Symbol:', tokenSymbol);
+        
+        if (!window.rabet) {
+            throw new Error("Rabet wallet not found. Please install Rabet extension.");
+        }
+        
+        const { publicKey } = await window.rabet.connect();
+        console.log('🎉 Rabet connected:', publicKey);
+        
+        // Get REAL transaction from backend
+        const response = await fetch('/api/prepare-token-deploy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userPublicKey: publicKey,
+                tokenName,
+                tokenSymbol
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Token deployment failed: ${errorData.error}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Got transaction XDR from backend');
+        
+        // Sign the transaction with Rabet
+        console.log('🔐 Signing transaction with Rabet...');
+        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        
+        if (signResult.error) {
+            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
+        }
+        
+        console.log('✅ Transaction signed successfully');
+        
+        // Submit the signed transaction
+        const submitResponse = await fetch('/api/submit-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                signedTransactionXdr: signResult.xdr,
+                tokenName,
+                tokenSymbol
+            })
+        });
+        
+        if (!submitResponse.ok) {
+            const errorData = await submitResponse.json();
+            throw new Error(`Transaction submission failed: ${errorData.error}`);
+        }
+        
+        const submitResult = await submitResponse.json();
+        const contractId = submitResult.contractId;
+        
+        console.log('✅ SAC Token deployed successfully:', contractId);
+        console.log('ℹ️ SAC tokens have unlimited supply and ready to use immediately');
+        
+        // Store the contract ID
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('tokenContractId', contractId);
+        }
+        
+        return contractId;
+        
+    } catch (error) {
+        console.error("❌ Token Contract deployment failed!", error);
+        throw error;
+    }
+};
 
-    const rr = await fetch(api("/api/add-employee"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
-    if (!rr.ok)
-        throw new Error((await rr.json()).error || "add-employee failed");
-    const j = await rr.json();
+// Simplified FairWage Contract Deployment
+export const deployFairWageContract = async (tokenContractId: string): Promise<string> => {
+    try {
+        console.log('🚀 Starting FairWage deployment...');
+        console.log('📋 Token Contract ID:', tokenContractId);
+        
+        if (!window.rabet) {
+            throw new Error("Rabet wallet not found.");
+        }
+        
+        const { publicKey } = await window.rabet.connect();
+        console.log('🎉 Rabet connected:', publicKey);
+        
+        // Use backend API for FairWage deployment
+        const response = await fetch('/api/prepare-fairwage-deploy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userPublicKey: publicKey,
+                tokenContractId: tokenContractId,
+                companyName: 'FairWage Company'
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`FairWage deployment failed: ${errorData.error}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Got FairWage transaction XDR from backend');
+        
+        // Sign the FairWage transaction with Rabet
+        console.log('🔐 Signing FairWage transaction with Rabet...');
+        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        
+        if (signResult.error) {
+            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
+        }
+        
+        console.log('✅ FairWage transaction signed successfully');
+        
+        // Submit the signed transaction
+        const submitResponse = await fetch('/api/submit-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                signedTransactionXdr: signResult.xdr,
+                contractType: 'fairwage'
+            })
+        });
+        
+        if (!submitResponse.ok) {
+            const errorData = await submitResponse.json();
+            throw new Error(`FairWage transaction submission failed: ${errorData.error}`);
+        }
+        
+        const submitResult = await submitResponse.json();
+        const contractId = submitResult.contractId;
+        
+        console.log('✅ FairWage deployed successfully:', contractId);
+        
+        // Store contract ID in local storage
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('fairWageContractId', contractId);
+        }
+        
+        return contractId;
+        
+    } catch (error) {
+        console.error("❌ FairWage Contract deployment failed!", error);
+        throw error;
+    }
+};
 
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Transaction signing cancelled");
+// Initialize FairWage Contract
+export const initializeFairWageContract = async (fairWageContractId: string, tokenContractId: string): Promise<string> => {
+    try {
+        console.log('🔧 Starting FairWage initialization...');
+        
+        if (!window.rabet) {
+            throw new Error("Rabet wallet not found.");
+        }
+        
+        const { publicKey } = await window.rabet.connect();
+        console.log('🎉 Rabet connected:', publicKey);
+        
+        // Prepare initialization transaction
+        const response = await fetch('/api/prepare-fairwage-initialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userPublicKey: publicKey,
+                fairWageContractId,
+                tokenContractId,
+                companyName: 'FairWage Company'
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`FairWage initialization failed: ${errorData.error}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Got initialization transaction XDR from backend');
+        
+        // Sign the transaction with Rabet
+        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+        
+        if (signResult.error) {
+            throw new Error(`Failed to sign with Rabet: ${signResult.error}`);
+        }
+        
+        console.log('✅ Initialization transaction signed successfully');
+        
+        // Submit the signed transaction
+        const submitResponse = await fetch('/api/submit-transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                signedTransactionXdr: signResult.xdr,
+                contractType: 'fairwage-init'
+            })
+        });
+        
+        if (!submitResponse.ok) {
+            const errorData = await submitResponse.json();
+            throw new Error(`Initialization submission failed: ${errorData.error}`);
+        }
+        
+        const submitResult = await submitResponse.json();
+        
+        console.log('✅ FairWage initialized successfully!');
+        
+        return submitResult.transactionHash;
+        
+    } catch (error) {
+        console.error("❌ Failed to initialize FairWage!", error);
+        console.log('🔍 Error details:', error);
+        throw error;
+    }
+};
 
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
+// Get stored contract IDs - NO ERRORS
+export const getStoredContractIds = (): { tokenContractId?: string, fairWageContractId?: string } => {
+    if (typeof window === 'undefined') return {};
+    
+    return {
+        tokenContractId: localStorage.getItem('tokenContractId') || undefined,
+        fairWageContractId: localStorage.getItem('fairWageContractId') || undefined
+    };
+};
 
-export async function removeEmployee(
+// Get current contract ID safely - NO ERRORS
+export const getCurrentContractId = async (): Promise<string | null> => {
+    try {
+        const contractId = getContractId();
+        if (contractId) return contractId;
+        
+        // Try to get from backend if not in localStorage
+        const response = await fetch('/api/get-both-contract-ids');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.fairWageContractId) {
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('fairWageContractId', data.fairWageContractId);
+                }
+                return data.fairWageContractId;
+            }
+        }
+        
+        return null; // No error, just return null
+    } catch (error) {
+        console.log('⚠️ No contract ID available yet');
+        return null; // No error, just return null
+    }
+};
+
+// Set contract ID
+export const setContractId = (contractId: string): void => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('fairWageContractId', contractId);
+    }
+};
+
+// Employee management functions (simplified)
+export const addEmployee = async (
     fairWageContractId: string,
     employeeAddress: string,
-): Promise<string> {
+    hourlyWage: number
+): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const r = await fetch(api("/api/remove-employee"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/add-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             userPublicKey: publicKey,
             fairWageContractId,
             employeeAddress,
-        }),
+            hourlyWage
+        })
     });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "remove-employee failed");
-    const j = await r.json();
 
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to add employee: ${errorData.error}`);
+    }
 
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
     });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
 
-export async function updateWageRate(
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
+
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
+
+// Pay all wages function
+export const payAllWages = async (
     fairWageContractId: string,
-    employeeAddress: string,
-    newWageRate: number,
-): Promise<string> {
+    employeeAddress: string
+): Promise<string> => {
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const r = await fetch(api("/api/update-wage-rate"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/pay-all-wages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             userPublicKey: publicKey,
             fairWageContractId,
-            employeeAddress,
-            newWageRate,
-        }),
+            employeeAddress
+        })
     });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "update-wage-rate failed");
-    const j = await r.json();
 
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to pay wages: ${errorData.error}`);
+    }
 
-    const send = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
+    const result = await response.json();
+
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
+    if (!signResult.xdr) throw new Error("Signing cancelled");
+
+    const submitResponse = await fetch('/api/submit-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
     });
-    if (!send.ok) throw new Error((await send.json()).error || "submit failed");
-    const s = await send.json();
-    return s.transactionHash;
-}
 
-export async function payEmployee(
-    fairWageContractId: string,
-    employeeAddress: string,
-    amount: number,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
+    if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(`Submit failed: ${errorData.error}`);
+    }
 
-    const r = await fetch(api("/api/pay-employee"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-            amount,
-        }),
-    });
-    if (!r.ok) throw new Error((await r.json()).error || "pay-employee failed");
-    const j = await r.json();
+    const submitResult = await submitResponse.json();
+    return submitResult.transactionHash;
+};
 
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-export async function payAllWages(
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-
-    const r = await fetch(api("/api/pay-all-wages"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-        }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "pay-all-wages failed");
-    const j = await r.json();
-
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-// Alias for payAllWages (used by EmployeeManagementCard)
+// Export alias for EmployeeManagementCard
 export const payAllEmployees = payAllWages;
 
-// Batch payment function for multiple employees
-export async function payAllEmployeesBatch(
-    fairWageContractId: string,
-    employeeAddresses: string[],
-): Promise<string[]> {
-    const results = [];
-    for (const employeeAddress of employeeAddresses) {
-        try {
-            const hash = await payAllWages(fairWageContractId, employeeAddress);
-            results.push(hash);
-        } catch (error) {
-            console.error(`Failed to pay employee ${employeeAddress}:`, error);
-            throw error;
+// Get employee balance
+export const getEmployeeBalance = async (employeeAddress: string): Promise<number> => {
+    try {
+        const response = await fetch('/api/get-employee-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeAddress })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Failed to get employee balance');
+            return 0;
         }
+
+        const result = await response.json();
+        return result.balance || 0;
+    } catch (error) {
+        console.warn('⚠️ Failed to check balance:', error);
+        return 0;
     }
-    return results;
-}
+};
 
-
-export async function fundContract(
-    fairWageContractId: string,
-    tokenContractId: string,
-    amount: number,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-
-    const r = await fetch(api("/api/fund-contract"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            tokenContractId,
-            amount,
-        }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "fund-contract failed");
-    const j = await r.json();
-
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-// ==============================
-// Trustline (classic-asset compat)
-// ==============================
-export async function checkTrustlineExists(
-    accountAddress: string,
-): Promise<boolean> {
+// List employees function
+export const listEmployees = async (fairWageContractId: string): Promise<any[]> => {
     try {
-        const { assetCode, issuer } = getClassicAssetFromStorage();
-        if (!horizon) initializeServers();
-        if (!horizon) throw new Error("Horizon not initialized");
-        const account = await horizon
-            .accounts()
-            .accountId(accountAddress)
-            .call();
-        const trustline = account.balances.find(
-            (b: any) => b.asset_code === assetCode && b.asset_issuer === issuer,
-        );
-        return !!trustline;
-    } catch (e) {
-        console.error("checkTrustlineExists error:", e);
-        return false;
-    }
-}
+        const response = await fetch('/api/list-employees', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fairWageContractId })
+        });
 
-export async function createTrustlineForEmployee(
-    tokenContractId: string,
-    tokenSymbol: string,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    if (!horizon) initializeServers();
-    if (!horizon) throw new Error("Horizon not initialized");
-    const { publicKey } = await window.rabet.connect();
-    const source = await horizon.loadAccount(publicKey);
+        if (!response.ok) {
+            console.warn('⚠️ Failed to list employees');
+            return [];
+        }
 
-    const op = StellarSdk.Operation.changeTrust({
-        asset: new StellarSdk.Asset(tokenSymbol, tokenContractId),
-        limit: "922337203685.4775807",
-    });
-
-    const tx = new StellarSdk.TransactionBuilder(source, {
-        fee: "100000",
-        networkPassphrase,
-    })
-        .addOperation(op)
-        .setTimeout(30)
-        .build();
-
-    const sign = await window.rabet.sign(
-        tx.toXDR(),
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const result = await horizon.submitTransaction(
-        StellarSdk.TransactionBuilder.fromXDR(sign.xdr, networkPassphrase),
-    );
-    return result.hash;
-}
-
-export async function ensureTrustlineExists(
-    employeeAddress: string,
-    tokenContractId: string,
-    tokenSymbol: string,
-): Promise<void> {
-    const has = await checkTrustlineExists(employeeAddress);
-    if (!has) {
-        throw new Error(
-            `Employee ${employeeAddress} needs to create trustline for token ${tokenSymbol}. Connect wallet & create trustline first.`,
-        );
-    }
-}
-
-export async function createTrustlineForCurrentUser(): Promise<string> {
-    const { assetCode, issuer } = getClassicAssetFromStorage();
-    return createTrustlineForEmployee(issuer, assetCode);
-}
-
-export function getClassicAssetFromStorage() {
-    if (typeof window === "undefined") throw new Error("No window");
-    const issuer = localStorage.getItem("employerPublicKey");
-    if (!issuer)
-        throw new Error(
-            "Missing employerPublicKey in localStorage. Please connect employer wallet first.",
-        );
-    const assetCode = localStorage.getItem("tokenSymbol") || "FAIRWAGE";
-    return { assetCode, issuer };
-}
-
-// ==============================
-// Misc read ops
-// ==============================
-export const getNetworkHealth = async () => {
-    try {
-        if (!server) initializeServers();
-        if (!server) throw new Error("Server not initialized");
-        const latestLedger = await server.getLatestLedger();
-        return {
-            healthy: true,
-            latestLedger: latestLedger.sequence,
-            timestamp: new Date().toISOString(),
-        };
-    } catch (e: any) {
-        return {
-            healthy: false,
-            error: e?.message || "Unknown",
-            timestamp: new Date().toISOString(),
-        };
+        const result = await response.json();
+        return result.employees || [];
+    } catch (error) {
+        console.warn('⚠️ Failed to list employees from blockchain:', error);
+        return [];
     }
 };
 
-export const getAccountInfo = async (accountId: string) => {
-    if (!horizon) initializeServers();
-    if (!horizon) throw new Error("Horizon server not initialized");
-    return horizon.accounts().accountId(accountId).call();
+// Export default
+export default {
+    connectWallet,
+    healthCheck,
+    deployTokenContract,
+    deployFairWageContract,
+    initializeFairWageContract,
+    getStoredContractIds,
+    getCurrentContractId,
+    setContractId,
+    addEmployee,
+    payAllWages,
+    payAllEmployees,
+    getEmployeeBalance,
+    listEmployees
 };
-
-export const getAccountTransactions = async (
-    accountId: string,
-    limit: number = 20,
-) => {
-    if (!horizon) throw new Error("Horizon server not initialized");
-    const txs = await horizon
-        .transactions()
-        .forAccount(accountId)
-        .limit(limit)
-        .order("desc")
-        .call();
-    return txs.records;
-};
-
-export const getRecentTransactions = async (limit: number = 20) => {
-    const publicKey = await connectWallet();
-    return getAccountTransactions(publicKey, limit);
-};
-
-export const getContractEvents = async (
-    startLedger?: number,
-    limit: number = 100,
-) => {
-    const contractId = await getContractId();
-    const events = await server.getEvents({
-        startLedger,
-        filters: [{ type: "contract", contractIds: [contractId] }],
-        limit,
-    });
-    return events;
-};
-
-// ==============================
-// Debug helpers
-// ==============================
-export async function debugEmployeeAccount(
-    employeeAddress: string,
-): Promise<any> {
-    if (!horizon) initializeServers();
-    if (!horizon) throw new Error("Horizon not initialized");
-    const account = await horizon.accounts().accountId(employeeAddress).call();
-    const { assetCode, issuer } = getClassicAssetFromStorage();
-    const trustlines = account.balances.filter(
-        (b: any) => b.asset_type !== "native",
-    );
-    const our = trustlines.find(
-        (b: any) => b.asset_code === assetCode && b.asset_issuer === issuer,
-    );
-    const has = !!our;
-    const verify = await checkTrustlineExists(employeeAddress);
-    return {
-        account,
-        trustlines,
-        ourTrustline: our,
-        hasOurTrustline: has,
-        checkTrustlineExistsResult: verify,
-    };
-}
-
-// ==============================
-// Extra helpers & aliases
-// ==============================
-export async function addEmployeeSimple(
-    fairWageContractId: string,
-    employeeAddress: string,
-    name: string,
-    wageRate: number,
-    wagePeriod: string = "hour",
-): Promise<string> {
-    // alias ke addEmployee dengan mapping period
-    return addEmployee(
-        fairWageContractId,
-        employeeAddress,
-        name,
-        wageRate,
-        wagePeriod,
-    );
-}
-
-export async function freezeEmployee(
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-
-    const r = await fetch(api("/api/freeze-employee"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-        }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "freeze-employee failed");
-    const j = await r.json();
-
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-export async function activateEmployee(
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<string> {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-
-    const r = await fetch(api("/api/activate-employee"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-        }),
-    });
-    if (!r.ok)
-        throw new Error((await r.json()).error || "activate-employee failed");
-    const j = await r.json();
-
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-// Old name kept for compatibility with your code
-export const updateEmployeeWageRate = updateWageRate;
-
-export const fixEmployeeTimestamp = async (
-    fairWageContractId: string,
-    employeeAddress: string,
-): Promise<string> => {
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const { publicKey } = await window.rabet.connect();
-
-    const r = await fetch(api("/api/fix-employee-timestamp"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-        }),
-    });
-    if (!r.ok)
-        throw new Error(
-            (await r.json()).error || "fix-employee-timestamp failed",
-        );
-    const j = await r.json();
-
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    if (!sign.xdr) throw new Error("Signing cancelled");
-
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-};
-
-export async function payPartialByEmployer(
-    fairWageContractId: string,
-    employeeAddress: string,
-    amount: number,
-): Promise<string> {
-    const publicKey = await connectWallet();
-    const r = await fetch(api("/api/pay-partial-employer"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress,
-            amount,
-        }),
-    });
-    if (!r.ok)
-        throw new Error(
-            (await r.json()).error || "pay-partial-employer failed",
-        );
-    const j = await r.json();
-
-    if (!window.rabet) throw new Error("Rabet wallet not found.");
-    const sign = await window.rabet.sign(
-        j.transactionXdr,
-        StellarSdk.Networks.TESTNET,
-    );
-    const submit = await fetch(api("/api/submit-transaction"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransactionXdr: sign.xdr }),
-    });
-    if (!submit.ok)
-        throw new Error((await submit.json()).error || "submit failed");
-    const s = await submit.json();
-    return s.transactionHash;
-}
-
-export async function loadEmployeesFromContract(_: string): Promise<any[]> {
-    // Belum ada fungsi kontrak spesifik selain list_employees (sudah ada di atas)
-    return [];
-}
-
-// ==============================
-// Deposit (alias ke fundContract untuk employer -> kontrak)
-// ==============================
-export const depositFunds = async (amount: bigint): Promise<void> => {
-    const fairWageContractId = await getContractId();
-    const { tokenContractId } = await getBothContractIds();
-    if (!tokenContractId) throw new Error("Token contract not configured.");
-    const tx = await fundContract(
-        fairWageContractId,
-        tokenContractId,
-        Number(amount),
-    );
-    console.log("Deposit submitted:", tx);
-};
-
-// ==============================
-// Contract balance (token balance milik kontrak)
-// ==============================
-export async function checkContractBalance(
-    fairWageContractId: string,
-    tokenContractId: string,
-): Promise<number> {
-    const r = await fetch(api("/api/check-contract-balance"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fairWageContractId, tokenContractId }),
-    });
-    if (!r.ok)
-        throw new Error(
-            (await r.json()).error || "check-contract-balance failed",
-        );
-    const j = await r.json();
-    return j.balance || 0;
-}
-
-// ==============================
-// Exports (servers & network)
-// ==============================
-export { server, horizon, networkType };
