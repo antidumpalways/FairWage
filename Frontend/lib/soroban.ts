@@ -593,7 +593,7 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
         throw new Error(`Invalid XDR format: ${xdrError.message}`);
     }
     
-    const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+    const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
     if (signResult.error) {
         throw new Error(`Signing failed: ${signResult.error}`);
     }
@@ -932,7 +932,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
             throw new Error(`Invalid XDR format: ${xdrError.message}`);
         }
         
-        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+        const signResult = await window.rabet.sign(result.transactionXdr, StellarSdk.Networks.TESTNET);
         if (signResult.error) {
             throw new Error(`Signing failed: ${signResult.error}`);
         }
