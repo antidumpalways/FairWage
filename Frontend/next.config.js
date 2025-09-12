@@ -5,6 +5,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  // Allow all hosts for Replit proxy environment
+  experimental: {
+    allowedHosts: true,
+  },
+  // Configure hostname for development
+  hostname: '0.0.0.0',
+  port: 5000,
 };
 
 module.exports = nextConfig;
