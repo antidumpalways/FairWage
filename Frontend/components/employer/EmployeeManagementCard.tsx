@@ -639,7 +639,8 @@ const EmployeeManagementCard: React.FC = () => {
 
   const formatTokenAmount = (amount: number) => {
     const tokenSymbol = localStorage.getItem("tokenSymbol") || "YUP";
-    const tokenAmount = amount < 1_000_000 ? amount : amount / 10_000_000; // WHY: convert units→tokens when large
+    // Always convert raw units to tokens (7 decimal places for Stellar tokens)
+    const tokenAmount = amount / 10_000_000;
     const formatted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
       tokenAmount
     );
@@ -648,7 +649,8 @@ const EmployeeManagementCard: React.FC = () => {
 
   const formatWageRate = (wageRateRawUnits: number) => {
     const tokenSymbol = localStorage.getItem("tokenSymbol") || "YUP";
-    const wageRateTokens = wageRateRawUnits < 1_000_000 ? wageRateRawUnits : wageRateRawUnits / 10_000_000;
+    // Always convert raw units to tokens (7 decimal places for Stellar tokens)
+    const wageRateTokens = wageRateRawUnits / 10_000_000;
     const formatted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(
       wageRateTokens
     );
