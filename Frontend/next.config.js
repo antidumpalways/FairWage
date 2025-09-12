@@ -5,13 +5,8 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
-  // Allow all hosts for Replit proxy environment
-  experimental: {
-    allowedHosts: true,
-  },
-  // Configure hostname for development
-  hostname: '0.0.0.0',
-  port: 5000,
+  // Configure hostname and port via script parameters instead
+  // Next.js doesn't support hostname/port in config for development
 };
 
 module.exports = nextConfig;
