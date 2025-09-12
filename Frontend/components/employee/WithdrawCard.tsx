@@ -36,39 +36,19 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   const [customAmount, setCustomAmount] = useState<string>('');
   const { publicKey, isWalletConnected } = useWallet();
 
-  const ensureContractDetected = async (): Promise<boolean> => {
-    try {
-      const r = await fetch(`/api/autodetect-employee-contract?employee=${publicKey}`);
-      const j = await r.json();
-      if (r.ok && j?.success && j?.contractId) {
-        try { localStorage.setItem("fairWageContractId", j.contractId); } catch {}
-        return true;
-      }
-      const r2 = await fetch(`/api/get-current-contract`);
-      const j2 = await r2.json();
-      if (r2.ok && j2?.success && j2?.contractId) {
-        try { localStorage.setItem("fairWageContractId", j2.contractId); } catch {}
-        return true;
-      }
-      return false;
-    } catch { return false; }
-  };
+  // Removed ensureContractDetected - now using selectedContract prop
 
   const loadAvailableBalance = async () => {
     if (!isWalletConnected || !publicKey || !selectedContract) return;
     setIsLoadingBalance(true);
     setErrorMsg(null);
     try {
-      const ok = await ensureContractDetected();
-      if (!ok) {
-        setErrorMsg("No FairWage contract found for your wallet.");
-        setAvailableBalance(0n);
-      } else {
-        const balance = await fetchAccruedBalance(publicKey);
-        setAvailableBalance(balance);
-      }
+      console.log('🔍 Loading withdrawal balance for:', publicKey, 'from contract:', selectedContract.contractId);
+      const balance = await fetchAccruedBalance(publicKey, selectedContract.contractId);
+      setAvailableBalance(balance);
+      console.log('✅ Withdrawal balance loaded:', balance);
     } catch (error) {
-      console.error(error);
+      console.error('❌ Failed to load withdrawal balance:', error);
       setErrorMsg(error instanceof Error ? error.message : "Failed to load balance");
       setAvailableBalance(0n);
     } finally {
@@ -150,10 +130,10 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   };
 
   useEffect(() => {
-    if (isWalletConnected && publicKey) loadAvailableBalance();
+    if (isWalletConnected && publicKey && selectedContract) loadAvailableBalance();
     else { setAvailableBalance(0n); setErrorMsg(null); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isWalletConnected, publicKey]);
+  }, [isWalletConnected, publicKey, selectedContract]);
 
   return (
     <Card className="bg-slate-800 border-slate-700">

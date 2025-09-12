@@ -15,35 +15,34 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Frontend"
+args = "Backend"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Backend"
+args = "Frontend"
+
+[[workflows.workflow]]
+name = "Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Backend && npm start"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [[workflows.workflow]]
 name = "Frontend"
 author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd Frontend && npm run dev"
 waitForPort = 5000
 
-[[workflows.workflow]]
-name = "Backend"
-author = "agent"
-
 [workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd Backend && npm start"
-waitForPort = 3001
+outputType = "webview"
 
 [[ports]]
 localPort = 3001
@@ -54,8 +53,8 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 43803
-externalPort = 3002
+localPort = 40555
+externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
