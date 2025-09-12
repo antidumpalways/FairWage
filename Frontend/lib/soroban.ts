@@ -39,10 +39,8 @@ const horizonUrl = "https://horizon-testnet.stellar.org";
 // ==============================
 // Backend base (tanpa ENV)
 // ==============================
-// Use environment-appropriate backend URL
-const BACKEND = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
-    ? `https://${window.location.hostname.replace(/(-00-[a-z0-9]+)\..*/, '$1')}.replit.dev:3001`
-    : "http://localhost:3001";
+// Use API proxy routes instead of direct backend access
+const BACKEND = "";
 const api = (path: string) => `${BACKEND}${path}`;
 
 // ==============================
