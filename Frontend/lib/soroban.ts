@@ -824,25 +824,41 @@ export const checkContractBalance = async (fairWageContractId: string, tokenCont
     }
 };
 
-// Get employee balance
-export const getEmployeeBalance = async (employeeAddress: string): Promise<number> => {
+// Get employee balance with better debugging
+export const getEmployeeBalance = async (employeeAddress: string, contractId?: string): Promise<number> => {
     try {
-        const contractId = localStorage.getItem("fairWageContractId");
+        // Use provided contractId or get from localStorage
+        const useContractId = contractId || localStorage.getItem("fairWageContractId");
+        
+        console.log('🔍 Getting employee balance:', { 
+            employeeAddress, 
+            contractId: useContractId,
+            fromStorage: !contractId
+        });
+
+        if (!useContractId) {
+            console.error('❌ No contract ID available for balance check');
+            return 0;
+        }
+
         const response = await fetch('/api/get-employee-balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeAddress, contractId })
+            body: JSON.stringify({ employeeAddress, contractId: useContractId })
         });
 
         if (!response.ok) {
-            console.warn('⚠️ Failed to get employee balance');
+            const errorText = await response.text();
+            console.error('❌ Employee balance API failed:', response.status, errorText);
             return 0;
         }
 
         const result = await response.json();
+        console.log('✅ Employee balance result:', result);
+        
         return result.balance || 0;
     } catch (error) {
-        console.warn('⚠️ Failed to check balance:', error);
+        console.error('❌ Failed to check balance:', error);
         return 0;
     }
 };

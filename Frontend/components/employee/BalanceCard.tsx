@@ -28,8 +28,8 @@ const BalanceCard: React.FC = () => {
         throw new Error('Invalid balance response type');
       }
       
-      // Convert from BigInt (with 6 decimal places) to number
-      const balanceInTokens = Number(realBalance) / 1000000;
+      // Convert from BigInt (with 7 decimal places for TBU) to number  
+      const balanceInTokens = Number(realBalance) / 10000000;
       console.log('✅ Balance in tokens:', balanceInTokens);
       return balanceInTokens;
     } catch (error) {
