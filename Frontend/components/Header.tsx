@@ -55,8 +55,8 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-soft">
-              <img src="/fairwage-logo.png" alt="FairWage" className="w-8 h-8" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src="/fairwage-logo.png" alt="FairWage" className="w-10 h-10" />
             </div>
             <div className="flex flex-col">
               <span className="text-2xl font-bold font-jakarta text-slate-900">FairWage</span>

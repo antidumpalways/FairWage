@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Building2, Users, ArrowRight, DollarSign, Clock, Shield, Check, Star } from 'lucide-react';
+import { Building2, Users, ArrowRight, DollarSign, Clock, Shield, Check, Star, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CompanySelector from '@/components/CompanySelector';
@@ -43,16 +43,17 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Column - Content */}
-            <div className="text-left">
-              <div className="flex items-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-brand-600 to-brand-700 rounded-3xl flex items-center justify-center mr-4 shadow-soft-lg">
-                  <Image src="/fairwage-logo.png" alt="FairWage Logo" width={32} height={32} priority className="w-8 h-8" />
-                </div>
-                <h1 className="text-4xl md:text-6xl font-bold font-jakarta text-slate-900">
-                  Fair<span className="text-brand-600">Wage</span>
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Main Content */}
+            <div className="text-center">
+              <div className="mb-8">
+                <h1 className="text-5xl md:text-7xl font-bold font-jakarta text-slate-900 mb-4">
+                  Payroll.<br/>
+                  <span className="text-brand-600">Reimagined.</span>
                 </h1>
+                <p className="text-xl text-slate-500 font-medium italic">
+                  "Where every second of work counts, instantly"
+                </p>
               </div>
               <p className="text-xl text-slate-600 mb-8 leading-relaxed">
                 Professional earned wage access platform powered by Stellar blockchain. 
@@ -80,7 +81,7 @@ export default function HomePage() {
                 <Link href="/employer">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-primary hover:shadow-soft-lg text-white px-8 py-4 text-lg font-semibold w-full sm:w-auto rounded-xl transition-all duration-300 transform hover:-translate-y-1"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-soft-lg text-white px-8 py-4 text-lg font-semibold w-full sm:w-auto rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <Building2 className="w-5 h-5 mr-2" />
                     Employer Portal
@@ -91,8 +92,7 @@ export default function HomePage() {
                 <Link href="/employee">
                   <Button 
                     size="lg"
-                    variant="outline"
-                    className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-8 py-4 text-lg font-medium w-full sm:w-auto rounded-xl transition-all duration-300"
+                    className="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 hover:shadow-soft-lg text-white px-8 py-4 text-lg font-semibold w-full sm:w-auto rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <Users className="w-5 h-5 mr-2" />
                     Employee Access
@@ -102,19 +102,9 @@ export default function HomePage() {
               </div>
             </div>
             
-            {/* Right Column - Hero Image */}
-            <div className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-soft-xl">
-                <Image 
-                  src="/hero-team.png" 
-                  alt="Professional team collaborating in modern office" 
-                  width={600} 
-                  height={400} 
-                  priority
-                  className="w-full h-auto"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-6 shadow-soft-lg border border-slate-200">
+            {/* Feature Highlight */}
+            <div className="mt-16 bg-gradient-to-r from-slate-50 to-blue-50/30 rounded-3xl p-8 border border-slate-200">
+              <div className="flex items-center justify-center space-x-6">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <DollarSign className="w-6 h-6 text-green-600" />
@@ -122,6 +112,16 @@ export default function HomePage() {
                   <div>
                     <p className="text-sm font-medium text-slate-600">Real-time earnings</p>
                     <p className="text-lg font-bold text-slate-900">$2,847.92</p>
+                  </div>
+                </div>
+                <div className="w-px h-12 bg-slate-300"></div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Instant withdrawal</p>
+                    <p className="text-lg font-bold text-slate-900">{"< 2 seconds"}</p>
                   </div>
                 </div>
               </div>
