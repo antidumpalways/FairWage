@@ -6,13 +6,16 @@ import OnboardingWizard from '@/components/employer/OnboardingWizard';
 import ContractInfoCard from '@/components/employer/ContractInfoCard';
 import EmployeeManagementCard from '@/components/employer/EmployeeManagementCard';
 import CompanyFundsCard from '@/components/employer/CompanyFundsCard';
+import { ContractDiscoveryModal } from '@/components/employer/ContractDiscoveryModal';
 import { Button } from '@/components/ui/button';
-import { Wallet, Building2 } from 'lucide-react';
+import { Wallet, Building2, Search, Plus } from 'lucide-react';
 
 export default function EmployerPage() {
   const { isWalletConnected, publicKey, connectWallet } = useWallet();
   const [tokenContractId, setTokenContractId] = useState<string | null>(null);
   const [fairWageContractId, setFairWageContractId] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
 
   useEffect(() => {
     // Load saved contract IDs from localStorage
@@ -30,6 +33,23 @@ export default function EmployerPage() {
     // Save to localStorage
     localStorage.setItem('tokenContractId', tokenId);
     localStorage.setItem('fairWageContractId', fairWageId);
+    setShowOnboarding(false);
+  };
+
+  const handleContractSelected = (contractId: string, tokenId?: string) => {
+    setFairWageContractId(contractId);
+    if (tokenId) {
+      setTokenContractId(tokenId);
+    }
+    setShowDiscoveryModal(false);
+  };
+
+  const handleShowOnboarding = () => {
+    setShowOnboarding(true);
+  };
+
+  const handleShowDiscovery = () => {
+    setShowDiscoveryModal(true);
   };
 
   if (!isWalletConnected) {
@@ -82,7 +102,62 @@ export default function EmployerPage() {
         </div>
 
         {!fairWageContractId ? (
-          <OnboardingWizard onComplete={handleOnboardingComplete} />
+          !showOnboarding ? (
+            // Contract Selection Screen
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-white mb-4">Get Started with FairWage</h2>
+                <p className="text-slate-400 text-lg">
+                  Choose an option to begin managing your payroll system
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Discover Existing Contracts */}
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Search className="w-10 h-10 text-blue-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">Find Existing Contracts</h3>
+                    <p className="text-slate-400 mb-6 leading-relaxed">
+                      Discover FairWage contracts previously deployed by your wallet across different browsers and devices.
+                    </p>
+                    <Button
+                      onClick={handleShowDiscovery}
+                      className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 text-lg font-semibold"
+                    >
+                      <Search className="w-5 h-5 mr-2" />
+                      Discover Contracts
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Deploy New Contract */}
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Plus className="w-10 h-10 text-emerald-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">Deploy New Contract</h3>
+                    <p className="text-slate-400 mb-6 leading-relaxed">
+                      Create a new FairWage payroll system with custom tokens and company settings.
+                    </p>
+                    <Button
+                      onClick={handleShowOnboarding}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-3 text-lg font-semibold"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Deploy New Contract
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Onboarding Wizard
+            <OnboardingWizard onComplete={handleOnboardingComplete} />
+          )
         ) : (
           <div className="space-y-8">
             {/* Main Content - Employee Management First */}
@@ -100,6 +175,14 @@ export default function EmployerPage() {
             </div>
           </div>
         )}
+        
+        {/* Contract Discovery Modal */}
+        <ContractDiscoveryModal
+          isOpen={showDiscoveryModal}
+          onClose={() => setShowDiscoveryModal(false)}
+          onContractSelected={handleContractSelected}
+          walletAddress={publicKey || undefined}
+        />
       </div>
     </div>
   );

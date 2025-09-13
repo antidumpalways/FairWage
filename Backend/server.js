@@ -4,6 +4,7 @@ const StellarSdk = require("@stellar/stellar-sdk");
 const { Keypair, TransactionBuilder, Networks, Asset, BASE_FEE } = StellarSdk;
 const crypto = require("crypto");
 const { discoverEmployeeContracts, addKnownContract } = require("./contract-discovery");
+const discoverContractsRouter = require('./routes/discoverContracts');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1926,6 +1927,11 @@ app.post("/api/discover-employee-contracts", async (req, res) => {
     });
   }
 });
+
+// ================================
+// Contract Discovery Routes
+// ================================
+app.use('/api', discoverContractsRouter);
 
 // ================================
 // Start server
