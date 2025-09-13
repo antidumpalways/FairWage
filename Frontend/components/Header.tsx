@@ -1,13 +1,54 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Wallet, Zap } from 'lucide-react';
+import { Wallet, Zap, Building2, ChevronDown, Search, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import { ContractDiscoveryModal } from '@/components/employer/ContractDiscoveryModal';
+import { getCurrentContractInfo, clearCurrentContract } from '@/lib/contractDiscovery';
 
 const Header: React.FC = () => {
   const { isWalletConnected, publicKey, connectWallet, disconnectWallet } = useWallet();
+  const [currentCompany, setCurrentCompany] = useState<any>(null);
+  const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
+
+  // Load current contract info on mount and refresh periodically
+  useEffect(() => {
+    const loadCurrentCompany = () => {
+      const contractInfo = getCurrentContractInfo();
+      setCurrentCompany(contractInfo);
+    };
+    
+    loadCurrentCompany();
+    
+    // Set up interval to refresh company info (in case it changes in other tabs)
+    const interval = setInterval(loadCurrentCompany, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCompanySwitch = (contractId: string) => {
+    // Refresh company info after selection
+    const contractInfo = getCurrentContractInfo();
+    setCurrentCompany(contractInfo);
+    setShowDiscoveryModal(false);
+  };
+
+  const handleClearCompany = () => {
+    clearCurrentContract();
+    setCurrentCompany(null);
+    // Refresh current page to reflect changes
+    window.location.reload();
+  };
 
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50 shadow-soft">
@@ -23,7 +64,69 @@ const Header: React.FC = () => {
             </div>
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6">
+            {/* Company Switcher */}
+            {isWalletConnected && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="border-slate-300 hover:bg-slate-50 hover:border-slate-400 rounded-xl flex items-center gap-2"
+                  >
+                    <Building2 className="w-4 h-4 text-slate-600" />
+                    <span className="text-slate-700 font-medium">
+                      {currentCompany ? currentCompany.companyName : 'Select Company'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-slate-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuLabel className="text-slate-600">Company Management</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  {currentCompany && (
+                    <>
+                      <div className="px-2 py-2 text-sm">
+                        <div className="font-medium text-slate-900">{currentCompany.companyName}</div>
+                        <div className="text-xs text-slate-500 font-mono">
+                          {currentCompany.contractId.slice(0, 8)}...{currentCompany.contractId.slice(-8)}
+                        </div>
+                        <div className="text-xs text-emerald-600 mt-1">
+                          Token: {currentCompany.tokenSymbol}
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  
+                  <DropdownMenuItem onClick={() => setShowDiscoveryModal(true)}>
+                    <Search className="w-4 h-4 mr-2" />
+                    Discover Companies
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem asChild>
+                    <Link href="/employer/onboard" className="cursor-pointer">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create New Company
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  {currentCompany && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={handleClearCompany}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Clear Selection
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
             <Link href="/employer" className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
               Employer Portal
             </Link>
@@ -61,6 +164,14 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Contract Discovery Modal */}
+      <ContractDiscoveryModal
+        isOpen={showDiscoveryModal}
+        onClose={() => setShowDiscoveryModal(false)}
+        onContractSelected={handleCompanySwitch}
+        walletAddress={publicKey || undefined}
+      />
     </header>
   );
 };

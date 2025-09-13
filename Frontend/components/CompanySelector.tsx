@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { setContractId, getCurrentContractId } from '@/lib/soroban';
+import { getCurrentContractInfo, selectDiscoveredContract, DiscoveredContract } from '@/lib/contractDiscovery';
 
 interface CompanySelectorProps {
     onCompanySelected: (contractId: string) => void;
@@ -14,22 +14,24 @@ interface CompanySelectorProps {
 
 export default function CompanySelector({ onCompanySelected }: CompanySelectorProps) {
     const [contractId, setContractIdInput] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [tokenSymbol, setTokenSymbol] = useState('');
     const [isValidating, setIsValidating] = useState(false);
     const [validationError, setValidationError] = useState('');
-    const [currentContractId, setCurrentContractId] = useState<string | null>(null);
+    const [currentCompanyInfo, setCurrentCompanyInfo] = useState<any>(null);
 
-    // Load current contract ID on component mount
+    // Load current contract info on component mount
     useEffect(() => {
-        const loadCurrentContractId = async () => {
+        const loadCurrentContractInfo = () => {
             try {
-                const current = await getCurrentContractId();
-                setCurrentContractId(current);
+                const current = getCurrentContractInfo();
+                setCurrentCompanyInfo(current);
             } catch (error) {
-                console.warn('Failed to load current contract ID:', error);
-                setCurrentContractId(null);
+                console.warn('Failed to load current contract info:', error);
+                setCurrentCompanyInfo(null);
             }
         };
-        loadCurrentContractId();
+        loadCurrentContractInfo();
     }, []);
 
     const handleJoinCompany = async () => {
@@ -37,17 +39,38 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
             setValidationError('Please enter a contract ID');
             return;
         }
+        if (!companyName.trim()) {
+            setValidationError('Please enter a company name');
+            return;
+        }
 
         setIsValidating(true);
         setValidationError('');
 
         try {
-            // TODO: Validate contract exists on blockchain
-            // For now, just save the contract ID
-            setContractId(contractId.trim());
+            // Create a contract object to store using the unified persistence layer
+            const contractData: DiscoveredContract = {
+                contractId: contractId.trim(),
+                companyName: companyName.trim(),
+                tokenSymbol: tokenSymbol.trim() || 'TBU',
+                deploymentDate: new Date().toISOString(),
+                transactionHash: 'manual-entry',
+                deployerAddress: 'manual-entry'
+            };
+            
+            // Use the unified persistence layer
+            selectDiscoveredContract(contractData);
+            
+            // Update local state
+            setCurrentCompanyInfo(contractData);
+            
+            // Notify parent component
             onCompanySelected(contractId.trim());
+            
+            console.log('✅ Company joined successfully:', contractData.companyName);
         } catch (error) {
-            setValidationError('Invalid contract ID. Please check and try again.');
+            console.error('❌ Failed to join company:', error);
+            setValidationError('Failed to join company. Please check your inputs and try again.');
         } finally {
             setIsValidating(false);
         }
@@ -59,28 +82,33 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
             <div className="w-full max-w-2xl space-y-6">
-                <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-2">FairWage</h1>
-                    <p className="text-gray-300">Choose your role to get started</p>
+                <div className="text-center mb-8">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-soft-lg">
+                            <span className="text-white font-bold text-xl">FW</span>
+                        </div>
+                        <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">FairWage</h1>
+                    </div>
+                    <p className="text-slate-600 text-lg">Choose your company access method</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {/* Join Existing Company */}
-                    <Card className="bg-slate-800/50 border-slate-700">
+                    <Card className="bg-white border-slate-200 shadow-soft-xl hover:shadow-soft-2xl transition-all duration-300">
                         <CardHeader>
-                            <CardTitle className="text-white flex items-center gap-2">
-                                <Badge variant="secondary">Employee</Badge>
+                            <CardTitle className="text-slate-900 flex items-center gap-2 text-xl">
+                                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Employee</Badge>
                                 Join Company
                             </CardTitle>
-                            <CardDescription className="text-gray-300">
+                            <CardDescription className="text-slate-600">
                                 Enter your company's contract ID to access your dashboard
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label htmlFor="contractId" className="text-white">
+                                <Label htmlFor="contractId" className="text-slate-700 font-medium">
                                     Company Contract ID
                                 </Label>
                                 <Input
@@ -88,39 +116,63 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                     placeholder="e.g., CCP6QFKFVMCGZZBMKQL4WGJ5DL6APXQZXSRQK54XZJPDCLVMAYWLJBBE"
                                     value={contractId}
                                     onChange={(e) => setContractIdInput(e.target.value)}
-                                    className="bg-slate-700 border-slate-600 text-white"
+                                    className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 />
-                                {validationError && (
-                                    <p className="text-red-400 text-sm mt-1">{validationError}</p>
-                                )}
                             </div>
+                            <div>
+                                <Label htmlFor="companyName" className="text-slate-700 font-medium">
+                                    Company Name
+                                </Label>
+                                <Input
+                                    id="companyName"
+                                    placeholder="e.g., My Company Inc."
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
+                                    className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="tokenSymbol" className="text-slate-700 font-medium">
+                                    Token Symbol (Optional)
+                                </Label>
+                                <Input
+                                    id="tokenSymbol"
+                                    placeholder="e.g., TBU, USD, etc."
+                                    value={tokenSymbol}
+                                    onChange={(e) => setTokenSymbol(e.target.value)}
+                                    className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                />
+                            </div>
+                            {validationError && (
+                                <p className="text-red-600 text-sm mt-1">{validationError}</p>
+                            )}
                             <Button
                                 onClick={handleJoinCompany}
-                                disabled={isValidating || !contractId.trim()}
-                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                disabled={isValidating || !contractId.trim() || !companyName.trim()}
+                                className="w-full bg-gradient-primary hover:shadow-soft-lg text-white transition-all duration-300"
                             >
-                                {isValidating ? 'Validating...' : 'Join Company'}
+                                {isValidating ? 'Joining...' : 'Join Company'}
                             </Button>
                         </CardContent>
                     </Card>
 
                     {/* Create New Company */}
-                    <Card className="bg-slate-800/50 border-slate-700">
+                    <Card className="bg-white border-slate-200 shadow-soft-xl hover:shadow-soft-2xl transition-all duration-300">
                         <CardHeader>
-                            <CardTitle className="text-white flex items-center gap-2">
-                                <Badge variant="outline">Employer</Badge>
+                            <CardTitle className="text-slate-900 flex items-center gap-2 text-xl">
+                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200">Employer</Badge>
                                 Create Company
                             </CardTitle>
-                            <CardDescription className="text-gray-300">
+                            <CardDescription className="text-slate-600">
                                 Deploy a new FairWage contract for your company
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <p className="text-sm text-gray-300">
+                                <p className="text-sm text-slate-700 font-medium">
                                     You'll need to:
                                 </p>
-                                <ul className="text-sm text-gray-400 space-y-1 ml-4">
+                                <ul className="text-sm text-slate-600 space-y-1 ml-4">
                                     <li>• Deploy token contract</li>
                                     <li>• Deploy FairWage contract</li>
                                     <li>• Initialize both contracts</li>
@@ -129,7 +181,7 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                             </div>
                             <Button
                                 onClick={handleCreateCompany}
-                                className="w-full bg-green-600 hover:bg-green-700"
+                                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white hover:shadow-soft-lg transition-all duration-300"
                             >
                                 Create Company
                             </Button>
@@ -137,15 +189,23 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                     </Card>
                 </div>
 
-                {/* Current Contract Info */}
-                {currentContractId && (
-                    <Card className="bg-slate-800/30 border-slate-600">
+                {/* Current Company Info */}
+                {currentCompanyInfo && (
+                    <Card className="bg-slate-50 border-slate-200 shadow-soft-lg">
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-sm text-gray-300 mb-2">Current Company:</p>
-                                <code className="text-xs bg-slate-700 px-2 py-1 rounded text-green-400">
-                                    {currentContractId}
-                                </code>
+                                <p className="text-sm text-slate-600 mb-2 font-medium">Current Company:</p>
+                                <div className="space-y-2">
+                                    <div className="text-lg font-semibold text-slate-900">
+                                        {currentCompanyInfo.companyName}
+                                    </div>
+                                    <div className="text-sm text-emerald-600 font-medium">
+                                        Token: {currentCompanyInfo.tokenSymbol}
+                                    </div>
+                                    <code className="text-xs bg-slate-100 px-3 py-2 rounded-lg text-slate-600 font-mono border border-slate-200 block">
+                                        {currentCompanyInfo.contractId}
+                                    </code>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
