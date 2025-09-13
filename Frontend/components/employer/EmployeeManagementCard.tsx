@@ -880,29 +880,33 @@ const EmployeeManagementCard: React.FC = () => {
                           onClick={() => void handlePayEmployee(employee.id)}
                           disabled={isLoading || !employee.active}
                           size="sm"
-                          className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+                          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 border-0 font-medium"
                         >
-                          <DollarSign className="w-4 h-4 mr-1" />
-                          Pay
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          Pay Now
                         </Button>
                         <Button
                           onClick={() => setUpdatingEmployeeId(employee.id)}
                           size="sm"
                           variant="outline"
-                          className="border-blue-500 text-blue-400 hover:bg-blue-900"
+                          className="border-2 border-blue-400 text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300 shadow-md hover:shadow-blue-400/20 backdrop-blur-sm"
                           disabled={isUpdatingWage}
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit Rate
                         </Button>
                         {employee.active && (
                           <Button
                             onClick={() => void handleFreezeEmployee(employee.id)}
                             size="sm"
                             variant="outline"
-                            className="border-orange-500 text-orange-400 hover:bg-orange-900"
+                            className="border-2 border-amber-400 text-amber-400 hover:bg-amber-500 hover:text-amber-900 hover:border-amber-500 transition-all duration-300 shadow-md hover:shadow-amber-400/20 backdrop-blur-sm font-medium"
                             disabled={isLoading}
                           >
-                            🧊 Freeze
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-6.219-8.56" />
+                            </svg>
+                            Pause
                           </Button>
                         )}
                         {!employee.active && (
@@ -911,10 +915,13 @@ const EmployeeManagementCard: React.FC = () => {
                               onClick={() => void handleActivateEmployee(employee.id)}
                               size="sm"
                               variant="outline"
-                              className="border-green-500 text-green-400 hover:bg-green-900"
+                              className="border-2 border-emerald-400 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-300 shadow-md hover:shadow-emerald-400/20 backdrop-blur-sm font-medium"
                               disabled={isLoading}
                             >
-                              🟢 Activate
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a2.5 2.5 0 100-5H9v5zm0 0H7.5a2.5 2.5 0 100 5H9v-5zm0 0v5" />
+                              </svg>
+                              Resume
                             </Button>
                     <Button
                               onClick={() => void handleRemoveEmployee(employee.id)}
