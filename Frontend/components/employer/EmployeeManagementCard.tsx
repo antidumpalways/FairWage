@@ -74,11 +74,26 @@ const EmployeeManagementCard: React.FC = () => {
 
   useEffect(() => {
     if (isWalletConnected && publicKey) {
-      // Always sync with blockchain on page load to get real status
-      void syncEmployeesFromContract();
+      // Load employees from localStorage first to preserve names, then sync with blockchain
+      loadEmployeesFromStorage();
+      setTimeout(() => void syncEmployeesFromContract(), 100); // Small delay to let localStorage load first
       void checkBalance();
     }
   }, [isWalletConnected, publicKey]);
+
+  // Load employees from localStorage to preserve names
+  const loadEmployeesFromStorage = () => {
+    try {
+      const savedEmployees = localStorage.getItem("employees");
+      if (savedEmployees) {
+        const parsedEmployees = JSON.parse(savedEmployees) as Employee[];
+        console.log("💾 Loading employees from localStorage:", parsedEmployees);
+        setEmployees(parsedEmployees);
+      }
+    } catch (error) {
+      console.error("❌ Failed to load employees from localStorage:", error);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -132,12 +147,30 @@ const EmployeeManagementCard: React.FC = () => {
         return;
       }
 
+      // Also check localStorage for names if not found in current state
+      let savedEmployees: Employee[] = [];
+      try {
+        const saved = localStorage.getItem("employees");
+        if (saved) {
+          savedEmployees = JSON.parse(saved) as Employee[];
+        }
+      } catch (error) {
+        console.error("❌ Failed to load saved employees for sync:", error);
+      }
+
       const syncedEmployees = await Promise.all(
         employeeAddresses.map(async (address: string) => {
           try {
             const info: any = await getEmployeeInfo(fairWageContractId, address);
             const accrued = await getAccruedBalance(address);
-            const existing = employees.find((e) => e.address === address);
+            
+            // Try to find existing employee in current state OR localStorage
+            const existingInState = employees.find((e) => e.address === address);
+            const existingInStorage = savedEmployees.find((e) => e.address === address);
+            const existing = existingInState || existingInStorage;
+            
+            console.log(`🔍 Employee ${address.slice(0, 8)}... - State: ${existingInState?.name || 'none'}, Storage: ${existingInStorage?.name || 'none'}`);
+            
             return {
               id:
                 existing?.id ||
