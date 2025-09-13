@@ -707,65 +707,44 @@ const EmployeeManagementCard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Employees Card */}
-        <Card className="bg-gradient-to-br from-slate-800 via-slate-800 to-blue-900/30 border-slate-700/50 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 group">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Total Employees</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
-                  {employees.length}
-                </p>
+              <div>
+                <p className="text-sm text-gray-400">Total Employees</p>
+                <p className="text-2xl font-bold text-blue-400">{employees.length}</p>
               </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/30 transition-all duration-300"></div>
-                <div className="relative bg-blue-500/10 p-3 rounded-full border border-blue-500/20 group-hover:bg-blue-500/20 transition-all duration-300">
-                  <Users className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
-                </div>
-              </div>
+              <Users className="w-8 h-8 text-blue-400" />
             </div>
           </CardContent>
         </Card>
 
         {/* Active Employees Card */}
-        <Card className="bg-gradient-to-br from-slate-800 via-slate-800 to-emerald-900/30 border-slate-700/50 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 group">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Active Employees</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-                  {employees.filter((e) => e.active).length}
-                </p>
+              <div>
+                <p className="text-sm text-gray-400">Active Employees</p>
+                <p className="text-2xl font-bold text-green-400">{employees.filter((e) => e.active).length}</p>
               </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-500/30 transition-all duration-300"></div>
-                <div className="relative bg-emerald-500/10 p-3 rounded-full border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all duration-300">
-                  <Clock className="w-6 h-6 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-                </div>
-              </div>
+              <Clock className="w-8 h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
         {/* Contract Balance Card */}
-        <Card className="bg-gradient-to-br from-slate-800 via-slate-800 to-purple-900/30 border-slate-700/50 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 group">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Contract Balance</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">
-                  {contractBalance !== null ? formatTokenAmount(contractBalance) : (
-                    <span className="text-slate-500 text-xl animate-pulse">Loading...</span>
-                  )}
+              <div>
+                <p className="text-sm text-gray-400">Contract Balance</p>
+                <p className="text-2xl font-bold text-purple-400">
+                  {contractBalance !== null ? formatTokenAmount(contractBalance) : "Loading..."}
                 </p>
               </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl group-hover:bg-purple-500/30 transition-all duration-300"></div>
-                <div className="relative bg-purple-500/10 p-3 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all duration-300">
-                  <DollarSign className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                </div>
-              </div>
+              <DollarSign className="w-8 h-8 text-purple-400" />
             </div>
           </CardContent>
         </Card>
