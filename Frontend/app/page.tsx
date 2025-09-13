@@ -43,9 +43,9 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Main Content */}
-            <div className="text-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Content */}
+            <div className="text-left">
               <div className="mb-8">
                 <h1 className="text-5xl md:text-7xl font-bold font-jakarta text-slate-900 mb-4">
                   Payroll.<br/>
@@ -102,9 +102,19 @@ export default function HomePage() {
               </div>
             </div>
             
-            {/* Feature Highlight */}
-            <div className="mt-16 bg-gradient-to-r from-slate-50 to-blue-50/30 rounded-3xl p-8 border border-slate-200">
-              <div className="flex items-center justify-center space-x-6">
+            {/* Right Column - Hero Image */}
+            <div className="relative">
+              <div className="rounded-3xl overflow-hidden shadow-soft-xl">
+                <Image 
+                  src="/hero-team.png" 
+                  alt="Professional team collaborating in modern office" 
+                  width={600} 
+                  height={400} 
+                  priority
+                  className="w-full h-auto"
+                />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-6 shadow-soft-lg border border-slate-200">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <DollarSign className="w-6 h-6 text-green-600" />
@@ -112,16 +122,6 @@ export default function HomePage() {
                   <div>
                     <p className="text-sm font-medium text-slate-600">Real-time earnings</p>
                     <p className="text-lg font-bold text-slate-900">$2,847.92</p>
-                  </div>
-                </div>
-                <div className="w-px h-12 bg-slate-300"></div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Instant withdrawal</p>
-                    <p className="text-lg font-bold text-slate-900">{"< 2 seconds"}</p>
                   </div>
                 </div>
               </div>
