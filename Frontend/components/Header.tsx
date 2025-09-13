@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Wallet, Zap, Building2, ChevronDown, Search, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
@@ -20,6 +21,7 @@ const Header: React.FC = () => {
   const { isWalletConnected, publicKey, connectWallet, disconnectWallet } = useWallet();
   const [currentCompany, setCurrentCompany] = useState<any>(null);
   const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
+  const pathname = usePathname();
 
   // Load current contract info on mount and refresh periodically
   useEffect(() => {
@@ -59,14 +61,16 @@ const Header: React.FC = () => {
               <img src="/fairwage-logo.png" alt="FairWage" className="w-10 h-10" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold font-jakarta text-slate-900">FairWage</span>
+              <span className="text-2xl font-bold font-jakarta">
+                Fair<span className="text-brand-600">Wage</span>
+              </span>
               <span className="text-xs text-slate-500 -mt-1">Powered by Stellar</span>
             </div>
           </Link>
           
           <nav className="hidden md:flex items-center space-x-6">
-            {/* Company Switcher */}
-            {isWalletConnected && (
+            {/* Company Switcher - Only show on employer/employee pages */}
+            {isWalletConnected && (pathname?.startsWith('/employer') || pathname?.startsWith('/employee')) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
