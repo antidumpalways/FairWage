@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, Users, ArrowRight, DollarSign, Clock, Shield } from 'lucide-react';
+import Image from 'next/image';
+import { Building2, Users, ArrowRight, DollarSign, Clock, Shield, Check, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CompanySelector from '@/components/CompanySelector';
@@ -40,55 +41,113 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-hero">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-slate-50/30"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-brand-600 to-brand-700 rounded-3xl flex items-center justify-center mr-6 shadow-soft-lg">
-                <img src="/fairwage-logo.png" alt="FairWage Logo" className="w-12 h-12" />
+      <div className="relative overflow-hidden bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Content */}
+            <div className="text-left">
+              <div className="flex items-center mb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-brand-600 to-brand-700 rounded-3xl flex items-center justify-center mr-4 shadow-soft-lg">
+                  <Image src="/fairwage-logo.png" alt="FairWage Logo" width={32} height={32} priority className="w-8 h-8" />
+                </div>
+                <h1 className="text-4xl md:text-6xl font-bold font-jakarta text-slate-900">
+                  Fair<span className="text-brand-600">Wage</span>
+                </h1>
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold font-jakarta text-slate-900">
-                Fair<span className="text-brand-600">Wage</span>
-              </h1>
-            </div>
-            <p className="text-xl text-slate-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Professional earned wage access platform powered by Stellar blockchain. 
-              Streamline payroll operations with real-time wage accrual and instant withdrawals.
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
-              <Link href="/employer">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-primary hover:shadow-soft-lg text-white px-12 py-6 text-lg font-semibold w-full sm:w-auto rounded-xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <Building2 className="w-5 h-5 mr-3" />
-                  Employer Portal
-                  <ArrowRight className="w-5 h-5 ml-3" />
-                </Button>
-              </Link>
+              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+                Professional earned wage access platform powered by Stellar blockchain. 
+                Streamline payroll operations with real-time wage accrual and instant withdrawals.
+              </p>
               
-              <Link href="/employee">
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-12 py-6 text-lg font-medium w-full sm:w-auto rounded-xl transition-all duration-300"
-                >
-                  <Users className="w-5 h-5 mr-3" />
-                  Employee Access
-                  <ArrowRight className="w-5 h-5 ml-3" />
-                </Button>
-              </Link>
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center gap-6 mb-10">
+                <div className="flex items-center">
+                  <Check className="w-5 h-5 text-green-600 mr-2" />
+                  <span className="text-slate-600 font-medium">Enterprise Security</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-5 h-5 text-green-600 mr-2" />
+                  <span className="text-slate-600 font-medium">Instant Settlements</span>
+                </div>
+                <div className="flex items-center">
+                  <Star className="w-5 h-5 text-yellow-500 mr-2" />
+                  <span className="text-slate-600 font-medium">Powered by Stellar</span>
+                </div>
+              </div>
+            
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/employer">
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-primary hover:shadow-soft-lg text-white px-8 py-4 text-lg font-semibold w-full sm:w-auto rounded-xl transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    <Building2 className="w-5 h-5 mr-2" />
+                    Employer Portal
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                
+                <Link href="/employee">
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-8 py-4 text-lg font-medium w-full sm:w-auto rounded-xl transition-all duration-300"
+                  >
+                    <Users className="w-5 h-5 mr-2" />
+                    Employee Access
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Right Column - Hero Image */}
+            <div className="relative">
+              <div className="rounded-3xl overflow-hidden shadow-soft-xl">
+                <Image 
+                  src="/hero-team.png" 
+                  alt="Professional team collaborating in modern office" 
+                  width={600} 
+                  height={400} 
+                  priority
+                  className="w-full h-auto"
+                />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-6 shadow-soft-lg border border-slate-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Real-time earnings</p>
+                    <p className="text-lg font-bold text-slate-900">$2,847.92</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Trust Bar */}
+      <div className="bg-slate-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-slate-500 text-sm mb-8">Trusted by forward-thinking companies worldwide</p>
+          <div className="flex justify-center items-center space-x-8 opacity-60">
+            <div className="text-slate-400 font-semibold">STELLAR</div>
+            <div className="w-px h-6 bg-slate-300"></div>
+            <div className="text-slate-400 font-semibold">BLOCKCHAIN</div>
+            <div className="w-px h-6 bg-slate-300"></div>
+            <div className="text-slate-400 font-semibold">ENTERPRISE</div>
+            <div className="w-px h-6 bg-slate-300"></div>
+            <div className="text-slate-400 font-semibold">SECURE</div>
+          </div>
+        </div>
+      </div>
+      
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold font-jakarta text-slate-900 mb-6">Enterprise-Grade Payroll Solution</h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
