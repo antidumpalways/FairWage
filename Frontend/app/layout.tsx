@@ -1,15 +1,25 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { WalletProvider } from '@/contexts/WalletContext';
 import Header from '@/components/Header';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jakarta = Plus_Jakarta_Sans({ 
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'FairWage - Earned Wage Access dApp',
-  description: 'Revolutionary earned wage access platform powered by blockchain technology',
+  title: 'FairWage - Professional Blockchain Payroll',
+  description: 'Professional earned wage access platform powered by Stellar blockchain. Streamline payroll with real-time wage accrual and instant withdrawals.',
 };
 
 export default function RootLayout({
@@ -19,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${jakarta.variable} font-sans antialiased`}>
         <ErrorBoundary>
           <WalletProvider>
             <Header />
