@@ -92,15 +92,20 @@ const CompanyFundsCard: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Add New Contract */}
-      <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-slate-900 text-xl font-semibold">Add New Contract</CardTitle>
+      <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+        <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/80 to-slate-50 border-b-2 border-slate-200 rounded-t-xl">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <CardTitle className="text-slate-900 text-xl font-bold tracking-wide">Add New Contract</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+        <CardContent className="bg-gradient-to-b from-white to-slate-50/30 rounded-b-xl">
+          <p className="text-sm text-slate-700 mb-6 leading-relaxed font-medium">
             Deploy additional payroll contracts for multiple business entities or departments
           </p>
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-blue-500/30 rounded-xl">
             <Building2 className="w-5 h-5 mr-3" />
             Deploy Contract
           </Button>

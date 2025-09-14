@@ -72,11 +72,18 @@ const ContractInfoCard: React.FC = () => {
   }, [isWalletConnected, publicKey]);
 
   return (
-    <Card className="bg-gradient-to-br from-white to-slate-50/80 border-2 border-slate-200/60 hover:border-slate-300/80 hover:shadow-lg transition-all duration-300 shadow-md">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-slate-900 text-xl font-semibold">Contract Information</CardTitle>
+    <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+      <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/80 to-slate-50 border-b-2 border-slate-200 rounded-t-xl">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <CardTitle className="text-slate-900 text-xl font-bold tracking-wide">Contract Information</CardTitle>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-gradient-to-b from-white to-slate-50/30 rounded-b-xl">
         {isLoading ? (
           <div className="animate-pulse space-y-2">
             <div className="h-8 bg-slate-200 rounded"></div>
