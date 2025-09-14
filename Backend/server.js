@@ -215,8 +215,22 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
         });
     }
 
-    const sourceAccount = await horizonServer.loadAccount(userPublicKey);
-    console.log("✅ User account loaded from Horizon");
+    let sourceAccount;
+    try {
+      sourceAccount = await horizonServer.loadAccount(userPublicKey);
+      console.log("✅ User account loaded from Horizon");
+    } catch (horizonError) {
+      console.error("❌ Failed to load account from Horizon:", horizonError.message);
+      if (horizonError.message.includes('not found') || horizonError.message.includes('404')) {
+        return res.status(400).json({
+          success: false,
+          error: "Account not found on Stellar testnet",
+          details: "The account " + userPublicKey + " does not exist on the Stellar testnet. Please create the account first or fund it with XLM.",
+          suggestion: "Visit https://laboratory.stellar.org/#account-creator?network=test to create a test account"
+        });
+      }
+      throw horizonError;
+    }
 
     // SAC: asset code = tokenSymbol, issuer = userPublicKey
     const asset = new StellarSdk.Asset(tokenSymbol, userPublicKey);
