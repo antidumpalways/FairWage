@@ -56,15 +56,23 @@ loadContractsFromFile();
  */
 async function discoverEmployeeContracts(employeeAddress, rpcServer, horizonServer, networkPassphrase) {
   const employeeContracts = [];
+  
+  console.log(`🔍 Starting employee discovery for: ${employeeAddress}`);
+  console.log(`📋 Checking ${knownContracts.length} known contracts...`);
 
   for (const contract of knownContracts) {
-    if (!contract.active) continue;
+    if (!contract.active) {
+      console.log(`⏭️ Skipping inactive contract: ${contract.name} (${contract.id})`);
+      continue;
+    }
 
     // Validate contract ID format (should start with 'C' and be 56 characters long)
     if (!contract.id || !contract.id.startsWith('C') || contract.id.length !== 56) {
       console.warn(`⚠️ Skipping invalid contract ID: ${contract.id}`);
       continue;
     }
+
+    console.log(`🔍 Checking contract: ${contract.name} (${contract.id})`);
 
     try {
       // Check if employee is registered in this contract
@@ -76,7 +84,11 @@ async function discoverEmployeeContracts(employeeAddress, rpcServer, horizonServ
         networkPassphrase
       );
 
+      console.log(`📊 Employee registration check for ${contract.name}: ${isRegistered ? '✅ REGISTERED' : '❌ NOT REGISTERED'}`);
+
       if (isRegistered) {
+        console.log(`🎯 Employee found in contract: ${contract.name}`);
+        
         // Get additional contract info
         const contractInfo = await getContractInfo(
           contract.id, 
@@ -85,19 +97,23 @@ async function discoverEmployeeContracts(employeeAddress, rpcServer, horizonServ
           networkPassphrase
         );
 
-        employeeContracts.push({
+        const contractData = {
           contractId: contract.id,
           companyName: contract.name,
           tokenSymbol: contract.tokenSymbol,
           tokenContract: contract.tokenContract,
           ...contractInfo
-        });
+        };
+
+        console.log(`📋 Adding contract to result:`, contractData);
+        employeeContracts.push(contractData);
       }
     } catch (error) {
-      console.warn(`⚠️ Failed to check contract ${contract.id}:`, error.message);
+      console.warn(`⚠️ Failed to check contract ${contract.name} (${contract.id}):`, error.message);
     }
   }
 
+  console.log(`✅ Discovery complete. Found ${employeeContracts.length} contracts for employee ${employeeAddress}`);
   return employeeContracts;
 }
 

@@ -2161,44 +2161,7 @@ app.get("/health", (req, res) => {
 // ================================ 
 // Contract Discovery API - Multi-Company Support
 // ================================
-app.post("/api/discover-employee-contracts", async (req, res) => {
-  try {
-    const { employeeAddress } = req.body;
-
-    if (!employeeAddress) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required parameter: employeeAddress",
-      });
-    }
-
-    console.log(`🔍 Discovering contracts for employee: ${employeeAddress}`);
-
-    // Discover all contracts where employee is registered
-    const employeeContracts = await discoverEmployeeContracts(
-      employeeAddress,
-      server,
-      networkPassphrase
-    );
-
-    console.log(`✅ Found ${employeeContracts.length} contracts for ${employeeAddress}`);
-
-    res.json({
-      success: true,
-      contracts: employeeContracts,
-      employeeAddress,
-      message: `Found ${employeeContracts.length} contract(s) where employee is registered`,
-    });
-
-  } catch (error) {
-    console.error("❌ Error discovering employee contracts:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to discover employee contracts",
-      details: error.message,
-    });
-  }
-});
+// Note: /api/discover-employee-contracts endpoint is already defined above at line 123
 
 // ================================
 // Contract Discovery Routes
