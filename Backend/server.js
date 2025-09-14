@@ -597,6 +597,22 @@ app.post("/api/submit-transaction", async (req, res) => {
       (contractType === "fairwage" || contractType === "token")
     ) {
       setCurrentContractId(contractId, contractType);
+      
+      // Add to contract registry for employee discovery
+      if (contractType === "fairwage") {
+        try {
+          addKnownContract({
+            id: contractId,
+            name: req.body.companyName || "Unknown Company",
+            tokenSymbol: req.body.tokenSymbol || "UNKNOWN",
+            tokenContract: req.body.tokenContractId || null,
+            active: true
+          });
+          console.log("✅ Contract added to discovery registry:", contractId);
+        } catch (error) {
+          console.warn("⚠️ Failed to add contract to registry:", error.message);
+        }
+      }
     }
 
     res.json({

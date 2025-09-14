@@ -465,7 +465,9 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 signedTransactionXdr: signResult.xdr,
-                contractType: 'fairwage'
+                contractType: 'fairwage',
+                companyName: 'FairWage Company',
+                tokenSymbol: 'FAIRWAGE'
             })
         });
         
@@ -575,7 +577,7 @@ export const getCurrentContractId = async (): Promise<string | null> => {
         if (contractId) return contractId;
         
         // Try to get from backend if not in localStorage
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-both-contract-ids`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-current-contract`);
         if (response.ok) {
             const data = await response.json();
             if (data.fairWageContractId) {
