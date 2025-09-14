@@ -272,13 +272,13 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                     console.log('⚠️ TESTNET (uppercase) failed:', error2?.message || error2);
                     signingError = error2;
                     
-                    // Try without network parameter
+                    // Try with 'public' network as fallback
                     try {
-                        signResult = await window.rabet.sign(result.transactionXdr);
-                        console.log('✅ Signed without network parameter');
+                        signResult = await window.rabet.sign(result.transactionXdr, 'public');
+                        console.log('✅ Signed with public network');
                         signingError = null;
                     } catch (error3: any) {
-                        console.log('⚠️ No network parameter failed:', error3?.message || error3);
+                        console.log('⚠️ Public network failed:', error3?.message || error3);
                         signingError = error3;
                     }
                 }
