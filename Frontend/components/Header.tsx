@@ -69,8 +69,8 @@ const Header: React.FC = () => {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-6">
-            {/* Company Switcher - Only show on employer/employee pages */}
-            {isWalletConnected && (pathname?.startsWith('/employer') || pathname?.startsWith('/employee')) && (
+            {/* Company Switcher - Only show on employer pages */}
+            {isWalletConnected && pathname?.startsWith('/employer') && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
