@@ -56,6 +56,23 @@ const ContractInfoCard: React.FC = () => {
     return `${address.slice(0, 8)}...${address.slice(-6)}`;
   };
 
+  // Monitor localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'fairWageContractId' || e.key === 'companyName') {
+        console.log('🔍 localStorage changed:', { key: e.key, oldValue: e.oldValue, newValue: e.newValue });
+        // Reload contract info when localStorage changes
+        setTimeout(() => {
+          console.log('🔄 Reloading contract info due to localStorage change');
+          window.location.reload();
+        }, 100);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Load contract info from localStorage
   useEffect(() => {
     const loadContractInfo = () => {

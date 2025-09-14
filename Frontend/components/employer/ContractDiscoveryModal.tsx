@@ -45,8 +45,12 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
 
   // Auto-discover when modal opens
   useEffect(() => {
+    console.log('🔍 ContractDiscoveryModal useEffect - isOpen changed:', isOpen);
     if (isOpen) {
+      console.log('🔄 Modal opened, starting discovery...');
       handleDiscover();
+    } else {
+      console.log('🔒 Modal closed');
     }
   }, [isOpen]);
 
@@ -74,18 +78,23 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
   };
 
   const handleSelectContract = async (contract: DiscoveredContract) => {
+    // Prevent double-click
+    if (selectedContract) {
+      console.log('⚠️ Contract selection already in progress, ignoring click');
+      return;
+    }
+
     try {
+      console.log('🔍 Starting contract selection:', contract.companyName);
       setSelectedContract(contract.contractId);
       
       // Save to localStorage and notify parent
       selectDiscoveredContract(contract);
       onContractSelected(contract.contractId, contract.tokenContractId);
       
-      // Close modal
-      setTimeout(() => {
-        onClose();
-        setSelectedContract(null);
-      }, 500);
+      // Close modal immediately
+      onClose();
+      setSelectedContract(null);
       
     } catch (error) {
       console.error('Failed to select contract:', error);
