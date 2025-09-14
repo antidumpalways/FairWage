@@ -131,3 +131,64 @@ export const clearCurrentContract = (): void => {
     console.error('❌ Failed to clear contract:', error);
   }
 };
+
+/**
+ * Get all contracts from registry (for employer contract selection)
+ */
+export const getAllEmployerContracts = async (): Promise<ContractDiscoveryResult> => {
+  try {
+    console.log(`🔍 Getting all employer contracts from registry`);
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/debug/contract-registry`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get contracts: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log(`✅ Registry result:`, result);
+    
+    if (result.success && result.contracts) {
+      // Convert registry format to DiscoveredContract format
+      const contracts: DiscoveredContract[] = result.contracts.map((contract: any) => ({
+        contractId: contract.id,
+        tokenContractId: contract.tokenContract,
+        companyName: contract.name,
+        tokenSymbol: contract.tokenSymbol,
+        deploymentDate: new Date().toISOString(), // Registry doesn't store dates
+        transactionHash: 'registry', // Placeholder
+        deployerAddress: 'current-user' // Placeholder
+      }));
+
+      return {
+        success: true,
+        contracts,
+        totalFound: contracts.length,
+        walletAddress: 'current-user'
+      };
+    } else {
+      return {
+        success: false,
+        contracts: [],
+        totalFound: 0,
+        walletAddress: 'current-user',
+        error: 'No contracts found in registry'
+      };
+    }
+
+  } catch (error) {
+    console.error('❌ Failed to get employer contracts:', error);
+    return {
+      success: false,
+      contracts: [],
+      totalFound: 0,
+      walletAddress: 'current-user',
+      error: error instanceof Error ? error.message : 'Failed to get contracts'
+    };
+  }
+};

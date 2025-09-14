@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { 
   discoverContractsByWallet, 
+  getAllEmployerContracts,
   selectDiscoveredContract, 
   DiscoveredContract,
   getCurrentContractInfo,
@@ -42,35 +43,31 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
 
-  // Auto-discover when modal opens and wallet is connected
+  // Auto-discover when modal opens
   useEffect(() => {
-    if (isOpen && walletAddress) {
+    if (isOpen) {
       handleDiscover();
     }
-  }, [isOpen, walletAddress]);
+  }, [isOpen]);
 
   const handleDiscover = async () => {
-    if (!walletAddress) {
-      setError('Wallet not connected');
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await discoverContractsByWallet(walletAddress);
+      // Get all contracts from registry instead of searching blockchain
+      const result = await getAllEmployerContracts();
       
       if (result.success) {
         setDiscoveredContracts(result.contracts);
         if (result.contracts.length === 0) {
-          setError('No FairWage contracts found for this wallet. You may need to deploy a new contract.');
+          setError('No contracts found in registry. You may need to deploy a new contract.');
         }
       } else {
-        setError(result.error || 'Failed to discover contracts');
+        setError(result.error || 'Failed to get contracts from registry');
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Discovery failed');
+      setError(error instanceof Error ? error.message : 'Failed to get contracts');
     } finally {
       setIsLoading(false);
     }
@@ -115,10 +112,10 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-white text-2xl flex items-center gap-2">
             <Search className="w-6 h-6" />
-            Discover Your FairWage Contracts
+            Select Your FairWage Contract
           </DialogTitle>
           <p className="text-gray-400 mt-2">
-            Find contracts previously deployed by your wallet across different browsers and devices.
+            Choose from your deployed contracts to manage employees and payroll.
           </p>
         </DialogHeader>
 
@@ -127,27 +124,21 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
           <div className="flex items-center gap-4">
             <Button
               onClick={handleDiscover}
-              disabled={isLoading || !walletAddress}
+              disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Discovering...
+                  Loading...
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Discover Contracts
+                  Refresh Contracts
                 </>
               )}
             </Button>
-            
-            {walletAddress && (
-              <div className="text-sm text-gray-400">
-                Wallet: <span className="font-mono">{walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}</span>
-              </div>
-            )}
           </div>
 
           {/* Error State */}
@@ -166,9 +157,9 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
           {/* Loading State */}
           {isLoading && (
             <div className="flex items-center justify-center py-12">
-              <div className="text-center">
+                <div className="text-center">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-400" />
-                <p className="text-gray-400">Scanning blockchain for your contracts...</p>
+                <p className="text-gray-400">Loading your contracts...</p>
               </div>
             </div>
           )}
@@ -178,7 +169,7 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-white">
-                  Found {discoveredContracts.length} Contract{discoveredContracts.length !== 1 ? 's' : ''}
+                  Your {discoveredContracts.length} Contract{discoveredContracts.length !== 1 ? 's' : ''}
                 </h3>
                 <Badge variant="secondary" className="bg-green-900/50 text-green-300 border-green-700">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -292,7 +283,7 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
                   <Search className="w-12 h-12 mx-auto text-gray-500 mb-4" />
                   <h3 className="text-lg font-semibold text-white mb-2">No Contracts Found</h3>
                   <p className="text-gray-400 mb-4">
-                    No FairWage contracts were found for this wallet address.
+                    No contracts found in registry. Deploy your first contract to get started.
                   </p>
                 </div>
                 
