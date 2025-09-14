@@ -133,14 +133,33 @@ export const clearCurrentContract = (): void => {
 };
 
 /**
- * Validate if a contract is accessible (has valid token contract)
+ * Validate if a contract is accessible and owned by current user
  */
 const validateContract = async (contract: any): Promise<boolean> => {
   try {
+    console.log(`🔍 Validating contract: ${contract.name} (${contract.id})`);
+    
     // Check if contract has valid token contract ID
     if (!contract.tokenContract || contract.tokenContract === 'null') {
       console.log(`⚠️ Contract ${contract.name} has no valid token contract`);
       return false;
+    }
+    
+    // Check if we have this contract in localStorage (indicates ownership)
+    const currentFairWageId = localStorage.getItem('fairWageContractId');
+    const currentTokenId = localStorage.getItem('tokenContractId');
+    const currentCompanyName = localStorage.getItem('companyName');
+    
+    console.log(`🔍 Current localStorage:`, {
+      fairWageId: currentFairWageId,
+      tokenId: currentTokenId,
+      companyName: currentCompanyName
+    });
+    
+    // If this contract is already in localStorage, it's valid
+    if (currentFairWageId === contract.id) {
+      console.log(`✅ Contract ${contract.name} is current contract in localStorage`);
+      return true;
     }
     
     // Try to check if we can access the contract (basic validation)
@@ -165,6 +184,28 @@ const validateContract = async (contract: any): Promise<boolean> => {
       return false;
     }
     
+    // Additional check: try to get contract info
+    try {
+      const infoResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-employee-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fairWageContractId: contract.id,
+          employeeAddress: 'GCUNUCNR...LNUQMM' // Current user's address
+        })
+      });
+      
+      if (!infoResponse.ok) {
+        console.log(`⚠️ Contract ${contract.name} employee info check failed (${infoResponse.status})`);
+        return false;
+      }
+    } catch (infoError) {
+      console.log(`⚠️ Contract ${contract.name} employee info check error:`, infoError);
+      return false;
+    }
+    
     console.log(`✅ Contract ${contract.name} is valid and accessible`);
     return true;
   } catch (error) {
@@ -174,11 +215,11 @@ const validateContract = async (contract: any): Promise<boolean> => {
 };
 
 /**
- * Get all contracts from registry (for employer contract selection)
+ * Get all contracts from registry (simple approach)
  */
 export const getAllEmployerContracts = async (): Promise<ContractDiscoveryResult> => {
   try {
-    console.log(`🔍 Getting all employer contracts from registry`);
+    console.log(`🔍 Getting all contracts from registry (simple approach)`);
     
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/debug/contract-registry`, {
       method: 'GET',
@@ -195,33 +236,27 @@ export const getAllEmployerContracts = async (): Promise<ContractDiscoveryResult
     console.log(`✅ Registry result:`, result);
     
     if (result.success && result.contracts) {
-      // Validate each contract
-      const validContracts: DiscoveredContract[] = [];
-      
-      for (const contract of result.contracts) {
-        const isValid = await validateContract(contract);
-        if (isValid) {
-          validContracts.push({
-            contractId: contract.id,
-            tokenContractId: contract.tokenContract,
-            companyName: contract.name,
-            tokenSymbol: contract.tokenSymbol,
-            deploymentDate: new Date().toISOString(), // Registry doesn't store dates
-            transactionHash: 'registry', // Placeholder
-            deployerAddress: 'current-user' // Placeholder
-          });
-        }
-      }
+      // Convert registry format to DiscoveredContract format
+      const contracts: DiscoveredContract[] = result.contracts.map((contract: any) => ({
+        contractId: contract.id,
+        tokenContractId: contract.tokenContract,
+        companyName: contract.name,
+        tokenSymbol: contract.tokenSymbol,
+        deploymentDate: new Date().toISOString(), // Registry doesn't store dates
+        transactionHash: 'registry', // Placeholder
+        deployerAddress: 'current-user' // Placeholder
+      }));
 
-      console.log(`✅ Found ${validContracts.length} valid contracts out of ${result.contracts.length} total`);
+      console.log(`✅ Found ${contracts.length} contracts from registry`);
 
       return {
         success: true,
-        contracts: validContracts,
-        totalFound: validContracts.length,
+        contracts,
+        totalFound: contracts.length,
         walletAddress: 'current-user'
       };
     } else {
+      console.log(`⚠️ No contracts found in registry`);
       return {
         success: false,
         contracts: [],
@@ -232,7 +267,7 @@ export const getAllEmployerContracts = async (): Promise<ContractDiscoveryResult
     }
 
   } catch (error) {
-    console.error('❌ Failed to get employer contracts:', error);
+    console.error('❌ Failed to get contracts from registry:', error);
     return {
       success: false,
       contracts: [],

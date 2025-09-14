@@ -96,6 +96,12 @@ export const ContractDiscoveryModal: React.FC<ContractDiscoveryModalProps> = ({
       onClose();
       setSelectedContract(null);
       
+      // Force page reload to update all components
+      setTimeout(() => {
+        console.log('🔄 Reloading page to update contract info');
+        window.location.reload();
+      }, 500);
+      
     } catch (error) {
       console.error('Failed to select contract:', error);
       setError('Failed to select contract');
