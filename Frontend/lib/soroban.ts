@@ -180,19 +180,25 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         console.log('🎉 Rabet connected:', publicKey);
         
         // Get REAL transaction from backend
+        const requestData = {
+            userPublicKey: publicKey,
+            tokenName,
+            tokenSymbol
+        };
+        console.log('📤 Sending request to backend:', requestData);
+        
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/prepare-token-deploy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userPublicKey: publicKey,
-                tokenName,
-                tokenSymbol
-            })
+            body: JSON.stringify(requestData)
         });
+        
+        console.log('📥 Backend response status:', response.status, response.statusText);
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`Token deployment failed: ${errorData.error}`);
+            console.error("❌ Backend error response:", errorData);
+            throw new Error(`Token deployment failed: ${errorData.error || 'Unknown backend error'}`);
         }
         
         const result = await response.json();

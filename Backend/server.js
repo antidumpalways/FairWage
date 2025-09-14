@@ -192,6 +192,7 @@ app.get("/api/wasm-hash", (req, res) => {
 // ================================
 app.post("/api/prepare-token-deploy", async (req, res) => {
   try {
+    console.log("📨 Received token deployment request:", req.body);
     const { userPublicKey, tokenName, tokenSymbol } = req.body;
     console.log(
       "🚀 Preparing REAL token deployment for:",
@@ -226,6 +227,7 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
     });
     console.log("✅ SAC deployment operation created");
 
+    console.log("🔨 Building transaction...");
     const tx = new TransactionBuilder(sourceAccount, {
       fee: "1000000",
       networkPassphrase,
@@ -233,12 +235,16 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
       .addOperation(deployOp)
       .setTimeout(30)
       .build();
+    console.log("✅ Transaction built successfully");
 
     let preparedTx;
     try {
+      console.log("🔧 Preparing transaction with Soroban RPC...");
       preparedTx = await server.prepareTransaction(tx);
+      console.log("✅ Transaction prepared successfully");
     } catch (prepareError) {
       console.error("❌ Prepare failed:", prepareError);
+      console.error("❌ Prepare error details:", JSON.stringify(prepareError, null, 2));
       throw new Error(
         "Cannot submit unprepared Soroban transaction: " + prepareError.message,
       );
@@ -254,12 +260,14 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ REAL deployment preparation failed:", error);
+    console.error("❌ Error stack:", error.stack);
     res
       .status(500)
       .json({
         success: false,
-        error: error.message,
+        error: error.message || "Unknown error occurred",
         details: "Soroban deployment error",
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
   }
 });
