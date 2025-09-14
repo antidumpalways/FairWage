@@ -3,7 +3,7 @@ const cors = require("cors");
 const StellarSdk = require("@stellar/stellar-sdk");
 const { Keypair, TransactionBuilder, Networks, Asset, BASE_FEE } = StellarSdk;
 const crypto = require("crypto");
-const { discoverEmployeeContracts, addKnownContract } = require("./contract-discovery");
+const { discoverEmployeeContracts, addKnownContract, getKnownContracts } = require("./contract-discovery");
 const discoverContractsRouter = require('./routes/discoverContracts');
 
 const app = express();
@@ -269,6 +269,26 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
         details: "Soroban deployment error",
         stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
+  }
+});
+
+// ================================
+// Debug: View contract registry
+// ================================
+app.get("/api/debug/contract-registry", (req, res) => {
+  try {
+    const contracts = getKnownContracts();
+    res.json({
+      success: true,
+      contracts,
+      count: contracts.length,
+      message: "Contract registry retrieved"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
@@ -601,11 +621,19 @@ app.post("/api/submit-transaction", async (req, res) => {
       // Add to contract registry for employee discovery
       if (contractType === "fairwage") {
         try {
+          console.log("🔍 Adding contract to registry:", {
+            contractId,
+            companyName: req.body.companyName,
+            tokenSymbol: req.body.tokenSymbol,
+            tokenContract: req.body.tokenContractId || req.body.tokenContract,
+            requestBody: req.body
+          });
+          
           addKnownContract({
             id: contractId,
             name: req.body.companyName || "Unknown Company",
             tokenSymbol: req.body.tokenSymbol || "UNKNOWN",
-            tokenContract: req.body.tokenContractId || null,
+            tokenContract: req.body.tokenContractId || req.body.tokenContract || null,
             active: true
           });
           console.log("✅ Contract added to discovery registry:", contractId);
