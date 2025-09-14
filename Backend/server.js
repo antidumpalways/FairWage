@@ -3,7 +3,7 @@ const cors = require("cors");
 const StellarSdk = require("@stellar/stellar-sdk");
 const { Keypair, TransactionBuilder, Networks, Asset, BASE_FEE } = StellarSdk;
 const crypto = require("crypto");
-const { discoverEmployeeContracts, addKnownContract, getKnownContracts } = require("./contract-discovery");
+const { discoverEmployeeContracts, addKnownContract, getKnownContracts, addContractManually } = require("./contract-discovery");
 const discoverContractsRouter = require('./routes/discoverContracts');
 
 const app = express();
@@ -284,6 +284,156 @@ app.get("/api/debug/contract-registry", (req, res) => {
       count: contracts.length,
       message: "Contract registry retrieved"
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ================================
+// Debug: Test freeze employee directly
+// ================================
+app.post("/api/debug/test-freeze", async (req, res) => {
+  try {
+    const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
+    
+    console.log("🧪 Debug freeze test:", {
+      userPublicKey,
+      fairWageContractId,
+      employeeAddress
+    });
+
+    if (!userPublicKey || !fairWageContractId || !employeeAddress) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required parameters"
+      });
+    }
+
+    // Test 1: Load account
+    console.log("🔍 Test 1: Loading account...");
+    const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+    console.log("✅ Account loaded:", sourceAccount.accountId());
+
+    // Test 2: Check if employee exists
+    console.log("🔍 Test 2: Checking if employee exists...");
+    try {
+      const checkOp = StellarSdk.Operation.invokeContractFunction({
+        contract: fairWageContractId,
+        function: "get_employee_info",
+        args: [StellarSdk.Address.fromString(employeeAddress).toScVal()],
+      });
+
+      const checkTx = new StellarSdk.TransactionBuilder(sourceAccount, {
+        fee: "100000",
+        networkPassphrase,
+      })
+        .addOperation(checkOp)
+        .setTimeout(30)
+        .build();
+
+      const checkSimulation = await server.simulateTransaction(checkTx);
+      if (checkSimulation.error) {
+        console.log("❌ Employee not found or error:", checkSimulation.error.message);
+        return res.json({
+          success: false,
+          error: "Employee not found in contract",
+          details: checkSimulation.error.message
+        });
+      }
+      console.log("✅ Employee exists in contract");
+    } catch (error) {
+      console.log("❌ Error checking employee:", error.message);
+      return res.json({
+        success: false,
+        error: "Failed to check employee",
+        details: error.message
+      });
+    }
+
+    // Test 3: Try to prepare freeze transaction
+    console.log("🔍 Test 3: Preparing freeze transaction...");
+    try {
+      const freezeOp = StellarSdk.Operation.invokeContractFunction({
+        contract: fairWageContractId,
+        function: "freeze_employee",
+        args: [StellarSdk.Address.fromString(employeeAddress).toScVal()],
+      });
+
+      const freezeTx = new StellarSdk.TransactionBuilder(sourceAccount, {
+        fee: "100000",
+        networkPassphrase,
+      })
+        .addOperation(freezeOp)
+        .setTimeout(30)
+        .build();
+
+      const freezeSimulation = await server.simulateTransaction(freezeTx);
+      if (freezeSimulation.error) {
+        console.log("❌ Freeze simulation failed:", freezeSimulation.error.message);
+        return res.json({
+          success: false,
+          error: "Freeze simulation failed",
+          details: freezeSimulation.error.message
+        });
+      }
+      console.log("✅ Freeze simulation successful");
+
+      const preparedTx = await server.prepareTransaction(freezeTx);
+      console.log("✅ Freeze transaction prepared successfully");
+
+      res.json({
+        success: true,
+        message: "All tests passed - freeze should work",
+        simulationResult: freezeSimulation.result
+      });
+    } catch (error) {
+      console.log("❌ Error preparing freeze transaction:", error.message);
+      return res.json({
+        success: false,
+        error: "Failed to prepare freeze transaction",
+        details: error.message
+      });
+    }
+
+  } catch (error) {
+    console.error("❌ Debug test failed:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ================================
+// Debug: Manually add contract for testing
+// ================================
+app.post("/api/debug/add-contract", (req, res) => {
+  try {
+    const { contractId, companyName, tokenSymbol, tokenContract } = req.body;
+    
+    if (!contractId || !companyName) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required parameters: contractId, companyName"
+      });
+    }
+
+    const success = addContractManually(contractId, companyName, tokenSymbol || "UNKNOWN", tokenContract);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: `Contract ${companyName} (${contractId}) added to registry`
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to add contract to registry"
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -629,16 +779,26 @@ app.post("/api/submit-transaction", async (req, res) => {
             requestBody: req.body
           });
           
-          addKnownContract({
+          const contractData = {
             id: contractId,
             name: req.body.companyName || "Unknown Company",
             tokenSymbol: req.body.tokenSymbol || "UNKNOWN",
             tokenContract: req.body.tokenContractId || req.body.tokenContract || null,
             active: true
-          });
+          };
+          
+          console.log("📋 Contract data to add:", contractData);
+          addKnownContract(contractData);
           console.log("✅ Contract added to discovery registry:", contractId);
+          
+          // Verify it was added
+          const contracts = getKnownContracts();
+          console.log("🔍 Registry now contains", contracts.length, "contracts");
+          contracts.forEach(c => console.log(`   - ${c.name} (${c.id})`));
+          
         } catch (error) {
-          console.warn("⚠️ Failed to add contract to registry:", error.message);
+          console.error("❌ Failed to add contract to registry:", error.message);
+          console.error("❌ Error stack:", error.stack);
         }
       }
     }
@@ -1793,6 +1953,13 @@ app.post("/api/freeze-employee", async (req, res) => {
   try {
     const { userPublicKey, fairWageContractId, employeeAddress } = req.body;
 
+    console.log("🧊 Freeze employee request:", {
+      userPublicKey,
+      fairWageContractId,
+      employeeAddress,
+      requestBody: req.body
+    });
+
     if (!userPublicKey || !fairWageContractId || !employeeAddress) {
       return res
         .status(400)
@@ -1802,14 +1969,19 @@ app.post("/api/freeze-employee", async (req, res) => {
         });
     }
 
+    console.log("🔍 Loading source account...");
     const sourceAccount = await horizonServer.loadAccount(userPublicKey);
+    console.log("✅ Source account loaded:", sourceAccount.accountId());
 
+    console.log("🔍 Creating freeze_employee operation...");
     const op = StellarSdk.Operation.invokeContractFunction({
       contract: fairWageContractId,
       function: "freeze_employee",
       args: [StellarSdk.Address.fromString(employeeAddress).toScVal()],
     });
+    console.log("✅ Operation created");
 
+    console.log("🔍 Building transaction...");
     const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
       fee: "100000",
       networkPassphrase,
@@ -1817,8 +1989,11 @@ app.post("/api/freeze-employee", async (req, res) => {
       .addOperation(op)
       .setTimeout(30)
       .build();
+    console.log("✅ Transaction built");
 
+    console.log("🔍 Preparing transaction...");
     const preparedTx = await server.prepareTransaction(tx);
+    console.log("✅ Transaction prepared");
 
     res.json({
       success: true,

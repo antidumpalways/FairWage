@@ -12,8 +12,40 @@ let knownContracts = [
     tokenContract: "CC4XK6RHDU6FW23WVWBSDTJFTTYASCF342LHA2JDTC32RJHNJIOTBN7R",
     active: true
   }
-  // Additional contracts can be added here
+  // Additional contracts can be added here dynamically
 ];
+
+// Persistent storage file path
+const fs = require('fs');
+const path = require('path');
+const REGISTRY_FILE = path.join(__dirname, 'contract-registry.json');
+
+// Load contracts from file on startup
+function loadContractsFromFile() {
+  try {
+    if (fs.existsSync(REGISTRY_FILE)) {
+      const data = fs.readFileSync(REGISTRY_FILE, 'utf8');
+      const loadedContracts = JSON.parse(data);
+      knownContracts = loadedContracts;
+      console.log(`✅ Loaded ${knownContracts.length} contracts from registry file`);
+    }
+  } catch (error) {
+    console.warn('⚠️ Failed to load contract registry file:', error.message);
+  }
+}
+
+// Save contracts to file
+function saveContractsToFile() {
+  try {
+    fs.writeFileSync(REGISTRY_FILE, JSON.stringify(knownContracts, null, 2));
+    console.log(`✅ Saved ${knownContracts.length} contracts to registry file`);
+  } catch (error) {
+    console.error('❌ Failed to save contract registry file:', error.message);
+  }
+}
+
+// Load contracts on module initialization
+loadContractsFromFile();
 
 /**
  * Discover all contracts where an employee is registered
@@ -134,15 +166,18 @@ function addKnownContract(contractData) {
   if (existingIndex >= 0) {
     // Update existing contract
     knownContracts[existingIndex] = { ...knownContracts[existingIndex], ...contractData };
+    console.log(`🔄 Contract registry updated: ${contractData.name} (${contractData.id})`);
   } else {
     // Add new contract
     knownContracts.push({
       active: true,
       ...contractData
     });
+    console.log(`➕ Contract registry added: ${contractData.name} (${contractData.id})`);
   }
 
-  console.log(`✅ Contract registry updated: ${contractData.name} (${contractData.id})`);
+  // Save to file for persistence
+  saveContractsToFile();
 }
 
 /**
@@ -152,10 +187,32 @@ function getKnownContracts() {
   return knownContracts.filter(c => c.active);
 }
 
+/**
+ * Manually add a contract for testing (bypasses normal flow)
+ */
+function addContractManually(contractId, companyName, tokenSymbol, tokenContract) {
+  try {
+    addKnownContract({
+      id: contractId,
+      name: companyName,
+      tokenSymbol: tokenSymbol,
+      tokenContract: tokenContract,
+      active: true
+    });
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to add contract manually:', error.message);
+    return false;
+  }
+}
+
 module.exports = {
   discoverEmployeeContracts,
   checkEmployeeRegistration,
   getContractInfo,
   addKnownContract,
-  getKnownContracts
+  getKnownContracts,
+  addContractManually,
+  loadContractsFromFile,
+  saveContractsToFile
 };

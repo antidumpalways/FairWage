@@ -830,17 +830,28 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
 };
 
 export const freezeEmployee = async (fairWageContractId: string, employeeAddress: string): Promise<string> => {
+    console.log('🧊 Freeze employee called with:', {
+        fairWageContractId,
+        employeeAddress,
+        contractIdLength: fairWageContractId?.length,
+        addressLength: employeeAddress?.length
+    });
+
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
+    console.log('🔑 Connected wallet:', publicKey);
+
+    const requestBody = {
+        userPublicKey: publicKey,
+        fairWageContractId,
+        employeeAddress
+    };
+    console.log('📤 Sending request body:', requestBody);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/freeze-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            userPublicKey: publicKey,
-            fairWageContractId,
-            employeeAddress
-        })
+        body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {

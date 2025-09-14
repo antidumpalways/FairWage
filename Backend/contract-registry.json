@@ -1,0 +1,23 @@
+[
+  {
+    "id": "CDCSZPH46V3CL7HWMQO6JIZO5VKIZVG2LKOJ3WX2ZAUGVJ4RI5D43GPU",
+    "name": "Payko",
+    "tokenSymbol": "TBU",
+    "tokenContract": "CC4XK6RHDU6FW23WVWBSDTJFTTYASCF342LHA2JDTC32RJHNJIOTBN7R",
+    "active": true
+  },
+  {
+    "active": true,
+    "id": "CC44UURKD3SGZP6NIPTU7JIY3QANNOTUHW45N2RUOMDGZMBTQUQC6YES",
+    "name": "FairWage Company",
+    "tokenSymbol": "FAIRWAGE",
+    "tokenContract": "CCYEUDEIHQSAPOG34VICLHNBR2TNNRRTLM6JXYOG32IGJAUAQ4J4JSHV"
+  },
+  {
+    "active": true,
+    "id": "TEST123",
+    "name": "Test Company",
+    "tokenSymbol": "TEST",
+    "tokenContract": "TEST456"
+  }
+]
