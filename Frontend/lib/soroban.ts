@@ -1,7 +1,7 @@
 // File: frontend/lib/soroban.ts
 // Updated to use Rabet Wallet (NO npm package needed)
 
-// Declare Rabet and Freighter types
+// Declare Rabet types only
 declare global {
   interface Window {
     rabet?: {
@@ -11,11 +11,6 @@ declare global {
       isUnlocked(): Promise<boolean>;
       close(): Promise<void>;
       on(event: string, handler: Function): void;
-    };
-    freighterApi?: {
-      signTransaction(xdr: string, options: any): Promise<{ xdr: string; error?: string }>;
-      isConnected(): Promise<boolean>;
-      getPublicKey(): Promise<string>;
     };
   }
 }
@@ -257,30 +252,15 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         let signResult;
         let signingError = null;
         
-        // Method 1: Try Freighter first (better Soroban support)
-        if (window.freighterApi) {
+        // Use Rabet wallet only
+        if (window.rabet) {
             try {
-                console.log('🔄 Trying Freighter wallet (recommended for Soroban)...');
-                signResult = await window.freighterApi.signTransaction(result.transactionXdr, {
-                    network: 'testnet',
-                    accountToSign: publicKey
-                });
-                console.log('✅ Signed with Freighter wallet');
-            } catch (freighterError) {
-                console.log('⚠️ Freighter failed:', freighterError.message);
-                signingError = freighterError;
-            }
-        }
-        
-        // Method 2: Try Rabet if Freighter failed or not available
-        if (!signResult && window.rabet) {
-            try {
-                console.log('🔄 Trying Rabet wallet...');
+                console.log('🔄 Signing with Rabet wallet...');
                 signResult = await window.rabet.sign(result.transactionXdr, 'testnet');
                 console.log('✅ Signed with Rabet wallet');
                 signingError = null;
             } catch (rabetError) {
-                console.log('⚠️ Rabet testnet (lowercase) failed:', rabetError.message);
+                console.log('⚠️ Rabet testnet failed:', rabetError.message);
                 signingError = rabetError;
                 
                 // Try with 'TESTNET' (uppercase)
@@ -292,7 +272,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                     console.log('⚠️ TESTNET (uppercase) failed:', error2.message);
                     signingError = error2;
                     
-                    // Method 3: Try without network parameter
+                    // Try without network parameter
                     try {
                         signResult = await window.rabet.sign(result.transactionXdr);
                         console.log('✅ Signed without network parameter');
@@ -300,48 +280,11 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                     } catch (error3) {
                         console.log('⚠️ No network parameter failed:', error3.message);
                         signingError = error3;
-                        
-                        // Method 4: Try with 'public' network
-                        try {
-                            signResult = await window.rabet.sign(result.transactionXdr, 'public');
-                            console.log('✅ Signed with public network');
-                            signingError = null;
-                        } catch (error4) {
-                            console.log('⚠️ Public network failed:', error4.message);
-                            signingError = error4;
-                            
-                            // Method 5: Try with 'futurenet'
-                            try {
-                                signResult = await window.rabet.sign(result.transactionXdr, 'futurenet');
-                                console.log('✅ Signed with futurenet');
-                                signingError = null;
-                            } catch (error5) {
-                                console.log('⚠️ Futurenet failed:', error5.message);
-                                signingError = error5;
-                                
-                                // Method 6: Try with Freighter wallet as fallback
-                                if (window.freighterApi) {
-                                    try {
-                                        console.log('🔄 Trying Freighter wallet as fallback...');
-                                        signResult = await window.freighterApi.signTransaction(result.transactionXdr, {
-                                            network: 'testnet',
-                                            accountToSign: publicKey
-                                        });
-                                        console.log('✅ Signed with Freighter wallet');
-                                        signingError = null;
-                                    } catch (freighterError) {
-                                        console.log('⚠️ Freighter also failed:', freighterError.message);
-                                        signingError = freighterError;
-                                        throw new Error(`All signing methods failed. Rabet error: ${error5.message}, Freighter error: ${freighterError.message}`);
-                                    }
-                                } else {
-                                    throw new Error(`All signing methods failed. Rabet error: ${error5.message}. Please try installing Freighter wallet as alternative.`);
-                                }
-                            }
-                        }
                     }
                 }
             }
+        } else {
+            signingError = new Error('Rabet wallet not found');
         }
         
         // Final check - if no signing method worked
