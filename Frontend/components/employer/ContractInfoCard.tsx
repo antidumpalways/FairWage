@@ -72,7 +72,7 @@ const ContractInfoCard: React.FC = () => {
   }, [isWalletConnected, publicKey]);
 
   return (
-    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
+    <Card className="bg-gradient-to-br from-white to-slate-50/80 border-2 border-slate-200/60 hover:border-slate-300/80 hover:shadow-lg transition-all duration-300 shadow-md">
       <CardHeader className="pb-4">
         <CardTitle className="text-slate-900 text-xl font-semibold">Contract Information</CardTitle>
       </CardHeader>
@@ -111,9 +111,9 @@ const ContractInfoCard: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between py-2">
-              <span className="text-slate-400 text-sm">FairWage ID:</span>
+              <span className="text-slate-600 text-sm">FairWage ID:</span>
               <div className="flex items-center space-x-2">
-                <span className="text-white text-sm font-mono">{formatAddress(contractInfo.fairWageContractId)}</span>
+                <span className="text-slate-900 text-sm font-mono">{formatAddress(contractInfo.fairWageContractId)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -126,8 +126,8 @@ const ContractInfoCard: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between py-2">
-              <span className="text-slate-400 text-sm">Network:</span>
-              <span className="text-white text-sm font-semibold">{contractInfo.network}</span>
+              <span className="text-slate-600 text-sm">Network:</span>
+              <span className="text-slate-900 text-sm font-semibold">{contractInfo.network}</span>
             </div>
           </>
         ) : (

@@ -709,42 +709,48 @@ const EmployeeManagementCard: React.FC = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Employees Card */}
-        <Card className="bg-blue-50 border border-blue-200 hover:bg-blue-100/50 transition-all duration-300 shadow-soft">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/80 border-2 border-blue-200/60 hover:border-blue-300/80 hover:shadow-lg transition-all duration-300 shadow-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600">Total Employees</p>
-                <p className="text-2xl font-bold text-blue-700">{employees.length}</p>
+                <p className="text-sm text-slate-700 font-medium">Total Employees</p>
+                <p className="text-2xl font-bold text-blue-800">{employees.length}</p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                <Users className="w-6 h-6 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Active Employees Card */}
-        <Card className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100/50 transition-all duration-300 shadow-soft">
+        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/80 border-2 border-emerald-200/60 hover:border-emerald-300/80 hover:shadow-lg transition-all duration-300 shadow-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600">Active Employees</p>
-                <p className="text-2xl font-bold text-emerald-700">{employees.filter((e) => e.active).length}</p>
+                <p className="text-sm text-slate-700 font-medium">Active Employees</p>
+                <p className="text-2xl font-bold text-emerald-800">{employees.filter((e) => e.active).length}</p>
               </div>
-              <Clock className="w-8 h-8 text-emerald-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-md">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Contract Balance Card */}
-        <Card className="bg-purple-50 border border-purple-200 hover:bg-purple-100/50 transition-all duration-300 shadow-soft">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100/80 border-2 border-purple-200/60 hover:border-purple-300/80 hover:shadow-lg transition-all duration-300 shadow-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600">Contract Balance</p>
-                <p className="text-2xl font-bold text-purple-700">
+                <p className="text-sm text-slate-700 font-medium">Contract Balance</p>
+                <p className="text-2xl font-bold text-purple-800">
                   {contractBalance !== null ? formatTokenAmount(contractBalance) : "Loading..."}
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-purple-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -904,7 +910,7 @@ const EmployeeManagementCard: React.FC = () => {
             </div>
           ) : (
               employees.map((employee) => (
-                <div key={employee.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-soft">
+                <div key={employee.id} className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-xl border-2 border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-slate-300/80 backdrop-blur-sm">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
                   <div>
@@ -976,22 +982,22 @@ const EmployeeManagementCard: React.FC = () => {
 
                   {/* Update Wage Rate Section */}
                   {updatingEmployeeId === employee.id && (
-                    <div className="bg-slate-600 p-3 rounded-lg mb-3">
+                    <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-4 rounded-lg mb-3 border border-slate-200 shadow-sm">
                       <div className="mb-3">
-                        <label className="block text-sm font-medium text-gray-300 mb-1">New Wage Rate</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">New Wage Rate</label>
                         <Input
                           type="number"
                           step="0.001"
                           placeholder="Enter new wage rate"
                           value={newWageRate}
                           onChange={(e) => setNewWageRate(e.target.value)}
-                          className="bg-slate-500 border-slate-400 text-white"
+                          className="bg-white border-slate-300 text-slate-900"
                         />
-                        <div className="bg-yellow-900/30 border border-yellow-400/30 rounded p-2 mt-2">
-                          <p className="text-xs text-yellow-300">
+                        <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-2 shadow-sm">
+                          <p className="text-xs text-amber-800">
                             ⚠️ <strong>Pay period cannot be changed after creation</strong>
                           </p>
-                          <p className="text-xs text-yellow-400 mt-1">
+                          <p className="text-xs text-amber-700 mt-1">
                             Current period: <strong>{employee.wagePeriod}</strong>. To change period, remove and re-add the employee.
                           </p>
                         </div>
@@ -1020,18 +1026,18 @@ const EmployeeManagementCard: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm p-4 bg-gradient-to-r from-slate-50 to-slate-100/80 rounded-lg border border-slate-200/60 shadow-sm">
                     <div>
-                      <p className="text-gray-400">Wage Rate</p>
-                      <p className="text-white">{formatWageRate(employee.wageRate)} / {employee.wagePeriod}</p>
+                      <p className="text-slate-600 font-medium">Wage Rate</p>
+                      <p className="text-slate-900 font-mono">{formatWageRate(employee.wageRate)} / {employee.wagePeriod}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">Accrued Balance</p>
-                      <p className="text-green-400 font-bold">{formatTokenAmount(employee.accruedWages || 0)}</p>
+                      <p className="text-slate-600 font-medium">Accrued Balance</p>
+                      <p className="text-emerald-700 font-bold">{formatTokenAmount(employee.accruedWages || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">Status</p>
-                      <Badge variant={employee.active ? "default" : "destructive"}>
+                      <p className="text-slate-600 font-medium">Status</p>
+                      <Badge variant={employee.active ? "default" : "destructive"} className="shadow-sm">
                         {employee.active ? "🟢 Active" : "🔴 Frozen"}
                       </Badge>
                     </div>
