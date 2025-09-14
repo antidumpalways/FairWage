@@ -156,38 +156,38 @@ export default function HomePage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <Card className="card-elevated-lg card-hover-subtle bg-white">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-soft">
+          <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+            <CardContent className="p-8 text-center bg-gradient-to-b from-white to-slate-50/30 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold font-jakarta text-slate-900 mb-4">Real-Time Accrual</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Wages accumulate by the second with blockchain precision, providing employees immediate access to earned compensation
+              <h3 className="text-2xl font-bold font-jakarta text-slate-900 mb-4 tracking-wide">Real-Time Accrual</h3>
+              <p className="text-slate-700 leading-relaxed font-medium">
+                Wages accumulate by the second with blockchain precision and transparency
               </p>
             </CardContent>
           </Card>
 
-          <Card className="card-elevated-lg card-hover-subtle bg-white">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-soft">
+          <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+            <CardContent className="p-8 text-center bg-gradient-to-b from-white to-slate-50/30 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <Clock className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold font-jakarta text-slate-900 mb-4">Instant Withdrawals</h3>
-              <p className="text-slate-600 leading-relaxed">
-                24/7 access to earned wages without waiting periods, improving employee financial wellness and satisfaction
+              <h3 className="text-2xl font-bold font-jakarta text-slate-900 mb-4 tracking-wide">Instant Withdrawals</h3>
+              <p className="text-slate-700 leading-relaxed font-medium">
+                Access earned wages 24/7 without delays or waiting periods
               </p>
             </CardContent>
           </Card>
 
-          <Card className="card-elevated-lg card-hover-subtle bg-white">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-soft">
+          <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+            <CardContent className="p-8 text-center bg-gradient-to-b from-white to-slate-50/30 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold font-jakarta text-slate-900 mb-4">Stellar Security</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Enterprise-grade security with immutable blockchain records and transparent smart contract operations
+              <h3 className="text-2xl font-bold font-jakarta text-slate-900 mb-4 tracking-wide">Stellar Security</h3>
+              <p className="text-slate-700 leading-relaxed font-medium">
+                Enterprise-grade security with immutable blockchain records
               </p>
             </CardContent>
           </Card>
