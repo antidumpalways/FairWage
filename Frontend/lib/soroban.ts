@@ -738,6 +738,12 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
+    console.log('🗑️ Remove employee called with:', {
+        fairWageContractId,
+        employeeAddress,
+        userPublicKey: publicKey
+    });
+
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/remove-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -750,14 +756,17 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
 
     if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Remove employee API error:', errorData);
         throw new Error(`Failed to remove employee: ${errorData.error}`);
     }
 
     const result = await response.json();
+    console.log('✅ Remove employee transaction prepared:', result);
 
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
+    console.log('✅ Transaction signed, submitting...');
     const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -766,10 +775,18 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
 
     if (!submitResponse.ok) {
         const errorData = await submitResponse.json();
+        console.error('❌ Submit transaction error:', errorData);
         throw new Error(`Submit failed: ${errorData.error}`);
     }
 
     const submitResult = await submitResponse.json();
+    console.log('✅ Transaction submitted successfully:', submitResult);
+    
+    if (!submitResult.transactionHash) {
+        console.error('❌ No transaction hash in response:', submitResult);
+        throw new Error('Transaction submitted but no hash returned');
+    }
+    
     return submitResult.transactionHash;
 };
 

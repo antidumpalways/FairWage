@@ -394,9 +394,9 @@ const EmployeeManagementCard: React.FC = () => {
         if (!fairWageContractId) throw new Error("FairWage contract not found. Please complete setup first.");
 
         try {
-          await removeEmployee(fairWageContractId, employee.address);
+          const transactionHash = await removeEmployee(fairWageContractId, employee.address);
           setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
-          alert(`Employee ${employee.name} removed successfully from blockchain!`);
+          alert(`Employee ${employee.name} removed successfully from blockchain!\nTransaction: ${transactionHash}`);
         } catch (removeError: any) {
           if (removeError.message?.includes("unpaid wages")) {
             const payAll = confirm(
@@ -404,14 +404,27 @@ const EmployeeManagementCard: React.FC = () => {
             );
             if (payAll) {
               await payAllWages(fairWageContractId, employee.address);
-              await removeEmployee(fairWageContractId, employee.address);
+              const transactionHash = await removeEmployee(fairWageContractId, employee.address);
               setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
-              alert(`All wages paid and ${employee.name} removed successfully from blockchain!`);
+              alert(`All wages paid and ${employee.name} removed successfully from blockchain!\nTransaction: ${transactionHash}`);
             } else {
               alert("Employee removal cancelled. Please pay outstanding wages first.");
             }
           } else {
-            throw removeError;
+            // Check if it's a network error but transaction might have succeeded
+            if (removeError.message?.includes("fetch") || removeError.message?.includes("network")) {
+              console.warn("⚠️ Network error during employee removal, but transaction may have succeeded");
+              // Ask user to refresh and check if employee was actually removed
+              const refresh = confirm(
+                `Network error occurred, but the removal might have succeeded. Would you like to refresh the employee list to check?`
+              );
+              if (refresh) {
+                await syncEmployeesFromContract();
+                alert("Employee list refreshed. Please check if the employee was removed.");
+              }
+            } else {
+              throw removeError;
+            }
           }
         }
       } catch (error: any) {
