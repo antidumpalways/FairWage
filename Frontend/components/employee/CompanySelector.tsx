@@ -158,43 +158,43 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
   }
 
   return (
-    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+    <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-slate-100/80 to-slate-50 border-b-2 border-slate-200 rounded-t-xl">
+        <CardTitle className="text-slate-900 flex items-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-4 shadow-lg">
             <Building2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-2xl font-bold">Select Your Employer</span>
-            <p className="text-slate-400 text-sm font-normal mt-1">
+            <span className="text-2xl font-bold tracking-wide">Select Your Employer</span>
+            <p className="text-slate-600 text-sm font-medium mt-1">
               Choose which company's payroll contract you want to access
             </p>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="bg-gradient-to-b from-white to-slate-50/30 rounded-b-xl">
         <div className="space-y-6">
           <div>
-            <label className="text-sm text-slate-300 mb-3 block font-semibold">
+            <label className="text-sm text-slate-700 mb-3 block font-semibold">
               Available Employers ({contracts.length})
             </label>
             <Select
               value={selectedContract?.contractId || ""}
               onValueChange={handleContractSelect}
             >
-              <SelectTrigger className="w-full bg-slate-700/50 border-slate-600 text-white hover:border-slate-500 transition-all duration-300 py-4">
+              <SelectTrigger className="w-full bg-white border-2 border-slate-300 text-slate-900 hover:border-slate-400 transition-all duration-300 py-4 shadow-sm">
                 <SelectValue placeholder="Choose an employer..." />
               </SelectTrigger>
-              <SelectContent className="bg-slate-700/95 border-slate-600 backdrop-blur-xl">
+              <SelectContent className="bg-white border-2 border-slate-300 backdrop-blur-xl shadow-xl">
                 {contracts.map((contract) => (
                   <SelectItem 
                     key={contract.contractId} 
                     value={contract.contractId}
-                    className="text-white hover:bg-slate-600/50 hover:text-white transition-all duration-200 cursor-pointer"
+                    className="text-slate-900 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 cursor-pointer"
                   >
                     <div className="flex items-center justify-between w-full py-2">
                       <span className="font-bold text-lg">{contract.companyName}</span>
-                      <span className="text-sm text-slate-300 ml-2 font-semibold px-3 py-1 bg-slate-600/50 rounded-full">
+                      <span className="text-sm text-slate-600 ml-2 font-semibold px-3 py-1 bg-slate-200 rounded-full">
                         {contract.tokenSymbol}
                       </span>
                     </div>
@@ -205,44 +205,44 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
           </div>
 
           {selectedContract && (
-            <div className="bg-slate-700/50 p-6 rounded-xl border border-slate-600">
-              <div className="text-white font-bold mb-4 flex items-center">
-                <span className="text-emerald-400 mr-2">✅</span>
-                <span className="text-gradient-purple text-lg">Selected: {selectedContract.companyName}</span>
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50/80 p-6 rounded-xl border-2 border-emerald-200/60 shadow-lg">
+              <div className="text-slate-900 font-bold mb-4 flex items-center">
+                <span className="text-emerald-600 mr-2">✅</span>
+                <span className="text-emerald-800 text-lg">Selected: {selectedContract.companyName}</span>
               </div>
               <div className="grid grid-cols-2 gap-6 text-sm">
                 <div className="space-y-2">
-                  <div className="text-purple-300 font-medium">💎 Token Symbol</div>
-                  <div className="text-white font-bold text-lg bg-purple-500/20 px-3 py-2 rounded-lg">
+                  <div className="text-purple-700 font-medium">💎 Token Symbol</div>
+                  <div className="text-slate-900 font-bold text-lg bg-purple-100 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
                     {selectedContract.tokenSymbol}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-blue-300 font-medium">🌐 Network</div>
-                  <div className="text-white font-bold text-lg bg-blue-500/20 px-3 py-2 rounded-lg capitalize">
+                  <div className="text-blue-700 font-medium">🌐 Network</div>
+                  <div className="text-slate-900 font-bold text-lg bg-blue-100 px-3 py-2 rounded-lg border border-blue-200 shadow-sm capitalize">
                     {selectedContract.network || 'testnet'}
                   </div>
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-                <div className="text-gray-300 text-sm font-medium">📋 Contract ID</div>
-                <div className="text-purple-200 text-sm font-mono bg-slate-800/50 px-3 py-2 rounded-lg border border-purple-500/20">
+                <div className="text-slate-700 text-sm font-medium">📋 Contract ID</div>
+                <div className="text-slate-900 text-sm font-mono bg-slate-100 px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                   {selectedContract.contractId.slice(0, 8)}...{selectedContract.contractId.slice(-6)}
                 </div>
               </div>
             </div>
           )}
 
-          <div className="flex justify-between items-center text-sm text-gray-300 pt-4 border-t border-purple-500/20">
+          <div className="flex justify-between items-center text-sm text-slate-600 pt-4 border-t border-slate-200">
             <span className="flex items-center">
-              <span className="text-green-400 mr-2">🕐</span>
+              <span className="text-green-600 mr-2">🕐</span>
               Last updated: {new Date().toLocaleTimeString()}
             </span>
             <Button 
               onClick={discoverContracts}
               variant="ghost" 
               size="sm"
-              className="text-slate-400 hover:text-white hover:bg-slate-600/50 px-4 py-2 rounded-lg transition-all duration-300 font-semibold"
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-4 py-2 rounded-lg transition-all duration-300 font-semibold"
             >
               🔄 Refresh
             </Button>

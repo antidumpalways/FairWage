@@ -81,19 +81,19 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ selectedContract }) => {
   }, [publicKey, isWalletConnected, selectedContract]);
 
   return (
-    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
-      <CardHeader>
+    <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-slate-100/80 to-slate-50 border-b-2 border-slate-200 rounded-t-xl">
         <CardTitle className="text-slate-900 flex items-center justify-between">
           <span className="flex items-center">
-            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-soft">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mr-4 shadow-lg">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold">Current Balance</span>
+            <span className="text-xl font-bold tracking-wide">Current Balance</span>
           </span>
           <TrendingUp className="w-6 h-6 text-blue-600" />
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="bg-gradient-to-b from-white to-slate-50/30 rounded-b-xl">
         <div className="space-y-6">
           <div>
             {isLoading ? (
@@ -109,23 +109,23 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ selectedContract }) => {
           
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-600 font-medium">Wage Rate:</span>
+              <span className="text-slate-700 font-medium">Wage Rate:</span>
               <span className="text-slate-900 font-semibold">0.001 tokens/second</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-400 font-medium">Status:</span>
+              <span className="text-slate-700 font-medium">Status:</span>
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></div>
-                <span className="text-blue-400 font-semibold">
+                <div className="w-3 h-3 bg-blue-500 rounded-full mr-3 animate-pulse"></div>
+                <span className="text-blue-600 font-semibold">
                   {isWalletConnected ? 'Connected' : 'Not Connected'}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
-            <div className="text-sm text-slate-400 mb-2 font-medium">Balance updates every 10 seconds</div>
-            <div className="text-sm text-slate-300">
+          <div className="bg-gradient-to-r from-slate-100/60 to-blue-50/40 p-4 rounded-xl border-2 border-slate-300/60 shadow-lg">
+            <div className="text-sm text-slate-700 mb-2 font-medium">Balance updates every 10 seconds</div>
+            <div className="text-sm text-slate-600">
               {isWalletConnected 
                 ? 'Real-time balance from Stellar blockchain'
                 : 'Connect wallet to access balance'

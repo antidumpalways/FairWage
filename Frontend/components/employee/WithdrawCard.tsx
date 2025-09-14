@@ -136,19 +136,19 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   }, [isWalletConnected, publicKey, selectedContract]);
 
   return (
-    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
-      <CardHeader>
+    <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-slate-100/80 to-slate-50 border-b-2 border-slate-200 rounded-t-xl">
         <CardTitle className="text-slate-900 flex items-center">
-          <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center mr-4 shadow-soft">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center mr-4 shadow-lg">
             <ArrowUpCircle className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-xl font-bold">Withdraw Wages</span>
-            <p className="text-slate-600 text-sm font-normal mt-1">Access your earned wages instantly with secure blockchain transactions</p>
+            <span className="text-xl font-bold tracking-wide">Withdraw Wages</span>
+            <p className="text-slate-600 text-sm font-medium mt-1">Access your earned wages instantly with secure blockchain transactions</p>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 bg-gradient-to-b from-white to-slate-50/30 rounded-b-xl">
         <div className="space-y-6">
           {/* Withdrawal Mode Selection */}
           <div className="flex gap-4 mb-6">
@@ -207,19 +207,19 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
             </div>
           )}
 
-          <div className="glass-card bg-gradient-to-br from-slate-700/30 to-slate-800/30 p-4 rounded-xl border border-slate-600/30">
+          <div className="bg-gradient-to-r from-slate-100/60 to-emerald-50/40 p-4 rounded-xl border-2 border-slate-300/60 shadow-lg">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-gray-300 font-medium">💎 Available Balance:</span>
-              <span className="text-emerald-400 font-bold text-lg">
+              <span className="text-slate-700 font-medium">💎 Available Balance:</span>
+              <span className="text-emerald-700 font-bold text-lg">
                 {isLoadingBalance ? <LoadingSpinner size="sm" className="inline" /> : formatBigintTokens(availableBalance)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-300 font-medium">⚡ Estimated Gas Fee:</span>
-              <span className="text-blue-400 font-semibold">~0.001 tokens</span>
+              <span className="text-slate-700 font-medium">⚡ Estimated Gas Fee:</span>
+              <span className="text-blue-700 font-semibold">~0.001 tokens</span>
             </div>
-            {!isWalletConnected && <div className="text-yellow-400 text-sm mt-3 p-2 bg-yellow-400/10 rounded-lg border border-yellow-400/20">🔗 Please connect your wallet to view balance and withdraw</div>}
-            {errorMsg && <div className="text-red-400 text-sm mt-3 p-2 bg-red-400/10 rounded-lg border border-red-400/20">⚠️ {errorMsg}</div>}
+            {!isWalletConnected && <div className="text-amber-800 text-sm mt-3 p-2 bg-amber-50 rounded-lg border border-amber-200">🔗 Please connect your wallet to view balance and withdraw</div>}
+            {errorMsg && <div className="text-red-800 text-sm mt-3 p-2 bg-red-50 rounded-lg border border-red-200">⚠️ {errorMsg}</div>}
           </div>
 
           <Button
