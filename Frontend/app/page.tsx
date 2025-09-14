@@ -133,15 +133,15 @@ export default function HomePage() {
       {/* Trust Bar */}
       <div className="bg-slate-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-slate-500 text-sm mb-8">Trusted by forward-thinking companies worldwide</p>
-          <div className="flex justify-center items-center space-x-8 opacity-60">
-            <div className="text-slate-400 font-semibold">STELLAR</div>
-            <div className="w-px h-6 bg-slate-300"></div>
-            <div className="text-slate-400 font-semibold">BLOCKCHAIN</div>
-            <div className="w-px h-6 bg-slate-300"></div>
-            <div className="text-slate-400 font-semibold">ENTERPRISE</div>
-            <div className="w-px h-6 bg-slate-300"></div>
-            <div className="text-slate-400 font-semibold">SECURE</div>
+          <p className="text-center text-slate-700 text-base font-medium mb-8">Trusted by forward-thinking companies worldwide</p>
+          <div className="flex justify-center items-center space-x-8">
+            <div className="text-slate-600 font-bold text-sm tracking-wider">STELLAR</div>
+            <div className="w-px h-6 bg-slate-400"></div>
+            <div className="text-slate-600 font-bold text-sm tracking-wider">BLOCKCHAIN</div>
+            <div className="w-px h-6 bg-slate-400"></div>
+            <div className="text-slate-600 font-bold text-sm tracking-wider">ENTERPRISE</div>
+            <div className="w-px h-6 bg-slate-400"></div>
+            <div className="text-slate-600 font-bold text-sm tracking-wider">SECURE</div>
           </div>
         </div>
       </div>
