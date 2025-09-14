@@ -19,5 +19,12 @@
     "name": "Biarlah",
     "tokenSymbol": "COB",
     "tokenContract": null
+  },
+  {
+    "active": true,
+    "id": "CC7NKQHVTI25C3CFUCGAJTRUJGGWAGK2RIE6ATVBQAKXKY5TS7A6VBL4",
+    "name": "TechCorp",
+    "tokenSymbol": "TCT",
+    "tokenContract": null
   }
 ]

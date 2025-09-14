@@ -411,7 +411,8 @@ export const deployFairWageContract = async (tokenContractId: string, companyNam
                 signedTransactionXdr: signResult.xdr,
                 contractType: 'fairwage',
                 companyName: companyName,
-                tokenSymbol: tokenSymbol
+                tokenSymbol: tokenSymbol,
+                tokenContractId: tokenContractId
             })
         });
         
