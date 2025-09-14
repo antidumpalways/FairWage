@@ -67,6 +67,12 @@ const ContractInfoCard: React.FC = () => {
         }
         
         console.log('🔍 Loading contract info from localStorage...');
+        console.log('🔍 Current localStorage values:', {
+          fairWageContractId: localStorage.getItem('fairWageContractId'),
+          tokenContractId: localStorage.getItem('tokenContractId'),
+          companyName: localStorage.getItem('companyName'),
+          tokenSymbol: localStorage.getItem('tokenSymbol')
+        });
         
         // Load from localStorage
         const savedTokenId = localStorage.getItem('tokenContractId');

@@ -73,7 +73,9 @@ const EmployeeManagementCard: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('🔄 EmployeeManagementCard useEffect triggered:', { isWalletConnected, publicKey });
     if (isWalletConnected && publicKey) {
+      console.log('📋 Loading employees from localStorage and syncing...');
       // Load employees from localStorage first to preserve names, then sync with blockchain
       loadEmployeesFromStorage();
       setTimeout(() => void syncEmployeesFromContract(), 100); // Small delay to let localStorage load first
