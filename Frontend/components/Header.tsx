@@ -64,7 +64,7 @@ const Header: React.FC = () => {
               <span className="text-2xl font-bold font-jakarta">
                 Fair<span className="text-brand-600">Wage</span>
               </span>
-              <span className="text-xs text-slate-500 -mt-1">Powered by <span className="font-bold">STELLAR</span></span>
+              <span className="text-xs text-slate-500 -mt-1">Powered by <span className="font-bold">Stellar</span></span>
             </div>
           </Link>
           
