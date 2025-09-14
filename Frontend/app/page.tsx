@@ -71,7 +71,7 @@ export default function HomePage() {
                   <span className="text-slate-600 font-medium">Instant Settlements</span>
                 </div>
                 <div className="flex items-center">
-                  <img src="/stellar-logo.png" alt="Stellar" className="w-8 h-3 mr-3" />
+                  <img src="/stellar-logo.png" alt="Stellar" className="w-5 h-5 mr-2" />
                   <span className="text-slate-600 font-medium">Powered by Stellar</span>
                 </div>
               </div>
