@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/contexts/WalletContext';
+import DeployNewContractModal from './DeployNewContractModal';
 
 interface CompanyContract {
   id: string;
@@ -20,7 +21,31 @@ interface CompanyContract {
 const CompanyFundsCard: React.FC = () => {
   const [companies, setCompanies] = useState<CompanyContract[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { publicKey, isWalletConnected } = useWallet();
+
+  const handleDeployContract = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleDeploySuccess = (tokenContractId: string, fairWageContractId: string, companyName: string, tokenSymbol: string) => {
+    // Add new contract to the list
+    const newContract: CompanyContract = {
+      id: fairWageContractId,
+      name: companyName,
+      tokenSymbol: tokenSymbol,
+      totalFunds: 0,
+      employeeCount: 0,
+      contractId: fairWageContractId,
+      isActive: true
+    };
+    
+    setCompanies(prev => [...prev, newContract]);
+    setIsModalOpen(false);
+    
+    // Show success message
+    alert(`New contract deployed successfully!\nCompany: ${companyName}\nContract ID: ${fairWageContractId}`);
+  };
 
   // Load real company data from localStorage
   useEffect(() => {
@@ -105,12 +130,22 @@ const CompanyFundsCard: React.FC = () => {
           <p className="text-sm text-slate-700 mb-6 leading-relaxed font-medium">
             Deploy additional payroll contracts for multiple business entities or departments
           </p>
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-blue-500/30 rounded-xl">
+          <Button 
+            onClick={handleDeployContract}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-blue-500/30 rounded-xl"
+          >
             <Building2 className="w-5 h-5 mr-3" />
             Deploy Contract
           </Button>
         </CardContent>
       </Card>
+
+      {/* Deploy New Contract Modal */}
+      <DeployNewContractModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleDeploySuccess}
+      />
     </div>
   );
 };
