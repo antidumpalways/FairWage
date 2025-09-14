@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Proxy request to backend server
-    const backendResponse = await fetch('http://localhost:3001/api/partial-withdraw', {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/partial-withdraw`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

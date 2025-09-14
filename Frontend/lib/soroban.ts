@@ -127,7 +127,7 @@ export const healthCheck = async (): Promise<{ success: boolean; message?: strin
         }
         
         // Check backend API health - Use API proxy
-        const response = await fetch('/api/health', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/health`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         console.log('🎉 Rabet connected:', publicKey);
         
         // Get REAL transaction from backend
-        const response = await fetch('/api/prepare-token-deploy', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/prepare-token-deploy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -206,7 +206,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         console.log('✅ Transaction signed successfully');
         
         // Submit the signed transaction
-        const submitResponse = await fetch('/api/submit-transaction', {
+        const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -254,7 +254,7 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
         console.log('🎉 Rabet connected:', publicKey);
         
         // Use backend API for FairWage deployment
-        const response = await fetch('/api/prepare-fairwage-deploy', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/prepare-fairwage-deploy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -280,7 +280,7 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
         console.log('✅ FairWage transaction signed successfully');
         
         // Submit the signed transaction
-        const submitResponse = await fetch('/api/submit-transaction', {
+        const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -325,7 +325,7 @@ export const initializeFairWageContract = async (fairWageContractId: string, tok
         console.log('🎉 Rabet connected:', publicKey);
         
         // Prepare initialization transaction
-        const response = await fetch('/api/prepare-fairwage-initialize', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/prepare-fairwage-initialize`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -351,7 +351,7 @@ export const initializeFairWageContract = async (fairWageContractId: string, tok
         console.log('✅ Initialization transaction signed successfully');
         
         // Submit the signed transaction
-        const submitResponse = await fetch('/api/submit-transaction', {
+        const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -395,7 +395,7 @@ export const getCurrentContractId = async (): Promise<string | null> => {
         if (contractId) return contractId;
         
         // Try to get from backend if not in localStorage
-        const response = await fetch('/api/get-both-contract-ids');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-both-contract-ids`);
         if (response.ok) {
             const data = await response.json();
             if (data.fairWageContractId) {
@@ -431,7 +431,7 @@ export const addEmployee = async (
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/add-employee', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/add-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -454,7 +454,7 @@ export const addEmployee = async (
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -477,7 +477,7 @@ export const payAllWages = async (
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/pay-all-wages', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/pay-all-wages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -497,7 +497,7 @@ export const payAllWages = async (
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -521,7 +521,7 @@ export const initializeContract = initializeFairWageContract;
 // Missing functions for EmployeeManagementCard compatibility
 export const getEmployeeInfo = async (fairWageContractId: string, employeeAddress: string): Promise<any> => {
     try {
-        const response = await fetch('/api/get-employee-info', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-employee-info`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fairWageContractId, employeeAddress })
@@ -558,7 +558,7 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
     const fairWageContractId = contractId || localStorage.getItem('fairWageContractId');
     if (!fairWageContractId) throw new Error('Contract not found. Please provide a contract ID.');
 
-    const response = await fetch('/api/pay-employee', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/pay-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -593,7 +593,7 @@ export const withdrawEmployeeFunds = async (contractId?: string): Promise<string
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -612,7 +612,7 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/remove-employee', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/remove-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -632,7 +632,7 @@ export const removeEmployee = async (fairWageContractId: string, employeeAddress
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -651,7 +651,7 @@ export const freezeEmployee = async (fairWageContractId: string, employeeAddress
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/freeze-employee', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/freeze-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -671,7 +671,7 @@ export const freezeEmployee = async (fairWageContractId: string, employeeAddress
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -690,7 +690,7 @@ export const activateEmployee = async (fairWageContractId: string, employeeAddre
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/activate-employee', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/activate-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -710,7 +710,7 @@ export const activateEmployee = async (fairWageContractId: string, employeeAddre
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -729,7 +729,7 @@ export const updateWageRate = async (fairWageContractId: string, employeeAddress
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/update-wage-rate', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/update-wage-rate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -750,7 +750,7 @@ export const updateWageRate = async (fairWageContractId: string, employeeAddress
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -773,7 +773,7 @@ export const fundContract = async (fairWageContractId: string, tokenContractId: 
     if (!window.rabet) throw new Error("Rabet wallet not found.");
     const { publicKey } = await window.rabet.connect();
 
-    const response = await fetch('/api/fund-contract', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/fund-contract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -794,7 +794,7 @@ export const fundContract = async (fairWageContractId: string, tokenContractId: 
     const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
     if (!signResult.xdr) throw new Error("Signing cancelled");
 
-    const submitResponse = await fetch('/api/submit-transaction', {
+    const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTransactionXdr: signResult.xdr })
@@ -811,7 +811,7 @@ export const fundContract = async (fairWageContractId: string, tokenContractId: 
 
 export const checkContractBalance = async (fairWageContractId: string, tokenContractId: string): Promise<number> => {
     try {
-        const response = await fetch('/api/check-contract-balance', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/check-contract-balance`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fairWageContractId, tokenContractId })
@@ -847,7 +847,7 @@ export const getEmployeeBalance = async (employeeAddress: string, contractId?: s
             return 0;
         }
 
-        const response = await fetch('/api/get-employee-balance', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-employee-balance`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeAddress, contractId: useContractId })
@@ -872,7 +872,7 @@ export const getEmployeeBalance = async (employeeAddress: string, contractId?: s
 // List employees function
 export const listEmployees = async (fairWageContractId: string): Promise<any[]> => {
     try {
-        const response = await fetch('/api/list-employees', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/list-employees`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fairWageContractId })
@@ -902,7 +902,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
         const { publicKey } = await window.rabet.connect();
         
         // Send original amount - backend will handle conversion to stroops  
-        const response = await fetch('/api/partial-withdraw', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/partial-withdraw`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -936,7 +936,7 @@ export const partialWithdraw = async (amount: string, contractId?: string): Prom
         const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
         if (!signResult.xdr) throw new Error("Signing cancelled");
         
-        const submitResponse = await fetch('/api/submit-transaction', {
+        const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/submit-transaction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

@@ -73,7 +73,7 @@ export default function EmployerOnboardPage() {
             console.log('🚀 Step 2: Deploying contract to testnet...');
             
             try {
-                const response = await fetch('/api/deploy-contract', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/deploy-contract`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

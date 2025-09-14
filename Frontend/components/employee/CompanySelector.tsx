@@ -42,7 +42,7 @@ const CompanySelector: React.FC<CompanySelectorProps> = ({
       
       console.log('🔍 Discovering contracts for employee:', publicKey);
       
-      const response = await fetch('/api/discover-employee-contracts', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/discover-employee-contracts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ employeeAddress: publicKey })

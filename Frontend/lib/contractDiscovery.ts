@@ -25,7 +25,7 @@ export const discoverContractsByWallet = async (walletAddress: string): Promise<
   try {
     console.log(`🔍 Discovering contracts for wallet: ${walletAddress}`);
     
-    const response = await fetch('/api/discover-contracts', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/discover-contracts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
