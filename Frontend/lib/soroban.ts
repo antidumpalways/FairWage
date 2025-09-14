@@ -216,7 +216,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
             console.log('📋 First operation type:', transaction.operations[0]?.type);
             
             // Check if this is a Soroban transaction
-            const hasSorobanOps = transaction.operations.some(op => 
+            const hasSorobanOps = transaction.operations.some((op: any) => 
                 op.type === 'createStellarAssetContract' || 
                 op.type === 'invokeHostFunction' ||
                 op.type === 'createCustomContract'
