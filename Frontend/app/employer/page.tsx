@@ -112,17 +112,22 @@ export default function EmployerPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-8 items-stretch">
                 {/* Discover Existing Contracts */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
-                  <div className="text-center">
+                  <div className="text-center flex flex-col h-full">
                     <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                       <Search className="w-10 h-10 text-blue-600" />
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-4">Find Existing Contracts</h3>
-                    <p className="text-slate-600 mb-6 leading-relaxed">
-                      Discover FairWage contracts previously deployed by your wallet across different browsers and devices.
+                    <p className="text-slate-600 mb-6 leading-relaxed flex-grow">
+                      Discover FairWage contracts previously deployed by your wallet across different browsers and devices. Access your existing payroll systems instantly with secure blockchain verification.
                     </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                      <p className="text-sm text-blue-700 font-medium">
+                        🔍 Scan your wallet history to find deployed contracts
+                      </p>
+                    </div>
                     <Button
                       onClick={handleShowDiscovery}
                       className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-soft-lg text-white w-full py-3 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-1"
@@ -135,14 +140,19 @@ export default function EmployerPage() {
 
                 {/* Deploy New Contract */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
-                  <div className="text-center">
+                  <div className="text-center flex flex-col h-full">
                     <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                       <Plus className="w-10 h-10 text-emerald-600" />
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-4">Deploy New Contract</h3>
-                    <p className="text-slate-600 mb-6 leading-relaxed">
-                      Create a new FairWage payroll system with custom tokens and company settings.
+                    <p className="text-slate-600 mb-6 leading-relaxed flex-grow">
+                      Create a new FairWage payroll system with custom tokens and company settings. Set up your complete blockchain-based payroll infrastructure from scratch with enterprise-grade security.
                     </p>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+                      <p className="text-sm text-emerald-700 font-medium">
+                        ⚡ Complete setup process takes 5-10 minutes
+                      </p>
+                    </div>
                     <Button
                       onClick={handleShowOnboarding}
                       className="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 hover:shadow-soft-lg text-white w-full py-3 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-1"

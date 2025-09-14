@@ -234,9 +234,24 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         
         return contractId;
         
-    } catch (error) {
+    } catch (error: any) {
         console.error("❌ Token Contract deployment failed!", error);
-        throw error;
+        console.error("🔍 Error details:", error);
+        console.error("🔍 Error message:", error.message);
+        console.error("🔍 Error cause:", error.cause);
+        
+        // Provide more specific error messages
+        if (error.message?.includes("Rabet wallet not found")) {
+            throw new Error("Please install and connect Rabet wallet extension");
+        } else if (error.message?.includes("Signing cancelled")) {
+            throw new Error("Transaction signing was cancelled");
+        } else if (error.message?.includes("Missing required fields")) {
+            throw new Error("Token name and symbol are required");
+        } else if (error.message?.includes("Cannot submit unprepared")) {
+            throw new Error("Network error: Unable to prepare transaction");
+        } else {
+            throw new Error(error.message || "Token deployment failed. Please try again.");
+        }
     }
 };
 

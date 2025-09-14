@@ -219,7 +219,12 @@ app.post("/api/prepare-token-deploy", async (req, res) => {
 
     // SAC: asset code = tokenSymbol, issuer = userPublicKey
     const asset = new StellarSdk.Asset(tokenSymbol, userPublicKey);
-    const deployOp = StellarSdk.Operation.createStellarAssetContract({ asset });
+    console.log("📋 Creating SAC asset:", asset.getCode(), asset.getIssuer());
+    
+    const deployOp = StellarSdk.Operation.createStellarAssetContract({ 
+      asset: asset 
+    });
+    console.log("✅ SAC deployment operation created");
 
     const tx = new TransactionBuilder(sourceAccount, {
       fee: "1000000",

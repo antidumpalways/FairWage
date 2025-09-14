@@ -41,7 +41,10 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       console.error('🔍 Error details:', error);
       console.error('🔍 Error message:', error.message);
       console.error('🔍 Error cause:', error.cause);
-      alert(`SAC Token deployment failed: ${error.message || 'Unknown error'}`);
+      
+      // Show user-friendly error message
+      const errorMessage = error.message || 'Unknown error';
+      alert(`❌ SAC Token deployment failed!\n\nError: ${errorMessage}\n\nPlease check:\n• Wallet is connected\n• Token name and symbol are filled\n• Network connection is stable\n\nTry again or contact support if the issue persists.`);
     } finally {
       setIsLoading(false);
     }
@@ -100,16 +103,30 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         <div className="flex items-center justify-center space-x-8">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                currentStep >= step.id 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
-                  : 'bg-slate-700'
+              <div className={`flex items-center px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
+                currentStep === step.id
+                  ? 'border-blue-400 bg-blue-50 shadow-md'
+                  : currentStep > step.id
+                  ? 'border-green-400 bg-green-50 shadow-md'
+                  : 'border-gray-300 bg-gray-50'
               }`}>
-                <step.icon className="w-5 h-5 text-white" />
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                  currentStep >= step.id 
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
+                    : 'bg-slate-700'
+                }`}>
+                  <step.icon className="w-5 h-5 text-white" />
+                </div>
+                <div className={`ml-3 text-sm font-semibold ${
+                  currentStep === step.id 
+                    ? 'text-blue-700' 
+                    : currentStep > step.id
+                    ? 'text-green-700'
+                    : 'text-gray-600'
+                }`}>{step.title}</div>
               </div>
-              <div className="ml-3 text-sm text-gray-300">{step.title}</div>
               {index < steps.length - 1 && (
-                <ChevronRight className="w-5 h-5 text-gray-600 ml-4" />
+                <ChevronRight className="w-5 h-5 text-gray-400 ml-4" />
               )}
             </div>
           ))}
