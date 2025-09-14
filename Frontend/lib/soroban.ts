@@ -172,12 +172,13 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         console.log('🚀 Starting SAC token deployment...');
         console.log('📋 Token Name:', tokenName, 'Symbol:', tokenSymbol);
         
-        if (!window.rabet) {
-            throw new Error("Rabet wallet not found. Please install Rabet extension.");
-        }
+        // Get publicKey from localStorage (set by WalletContext)
+        let publicKey = localStorage.getItem('publicKey');
+        console.log('🔑 PublicKey from localStorage:', publicKey);
         
-        const { publicKey } = await window.rabet.connect();
-        console.log('🎉 Rabet connected:', publicKey);
+        if (!publicKey) {
+            throw new Error("Wallet not connected. Please connect your wallet first.");
+        }
         
         // Get REAL transaction from backend
         const requestData = {
@@ -204,10 +205,160 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         const result = await response.json();
         console.log('✅ Got transaction XDR from backend');
         
-        // Sign the transaction with Rabet
-        console.log('🔐 Signing transaction with Rabet...');
-        const signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
-        if (!signResult.xdr) throw new Error("Signing cancelled");
+        // Validate XDR format before signing
+        try {
+            const StellarSdk = require('@stellar/stellar-sdk');
+            const transaction = StellarSdk.TransactionBuilder.fromXDR(result.transactionXdr, 'TESTNET');
+            console.log('✅ XDR validation successful');
+            console.log('📋 Transaction source:', transaction.source);
+            console.log('📋 Transaction sequence:', transaction.sequence);
+            console.log('📋 Transaction operations count:', transaction.operations.length);
+            console.log('📋 First operation type:', transaction.operations[0]?.type);
+            
+            // Check if this is a Soroban transaction
+            const hasSorobanOps = transaction.operations.some(op => 
+                op.type === 'createStellarAssetContract' || 
+                op.type === 'invokeHostFunction' ||
+                op.type === 'createCustomContract'
+            );
+            console.log('📋 Has Soroban operations:', hasSorobanOps);
+            
+        } catch (xdrError) {
+            console.error('❌ XDR validation failed:', xdrError);
+            throw new Error('Invalid transaction format received from backend');
+        }
+        
+        // Check browser compatibility
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isEdge = userAgent.includes('edg/') || userAgent.includes('edge/');
+        const isChrome = userAgent.includes('chrome') && !userAgent.includes('edg/');
+        const isFirefox = userAgent.includes('firefox');
+        const isOpera = userAgent.includes('opr/') || userAgent.includes('opera');
+        
+        console.log('🌐 Browser detection:');
+        console.log('📋 User Agent:', navigator.userAgent);
+        console.log('📋 Is Edge:', isEdge);
+        console.log('📋 Is Chrome:', isChrome);
+        console.log('📋 Is Firefox:', isFirefox);
+        console.log('📋 Is Opera:', isOpera);
+        
+        if (isEdge) {
+            console.warn('⚠️ Microsoft Edge detected - known issues with Stellar wallet integrations');
+            console.warn('💡 Recommendation: Use Chrome, Firefox, or Opera for better compatibility');
+        }
+        
+        // Sign the transaction - try Freighter first (better Soroban support), then Rabet
+        console.log('🔐 Signing transaction...');
+        console.log('📋 Transaction XDR length:', result.transactionXdr.length);
+        console.log('📋 Transaction XDR preview:', result.transactionXdr.substring(0, 100) + '...');
+        console.log('🔑 Using publicKey for signing:', publicKey);
+        
+        let signResult;
+        let signingError = null;
+        
+        // Method 1: Try Freighter first (better Soroban support)
+        if (window.freighterApi) {
+            try {
+                console.log('🔄 Trying Freighter wallet (recommended for Soroban)...');
+                signResult = await window.freighterApi.signTransaction(result.transactionXdr, {
+                    network: 'testnet',
+                    accountToSign: publicKey
+                });
+                console.log('✅ Signed with Freighter wallet');
+            } catch (freighterError) {
+                console.log('⚠️ Freighter failed:', freighterError.message);
+                signingError = freighterError;
+            }
+        }
+        
+        // Method 2: Try Rabet if Freighter failed or not available
+        if (!signResult && window.rabet) {
+            try {
+                console.log('🔄 Trying Rabet wallet...');
+                signResult = await window.rabet.sign(result.transactionXdr, 'testnet');
+                console.log('✅ Signed with Rabet wallet');
+                signingError = null;
+            } catch (rabetError) {
+                console.log('⚠️ Rabet testnet (lowercase) failed:', rabetError.message);
+                signingError = rabetError;
+                
+                // Try with 'TESTNET' (uppercase)
+                try {
+                    signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
+                    console.log('✅ Signed with TESTNET (uppercase)');
+                    signingError = null;
+                } catch (error2) {
+                    console.log('⚠️ TESTNET (uppercase) failed:', error2.message);
+                    signingError = error2;
+                    
+                    // Method 3: Try without network parameter
+                    try {
+                        signResult = await window.rabet.sign(result.transactionXdr);
+                        console.log('✅ Signed without network parameter');
+                        signingError = null;
+                    } catch (error3) {
+                        console.log('⚠️ No network parameter failed:', error3.message);
+                        signingError = error3;
+                        
+                        // Method 4: Try with 'public' network
+                        try {
+                            signResult = await window.rabet.sign(result.transactionXdr, 'public');
+                            console.log('✅ Signed with public network');
+                            signingError = null;
+                        } catch (error4) {
+                            console.log('⚠️ Public network failed:', error4.message);
+                            signingError = error4;
+                            
+                            // Method 5: Try with 'futurenet'
+                            try {
+                                signResult = await window.rabet.sign(result.transactionXdr, 'futurenet');
+                                console.log('✅ Signed with futurenet');
+                                signingError = null;
+                            } catch (error5) {
+                                console.log('⚠️ Futurenet failed:', error5.message);
+                                signingError = error5;
+                                
+                                // Method 6: Try with Freighter wallet as fallback
+                                if (window.freighterApi) {
+                                    try {
+                                        console.log('🔄 Trying Freighter wallet as fallback...');
+                                        signResult = await window.freighterApi.signTransaction(result.transactionXdr, {
+                                            network: 'testnet',
+                                            accountToSign: publicKey
+                                        });
+                                        console.log('✅ Signed with Freighter wallet');
+                                        signingError = null;
+                                    } catch (freighterError) {
+                                        console.log('⚠️ Freighter also failed:', freighterError.message);
+                                        signingError = freighterError;
+                                        throw new Error(`All signing methods failed. Rabet error: ${error5.message}, Freighter error: ${freighterError.message}`);
+                                    }
+                                } else {
+                                    throw new Error(`All signing methods failed. Rabet error: ${error5.message}. Please try installing Freighter wallet as alternative.`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Final check - if no signing method worked
+        if (!signResult) {
+            if (isEdge) {
+                throw new Error('Microsoft Edge has known compatibility issues with Stellar wallet integrations. Please try using Chrome, Firefox, or Opera browser for better wallet support.');
+            } else {
+                throw new Error('All signing methods failed. Please check your wallet connection and try again.');
+            }
+        }
+        
+        console.log('📝 Sign result:', signResult);
+        
+        if (!signResult.xdr) {
+            console.error('❌ Signing failed - no XDR returned');
+            console.error('❌ Sign result details:', JSON.stringify(signResult, null, 2));
+            throw new Error(`Signing failed: ${signResult.error || 'No XDR returned'}`);
+        }
         
         console.log('✅ Transaction signed successfully');
         
@@ -249,12 +400,20 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
         // Provide more specific error messages
         if (error.message?.includes("Rabet wallet not found")) {
             throw new Error("Please install and connect Rabet wallet extension");
+        } else if (error.message?.includes("Failed to get public key")) {
+            throw new Error("Wallet connection failed. Please reconnect your wallet.");
         } else if (error.message?.includes("Signing cancelled")) {
             throw new Error("Transaction signing was cancelled");
         } else if (error.message?.includes("Missing required fields")) {
             throw new Error("Token name and symbol are required");
         } else if (error.message?.includes("Cannot submit unprepared")) {
             throw new Error("Network error: Unable to prepare transaction");
+        } else if (error.message?.includes("no-account")) {
+            throw new Error("Account not found in wallet. Please make sure your Rabet wallet is properly connected and has a valid account with the correct public key.");
+        } else if (error.message?.includes("Signing failed")) {
+            throw new Error("Transaction signing failed. Please check if your wallet is unlocked and try again.");
+        } else if (error.message?.includes("Invalid XDR")) {
+            throw new Error("Invalid transaction format. Please try again or contact support if the issue persists.");
         } else {
             throw new Error(error.message || "Token deployment failed. Please try again.");
         }
