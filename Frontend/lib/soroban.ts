@@ -1027,10 +1027,13 @@ export const getEmployeeBalance = async (employeeAddress: string, contractId?: s
             return 0;
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-employee-balance`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/get-accrued-balance`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeAddress, contractId: useContractId })
+            body: JSON.stringify({ 
+                fairWageContractId: useContractId, 
+                employeeAddress 
+            })
         });
 
         if (!response.ok) {
