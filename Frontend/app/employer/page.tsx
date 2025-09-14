@@ -54,20 +54,20 @@ export default function EmployerPage() {
 
   if (!isWalletConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-soft">
             <Building2 className="h-10 w-10 text-white" />
           </div>
           
-          <h1 className="text-4xl font-bold text-white mb-6">Employer Portal</h1>
-          <p className="text-slate-400 mb-8 text-lg leading-relaxed">
-            Connect your wallet to access enterprise payroll management tools and oversee real-time wage operations.
+          <h1 className="text-4xl font-bold text-slate-900 mb-6">Employer Portal</h1>
+          <p className="text-slate-600 mb-8 text-lg leading-relaxed">
+            Enterprise payroll management system powered by Stellar blockchain. Manage employee wages, monitor real-time accruals, and oversee payroll operations with complete transparency.
           </p>
           
           <Button
             onClick={connectWallet}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
+            className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-soft-lg text-white px-10 py-4 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <Wallet className="w-5 h-5 mr-3" />
             Connect Wallet
@@ -78,24 +78,24 @@ export default function EmployerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-16 text-center">
           <div className="flex items-center justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-soft">
               <Building2 className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white">
-              Employer <span className="text-blue-400">Portal</span>
+            <h1 className="text-5xl md:text-6xl font-bold text-slate-900">
+              Employer <span className="text-blue-600">Portal</span>
             </h1>
           </div>
-          <p className="text-xl text-slate-400 mb-8 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 mb-8 max-w-4xl mx-auto leading-relaxed">
             Enterprise payroll management system powered by Stellar blockchain. 
             Manage employee wages, monitor real-time accruals, and oversee payroll operations with complete transparency.
           </p>
-          <div className="inline-flex items-center bg-slate-800/50 px-6 py-3 rounded-xl border border-slate-600">
-            <span className="text-slate-300 font-medium">Connected as: </span>
-            <span className="text-white font-mono ml-2 text-blue-400">
+          <div className="inline-flex items-center bg-slate-50 px-6 py-3 rounded-xl border border-slate-200">
+            <span className="text-slate-600 font-medium">Connected as: </span>
+            <span className="text-slate-900 font-mono ml-2">
               {publicKey?.slice(0, 8)}...{publicKey?.slice(-6)}
             </span>
           </div>
@@ -106,26 +106,26 @@ export default function EmployerPage() {
             // Contract Selection Screen
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">Get Started with FairWage</h2>
-                <p className="text-slate-400 text-lg">
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">Get Started with FairWage</h2>
+                <p className="text-slate-600 text-lg">
                   Choose an option to begin managing your payroll system
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Discover Existing Contracts */}
-                <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300">
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Search className="w-10 h-10 text-blue-400" />
+                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Search className="w-10 h-10 text-blue-600" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Find Existing Contracts</h3>
-                    <p className="text-slate-400 mb-6 leading-relaxed">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">Find Existing Contracts</h3>
+                    <p className="text-slate-600 mb-6 leading-relaxed">
                       Discover FairWage contracts previously deployed by your wallet across different browsers and devices.
                     </p>
                     <Button
                       onClick={handleShowDiscovery}
-                      className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 text-lg font-semibold"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-soft-lg text-white w-full py-3 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                     >
                       <Search className="w-5 h-5 mr-2" />
                       Discover Contracts
@@ -134,18 +134,18 @@ export default function EmployerPage() {
                 </div>
 
                 {/* Deploy New Contract */}
-                <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300">
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Plus className="w-10 h-10 text-emerald-400" />
+                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Plus className="w-10 h-10 text-emerald-600" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Deploy New Contract</h3>
-                    <p className="text-slate-400 mb-6 leading-relaxed">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">Deploy New Contract</h3>
+                    <p className="text-slate-600 mb-6 leading-relaxed">
                       Create a new FairWage payroll system with custom tokens and company settings.
                     </p>
                     <Button
                       onClick={handleShowOnboarding}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-3 text-lg font-semibold"
+                      className="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 hover:shadow-soft-lg text-white w-full py-3 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                     >
                       <Plus className="w-5 h-5 mr-2" />
                       Deploy New Contract
