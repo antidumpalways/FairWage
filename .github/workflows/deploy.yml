@@ -141,6 +141,35 @@ jobs:
           echo "**Network:** Testnet" >> $GITHUB_STEP_SUMMARY
           echo "**Status:** ✅ Successfully deployed" >> $GITHUB_STEP_SUMMARY
 
+  # Deploy Backend to Render (on main branch)
+  deploy-backend:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy Backend
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: Backend/package-lock.json
+          
+      - name: 📦 Install Backend dependencies
+        run: |
+          cd Backend
+          npm ci
+          
+      - name: 🚀 Trigger Render Deployment
+        run: |
+          echo "✅ Backend deployment triggered on Render"
+          echo "📋 Render will auto-deploy from GitHub repository"
+          echo "🔗 Check Render dashboard for deployment status"
+
   # Deploy Frontend to Vercel (on main branch)
   deploy-frontend:
     needs: test-and-build
@@ -217,7 +246,7 @@ jobs:
 
   # Notify on completion
   notify:
-    needs: [deploy-testnet, deploy-frontend, security]
+    needs: [deploy-testnet, deploy-backend, deploy-frontend, security]
     runs-on: ubuntu-latest
     name: 📢 Notify Team
     if: always()
@@ -225,14 +254,16 @@ jobs:
     steps:
       - name: 📊 Deployment Status
         run: |
-          if [ "${{ needs.deploy-testnet.result }}" == "success" ] && [ "${{ needs.deploy-frontend.result }}" == "success" ]; then
+          if [ "${{ needs.deploy-testnet.result }}" == "success" ] && [ "${{ needs.deploy-backend.result }}" == "success" ] && [ "${{ needs.deploy-frontend.result }}" == "success" ]; then
             echo "🎉 All deployments successful!"
             echo "✅ Testnet: ${{ needs.deploy-testnet.result }}"
+            echo "✅ Backend: ${{ needs.deploy-backend.result }}"
             echo "✅ Frontend: ${{ needs.deploy-frontend.result }}"
             echo "✅ Security: ${{ needs.security.result }}"
           else
             echo "❌ Some deployments failed"
             echo "Testnet: ${{ needs.deploy-testnet.result }}"
+            echo "Backend: ${{ needs.deploy-backend.result }}"
             echo "Frontend: ${{ needs.deploy-frontend.result }}"
             echo "Security: ${{ needs.security.result }}"
             exit 1

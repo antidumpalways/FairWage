@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: fairwage-backend
+    env: node
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
+    autoDeploy: true
+    branch: main
+    rootDir: .
+    plan: free
