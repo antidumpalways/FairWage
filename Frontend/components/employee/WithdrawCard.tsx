@@ -189,8 +189,8 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
           
           {/* Custom Amount Input */}
           {withdrawMode === 'partial' && (
-            <div className="space-y-2">
-              <label className="text-sm text-gray-300">Amount to withdraw (TBU):</label>
+            <div className="space-y-3">
+              <label className="text-sm text-slate-900 font-semibold">Amount to withdraw (TBU):</label>
               <Input
                 type="number"
                 step="0.0000001"
@@ -199,9 +199,9 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
                 value={customAmount}
                 onChange={(e) => setCustomAmount(e.target.value)}
                 placeholder="Enter amount..."
-                className="bg-slate-700 border-slate-600 text-white"
+                className="bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500 py-3 text-lg font-medium shadow-sm"
               />
-              <div className="text-xs text-gray-400">
+              <div className="text-sm text-slate-700 font-medium bg-slate-100 p-2 rounded-lg border border-slate-200">
                 Max: {(Number(availableBalance) / 10000000).toFixed(7)} TBU
               </div>
             </div>
