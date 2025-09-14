@@ -111,3 +111,6 @@ deployments/
 
 # Soroban specific
 .soroban/
+
+# Local development files
+.local/
