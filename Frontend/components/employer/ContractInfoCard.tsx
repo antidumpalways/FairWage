@@ -20,7 +20,7 @@ const ContractInfoCard: React.FC = () => {
       console.log('🔄 Refreshing contract data from registry...');
       
       // Get contract registry
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/contracts`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/debug/contract-registry`);
       const result = await response.json();
       
       if (result.success && result.contracts.length > 0) {
