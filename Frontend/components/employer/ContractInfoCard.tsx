@@ -7,6 +7,7 @@ import { useWallet } from '@/contexts/WalletContext';
 const ContractInfoCard: React.FC = () => {
   const [contractInfo, setContractInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { publicKey, isWalletConnected } = useWallet();
   const [tokenContractId, setTokenContractId] = useState<string | null>(null);
   const [fairWageContractId, setFairWageContractId] = useState<string | null>(null);
@@ -56,21 +57,36 @@ const ContractInfoCard: React.FC = () => {
     return `${address.slice(0, 8)}...${address.slice(-6)}`;
   };
 
-  // Monitor localStorage changes
+  // Monitor localStorage changes with polling
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'fairWageContractId' || e.key === 'companyName') {
-        console.log('🔍 localStorage changed:', { key: e.key, oldValue: e.oldValue, newValue: e.newValue });
-        // Reload contract info when localStorage changes
+    let lastContractId = localStorage.getItem('fairWageContractId');
+    let lastCompanyName = localStorage.getItem('companyName');
+    
+    const checkLocalStorageChanges = () => {
+      const currentContractId = localStorage.getItem('fairWageContractId');
+      const currentCompanyName = localStorage.getItem('companyName');
+      
+      if (currentContractId !== lastContractId || currentCompanyName !== lastCompanyName) {
+        console.log('🔍 localStorage changed via polling:', { 
+          contractId: { old: lastContractId, new: currentContractId },
+          companyName: { old: lastCompanyName, new: currentCompanyName }
+        });
+        
+        lastContractId = currentContractId;
+        lastCompanyName = currentCompanyName;
+        
+        // Force reload contract info
         setTimeout(() => {
           console.log('🔄 Reloading contract info due to localStorage change');
-          window.location.reload();
+          setRefreshTrigger(prev => prev + 1);
         }, 100);
       }
     };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Check every 500ms
+    const interval = setInterval(checkLocalStorageChanges, 500);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Load contract info from localStorage
@@ -129,7 +145,7 @@ const ContractInfoCard: React.FC = () => {
     };
 
     loadContractInfo();
-  }, [isWalletConnected, publicKey]);
+  }, [isWalletConnected, publicKey, refreshTrigger]);
 
   return (
     <Card className="bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 border-4 border-slate-300 hover:border-slate-400 transition-all duration-300 shadow-2xl hover:shadow-3xl rounded-2xl backdrop-blur-sm">

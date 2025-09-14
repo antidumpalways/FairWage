@@ -16,6 +16,20 @@ export default function EmployerPage() {
   const [fairWageContractId, setFairWageContractId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
+  const [isModalOpening, setIsModalOpening] = useState(false);
+
+  // Track component lifecycle
+  useEffect(() => {
+    console.log('🏢 EmployerPage component mounted');
+    return () => {
+      console.log('🏢 EmployerPage component unmounted');
+    };
+  }, []);
+
+  // Track modal state changes
+  useEffect(() => {
+    console.log('🔍 showDiscoveryModal state changed:', showDiscoveryModal);
+  }, [showDiscoveryModal]);
 
   useEffect(() => {
     // Load saved contract IDs from localStorage only on initial load
@@ -53,7 +67,19 @@ export default function EmployerPage() {
   };
 
   const handleShowDiscovery = () => {
+    if (isModalOpening) {
+      console.log('⚠️ Modal already opening, ignoring request');
+      return;
+    }
+    
+    console.log('🔍 handleShowDiscovery called - opening modal');
+    setIsModalOpening(true);
     setShowDiscoveryModal(true);
+    
+    // Reset flag after modal is fully opened
+    setTimeout(() => {
+      setIsModalOpening(false);
+    }, 1000);
   };
 
   if (!isWalletConnected) {
