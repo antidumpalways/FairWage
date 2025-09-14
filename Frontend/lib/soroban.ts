@@ -126,8 +126,8 @@ export const healthCheck = async (): Promise<{ success: boolean; message?: strin
             console.log('✅ Soroban network healthy, ledger:', latestLedger.sequence);
         }
         
-        // Check backend API health - Use API proxy
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/health`, {
+        // Check backend API health - Use Render backend by default
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://fairwage.onrender.com'}/health`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
