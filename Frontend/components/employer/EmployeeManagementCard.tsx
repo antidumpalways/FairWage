@@ -83,6 +83,36 @@ const EmployeeManagementCard: React.FC = () => {
     }
   }, [isWalletConnected, publicKey]);
 
+  // Monitor localStorage changes for contract switching
+  useEffect(() => {
+    let lastContractId = localStorage.getItem('fairWageContractId');
+    
+    const checkContractChange = () => {
+      const currentContractId = localStorage.getItem('fairWageContractId');
+      
+      if (currentContractId !== lastContractId) {
+        console.log('🔍 Contract changed in localStorage:', { 
+          old: lastContractId, 
+          new: currentContractId 
+        });
+        
+        lastContractId = currentContractId;
+        
+        // Re-sync employees with new contract
+        setTimeout(() => {
+          console.log('🔄 Re-syncing employees due to contract change');
+          void syncEmployeesFromContract();
+          void checkBalance();
+        }, 200);
+      }
+    };
+    
+    // Check every 500ms
+    const interval = setInterval(checkContractChange, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Load employees from localStorage to preserve names
   const loadEmployeesFromStorage = () => {
     try {
