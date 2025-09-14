@@ -1,7 +1,7 @@
 // File: frontend/lib/soroban.ts
 // Updated to use Rabet Wallet (NO npm package needed)
 
-// Declare Rabet types
+// Declare Rabet and Freighter types
 declare global {
   interface Window {
     rabet?: {
@@ -11,6 +11,11 @@ declare global {
       isUnlocked(): Promise<boolean>;
       close(): Promise<void>;
       on(event: string, handler: Function): void;
+    };
+    freighterApi?: {
+      signTransaction(xdr: string, options: any): Promise<{ xdr: string; error?: string }>;
+      isConnected(): Promise<boolean>;
+      getPublicKey(): Promise<string>;
     };
   }
 }
