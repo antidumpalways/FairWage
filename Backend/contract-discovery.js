@@ -60,6 +60,12 @@ async function discoverEmployeeContracts(employeeAddress, rpcServer, horizonServ
   for (const contract of knownContracts) {
     if (!contract.active) continue;
 
+    // Validate contract ID format (should start with 'C' and be 56 characters long)
+    if (!contract.id || !contract.id.startsWith('C') || contract.id.length !== 56) {
+      console.warn(`⚠️ Skipping invalid contract ID: ${contract.id}`);
+      continue;
+    }
+
     try {
       // Check if employee is registered in this contract
       const isRegistered = await checkEmployeeRegistration(

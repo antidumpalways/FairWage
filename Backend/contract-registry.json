@@ -15,13 +15,6 @@
   },
   {
     "active": true,
-    "id": "TEST123",
-    "name": "Test Company",
-    "tokenSymbol": "TEST",
-    "tokenContract": "TEST456"
-  },
-  {
-    "active": true,
     "id": "CAODFUMC2U24LNUXJZGYZK5CFEHW4XDZQ76DB3VFAKSULQ4QCR6XU2KM",
     "name": "Biarlah",
     "tokenSymbol": "COB",
