@@ -81,16 +81,16 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ selectedContract }) => {
   }, [publicKey, isWalletConnected, selectedContract]);
 
   return (
-    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
       <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
+        <CardTitle className="text-slate-900 flex items-center justify-between">
           <span className="flex items-center">
-            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-soft">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold">Current Balance</span>
           </span>
-          <TrendingUp className="w-6 h-6 text-blue-400" />
+          <TrendingUp className="w-6 h-6 text-blue-600" />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -98,19 +98,19 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ selectedContract }) => {
           <div>
             {isLoading ? (
               <div className="animate-pulse">
-                <div className="h-16 bg-slate-700 rounded w-3/4"></div>
+                <div className="h-16 bg-slate-200 rounded w-3/4"></div>
               </div>
             ) : (
-              <div className="text-5xl font-bold text-white">
-                {balance.toFixed(6)} <span className="text-xl text-slate-400">tokens</span>
+              <div className="text-5xl font-bold text-slate-900">
+                {balance.toFixed(6)} <span className="text-xl text-slate-600">tokens</span>
               </div>
             )}
           </div>
           
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-400 font-medium">Wage Rate:</span>
-              <span className="text-white font-semibold">0.001 tokens/second</span>
+              <span className="text-slate-600 font-medium">Wage Rate:</span>
+              <span className="text-slate-900 font-semibold">0.001 tokens/second</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-slate-400 font-medium">Status:</span>

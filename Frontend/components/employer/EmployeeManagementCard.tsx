@@ -709,55 +709,55 @@ const EmployeeManagementCard: React.FC = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Employees Card */}
-        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+        <Card className="bg-blue-50 border border-blue-200 hover:bg-blue-100/50 transition-all duration-300 shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Total Employees</p>
-                <p className="text-2xl font-bold text-blue-400">{employees.length}</p>
+                <p className="text-sm text-slate-600">Total Employees</p>
+                <p className="text-2xl font-bold text-blue-700">{employees.length}</p>
               </div>
-              <Users className="w-8 h-8 text-blue-400" />
+              <Users className="w-8 h-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         {/* Active Employees Card */}
-        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+        <Card className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100/50 transition-all duration-300 shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Active Employees</p>
-                <p className="text-2xl font-bold text-green-400">{employees.filter((e) => e.active).length}</p>
+                <p className="text-sm text-slate-600">Active Employees</p>
+                <p className="text-2xl font-bold text-emerald-700">{employees.filter((e) => e.active).length}</p>
               </div>
-              <Clock className="w-8 h-8 text-green-400" />
+              <Clock className="w-8 h-8 text-emerald-600" />
             </div>
           </CardContent>
         </Card>
 
         {/* Contract Balance Card */}
-        <Card className="bg-slate-800 border-slate-700 hover:bg-slate-700/50 transition-all duration-300">
+        <Card className="bg-purple-50 border border-purple-200 hover:bg-purple-100/50 transition-all duration-300 shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Contract Balance</p>
-                <p className="text-2xl font-bold text-purple-400">
+                <p className="text-sm text-slate-600">Contract Balance</p>
+                <p className="text-2xl font-bold text-purple-700">
                   {contractBalance !== null ? formatTokenAmount(contractBalance) : "Loading..."}
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-purple-400" />
+              <DollarSign className="w-8 h-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Add Employee Section */}
-    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center space-x-4">
-            <CardTitle className="text-white text-2xl font-bold">Employee Management</CardTitle>
+            <CardTitle className="text-slate-900 text-2xl font-bold">Employee Management</CardTitle>
             {isSyncing && (
-              <div className="flex items-center space-x-2 text-sm text-blue-400">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+              <div className="flex items-center space-x-2 text-sm text-blue-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 <span>Syncing...</span>
               </div>
             )}
@@ -784,10 +784,10 @@ const EmployeeManagementCard: React.FC = () => {
       </CardHeader>
         <CardContent>
           {isAddingEmployee && (
-            <div className="bg-slate-700/50 p-6 rounded-xl mb-6 border border-slate-600">
+            <div className="bg-slate-50 p-6 rounded-xl mb-6 border border-slate-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-                  <Label htmlFor="employee-address" className="text-white font-semibold mb-2 block">
+                  <Label htmlFor="employee-address" className="text-slate-900 font-semibold mb-2 block">
               Employee Address
             </Label>
             <Input
@@ -795,11 +795,11 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="G... (56 characters)"
                     value={newEmployee.address}
                     onChange={(e) => setNewEmployee({ ...newEmployee, address: e.target.value })}
-                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
+                    className="bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="employee-name" className="text-white font-semibold mb-2 block">
+                  <Label htmlFor="employee-name" className="text-slate-900 font-semibold mb-2 block">
                     Employee Name
                   </Label>
                   <Input
@@ -807,11 +807,11 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="John Doe"
                     value={newEmployee.name}
                     onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
+                    className="bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
             />
           </div>
           <div>
-                  <Label htmlFor="wage-rate" className="text-white font-semibold mb-2 block">
+                  <Label htmlFor="wage-rate" className="text-slate-900 font-semibold mb-2 block">
                     Wage Rate
             </Label>
             <Input
@@ -823,11 +823,11 @@ const EmployeeManagementCard: React.FC = () => {
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, wageRate: parseFloat(e.target.value) || 0 })
                     }
-                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
+                    className="bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
             />
           </div>
                 <div>
-                  <Label htmlFor="wage-period" className="text-white font-semibold mb-2 block">
+                  <Label htmlFor="wage-period" className="text-slate-900 font-semibold mb-2 block">
                     Wage Period
                   </Label>
                   <select
@@ -878,7 +878,7 @@ const EmployeeManagementCard: React.FC = () => {
                     placeholder="1000"
                     value={fundAmount}
                     onChange={(e) => setFundAmount(e.target.value)}
-                    className="bg-slate-600/50 border-slate-500 text-white focus:border-blue-400 focus:ring-blue-400/20"
+                    className="bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                   <p className="text-sm text-slate-400 mt-2 leading-relaxed">
                     Transfer tokens from your account to the contract for payroll operations

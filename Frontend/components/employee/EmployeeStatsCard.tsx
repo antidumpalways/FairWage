@@ -136,79 +136,79 @@ const EmployeeStatsCard: React.FC<EmployeeStatsCardProps> = ({ selectedContract 
   }, [isWalletConnected, publicKey, empId]);
 
   if (!isWalletConnected)
-    return <Card className="bg-slate-800 border-slate-700"><CardContent className="p-6 text-center"><div className="text-gray-400">Connect your wallet to view employee statistics</div></CardContent></Card>;
+    return <Card className="bg-white border border-slate-200 shadow-soft"><CardContent className="p-6 text-center"><div className="text-slate-600">Connect your wallet to view employee statistics</div></CardContent></Card>;
 
   if (isLoading)
-    return <Card className="bg-slate-800 border-slate-700"><CardContent className="p-6"><div className="animate-pulse space-y-4"><div className="h-6 bg-slate-700 rounded w-3/4"></div><div className="h-4 bg-slate-700 rounded w-1/2"></div><div className="h-4 bg-slate-700 rounded w-2/3"></div></div></CardContent></Card>;
+    return <Card className="bg-white border border-slate-200 shadow-soft"><CardContent className="p-6"><div className="animate-pulse space-y-4"><div className="h-6 bg-slate-200 rounded w-3/4"></div><div className="h-4 bg-slate-200 rounded w-1/2"></div><div className="h-4 bg-slate-200 rounded w-2/3"></div></div></CardContent></Card>;
 
   if (errorMsg || !stats)
-    return <Card className="bg-slate-800 border-slate-700"><CardContent className="p-6 text-center"><div className="text-gray-400">{errorMsg ?? "No employee data found"}</div></CardContent></Card>;
+    return <Card className="bg-white border border-slate-200 shadow-soft"><CardContent className="p-6 text-center"><div className="text-slate-600">{errorMsg ?? "No employee data found"}</div></CardContent></Card>;
 
   return (
     <div className="space-y-6">
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader><CardTitle className="text-white flex items-center"><Building2 className="w-5 h-5 mr-2 text-blue-400"/>Employee Information</CardTitle></CardHeader>
+      <Card className="bg-white border border-slate-200 shadow-soft">
+        <CardHeader><CardTitle className="text-slate-900 flex items-center"><Building2 className="w-5 h-5 mr-2 text-blue-600"/>Employee Information</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><p className="text-sm text-gray-400">Employee ID</p><p className="text-white font-mono">{stats.employeeId}</p></div>
-            <div><p className="text-sm text-gray-400">Company</p><p className="text-white">{stats.companyName}</p></div>
-            <div><p className="text-sm text-gray-400">Position</p><p className="text-white">{stats.position}</p></div>
-            <div><p className="text-sm text-gray-400">Start Date</p><p className="text-white">{formatDate(stats.startDate)}</p></div>
-            <div><p className="text-sm text-gray-400">Status</p><Badge variant={stats.status === "active" ? "default" : "destructive"}>{stats.status[0].toUpperCase()+stats.status.slice(1)}</Badge></div>
-            <div><p className="text-sm text-gray-400">Performance Rating</p><div className="flex items-center"><span className="text-white mr-2">{stats.performanceRating}/5.0</span><Award className="w-4 h-4 text-yellow-400"/></div></div>
+            <div><p className="text-sm text-slate-600">Employee ID</p><p className="text-slate-900 font-mono">{stats.employeeId}</p></div>
+            <div><p className="text-sm text-slate-600">Company</p><p className="text-slate-900">{stats.companyName}</p></div>
+            <div><p className="text-sm text-slate-600">Position</p><p className="text-slate-900">{stats.position}</p></div>
+            <div><p className="text-sm text-slate-600">Start Date</p><p className="text-slate-900">{formatDate(stats.startDate)}</p></div>
+            <div><p className="text-sm text-slate-600">Status</p><Badge variant={stats.status === "active" ? "default" : "destructive"}>{stats.status[0].toUpperCase()+stats.status.slice(1)}</Badge></div>
+            <div><p className="text-sm text-slate-600">Performance Rating</p><div className="flex items-center"><span className="text-slate-900 mr-2">{stats.performanceRating}/5.0</span><Award className="w-4 h-4 text-yellow-500"/></div></div>
             {stats.contractId && (<div className="md:col-span-2"><p className="text-sm text-gray-400">Contract</p><p className="text-white font-mono break-all">{stats.contractId}</p></div>)}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader><CardTitle className="text-white flex items-center"><Coins className="w-5 h-5 mr-2 text-green-400"/>Earnings Overview</CardTitle></CardHeader>
+      <Card className="bg-white border border-slate-200 shadow-soft">
+        <CardHeader><CardTitle className="text-slate-900 flex items-center"><Coins className="w-5 h-5 mr-2 text-emerald-600"/>Earnings Overview</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Total Earned</p><p className="text-2xl font-bold text-green-400">{formatTokens(stats.totalEarned)}</p></div>
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Total Withdrawn</p><p className="text-2xl font-bold text-blue-400">{formatTokens(stats.totalWithdrawn)}</p></div>
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Current Balance</p><p className="text-2xl font-bold text-purple-400">{formatTokens(stats.currentBalance)}</p></div>
+            <div className="text-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Total Earned</p><p className="text-2xl font-bold text-emerald-700">{formatTokens(stats.totalEarned)}</p></div>
+            <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Total Withdrawn</p><p className="text-2xl font-bold text-blue-700">{formatTokens(stats.totalWithdrawn)}</p></div>
+            <div className="text-center p-4 bg-purple-50 border border-purple-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Current Balance</p><p className="text-2xl font-bold text-purple-700">{formatTokens(stats.currentBalance)}</p></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-400">Wage Rate</p>
-              <p className="text-white font-mono">
+              <p className="text-sm text-slate-600">Wage Rate</p>
+              <p className="text-slate-900 font-mono">
                 {formatTokens(stats.wageRatePerSecond)} / second{" "}
-                <span className="text-gray-400">
+                <span className="text-slate-500">
                   ({formatTokens(stats.wageRatePerSecond * secsPerPeriod(["hour","day","week","month"].indexOf(stats.wagePeriodLabel || "hour")))} per {stats.wagePeriodLabel})
                 </span>
               </p>
             </div>
-            <div><p className="text-sm text-gray-400">Last Accrual</p><p className="text-white">{formatDateTime(stats.lastPayout)}</p></div>
+            <div><p className="text-sm text-slate-600">Last Accrual</p><p className="text-slate-900">{formatDateTime(stats.lastPayout)}</p></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader><CardTitle className="text-white flex items-center"><Clock className="w-5 h-5 mr-2 text-purple-400"/>Work Statistics</CardTitle></CardHeader>
+      <Card className="bg-white border border-slate-200 shadow-soft">
+        <CardHeader><CardTitle className="text-slate-900 flex items-center"><Clock className="w-5 h-5 mr-2 text-purple-600"/>Work Statistics</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Work Hours (This Month)</p><p className="text-2xl font-bold text-blue-400">{stats.workHours}h</p></div>
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Overtime Hours</p><p className="text-2xl font-bold text-orange-400">{stats.overtimeHours}h</p></div>
-            <div className="text-center p-4 bg-slate-700 rounded-lg"><p className="text-sm text-gray-400 mb-1">Efficiency</p><p className="text-2xl font-bold text-green-400">{Math.round((stats.workHours / 160) * 100)}%</p></div>
+            <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Work Hours (This Month)</p><p className="text-2xl font-bold text-blue-700">{stats.workHours}h</p></div>
+            <div className="text-center p-4 bg-orange-50 border border-orange-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Overtime Hours</p><p className="text-2xl font-bold text-orange-700">{stats.overtimeHours}h</p></div>
+            <div className="text-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg"><p className="text-sm text-slate-600 mb-1">Efficiency</p><p className="text-2xl font-bold text-emerald-700">{Math.round((stats.workHours / 160) * 100)}%</p></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader><CardTitle className="text-white flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-green-400"/>Real-time Earnings Calculator</CardTitle></CardHeader>
+      <Card className="bg-white border border-slate-200 shadow-soft">
+        <CardHeader><CardTitle className="text-slate-900 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-emerald-600"/>Real-time Earnings Calculator</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="bg-slate-700 p-4 rounded-lg">
-              <p className="text-sm text-gray-400 mb-2">Current Session Earnings</p>
-              <div className="text-2xl font-bold text-green-400">{formatTokens(stats.currentBalance)}</div>
-              <p className="text-xs text-gray-500 mt-1">Updated every 10 seconds from blockchain</p>
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg">
+              <p className="text-sm text-slate-600 mb-2">Current Session Earnings</p>
+              <div className="text-2xl font-bold text-emerald-700">{formatTokens(stats.currentBalance)}</div>
+              <p className="text-xs text-slate-500 mt-1">Updated every 10 seconds from blockchain</p>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><p className="text-gray-400">Per Second:</p><p className="text-white">{formatTokens(stats.wageRatePerSecond)}</p></div>
-              <div><p className="text-gray-400">Per Hour:</p><p className="text-white">{formatTokens(stats.wageRatePerSecond * 3600)}</p></div>
-              <div><p className="text-gray-400">Per Day:</p><p className="text-white">{formatTokens(stats.wageRatePerSecond * 86400)}</p></div>
-              <div><p className="text-gray-400">Per Week:</p><p className="text-white">{formatTokens(stats.wageRatePerSecond * 604800)}</p></div>
+              <div><p className="text-slate-600">Per Second:</p><p className="text-slate-900">{formatTokens(stats.wageRatePerSecond)}</p></div>
+              <div><p className="text-slate-600">Per Hour:</p><p className="text-slate-900">{formatTokens(stats.wageRatePerSecond * 3600)}</p></div>
+              <div><p className="text-slate-600">Per Day:</p><p className="text-slate-900">{formatTokens(stats.wageRatePerSecond * 86400)}</p></div>
+              <div><p className="text-slate-600">Per Week:</p><p className="text-slate-900">{formatTokens(stats.wageRatePerSecond * 604800)}</p></div>
             </div>
           </div>
         </CardContent>

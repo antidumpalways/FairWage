@@ -79,9 +79,9 @@ const CompanyFundsCard: React.FC = () => {
 
   if (!isWalletConnected) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border border-slate-200 shadow-soft">
         <CardContent className="p-6 text-center">
-          <div className="text-gray-400">
+          <div className="text-slate-600">
             Connect your wallet to view company funds
           </div>
         </CardContent>
@@ -92,12 +92,12 @@ const CompanyFundsCard: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Add New Contract */}
-      <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+      <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
         <CardHeader className="pb-4">
-          <CardTitle className="text-white text-xl font-semibold">Add New Contract</CardTitle>
+          <CardTitle className="text-slate-900 text-xl font-semibold">Add New Contract</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
             Deploy additional payroll contracts for multiple business entities or departments
           </p>
           <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300">
