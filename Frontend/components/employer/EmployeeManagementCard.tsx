@@ -482,7 +482,11 @@ const EmployeeManagementCard: React.FC = () => {
       const tokenContractId = localStorage.getItem("tokenContractId");
       if (!tokenContractId) throw new Error("Please deploy token contract first");
 
-      const fairWageContractId = await deployFairWageContract(tokenContractId);
+      // Get company info from localStorage or use defaults
+      const companyName = localStorage.getItem("companyName") || "My Company";
+      const tokenSymbol = localStorage.getItem("tokenSymbol") || "MYCOIN";
+      
+      const fairWageContractId = await deployFairWageContract(tokenContractId, companyName, tokenSymbol);
       localStorage.setItem("fairWageContractId", fairWageContractId);
       
       alert(`FairWage contract deployed successfully! Contract ID: ${fairWageContractId}`);

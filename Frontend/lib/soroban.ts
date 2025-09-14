@@ -421,7 +421,7 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
 };
 
 // Simplified FairWage Contract Deployment
-export const deployFairWageContract = async (tokenContractId: string): Promise<string> => {
+export const deployFairWageContract = async (tokenContractId: string, companyName: string = 'FairWage Company', tokenSymbol: string = 'FAIRWAGE'): Promise<string> => {
     try {
         console.log('🚀 Starting FairWage deployment...');
         console.log('📋 Token Contract ID:', tokenContractId);
@@ -440,7 +440,7 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
             body: JSON.stringify({
                 userPublicKey: publicKey,
                 tokenContractId: tokenContractId,
-                companyName: 'FairWage Company'
+                companyName: companyName
             })
         });
         
@@ -466,8 +466,8 @@ export const deployFairWageContract = async (tokenContractId: string): Promise<s
             body: JSON.stringify({
                 signedTransactionXdr: signResult.xdr,
                 contractType: 'fairwage',
-                companyName: 'FairWage Company',
-                tokenSymbol: 'FAIRWAGE'
+                companyName: companyName,
+                tokenSymbol: tokenSymbol
             })
         });
         

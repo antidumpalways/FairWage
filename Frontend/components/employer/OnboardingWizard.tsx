@@ -56,10 +56,15 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       console.log('🚀 Starting FairWage deployment...');
       
       // Deploy FairWage contract
-      const realFairWageId = await deployFairWageContract(tokenContractId);
+      const realFairWageId = await deployFairWageContract(tokenContractId, companyName, tokenSymbol);
       console.log('✅ FairWage deployed successfully:', realFairWageId);
       
       setFairWageContractId(realFairWageId);
+      
+      // Store company info for future use
+      localStorage.setItem("companyName", companyName);
+      localStorage.setItem("tokenSymbol", tokenSymbol);
+      
       setCurrentStep(3); // Updated step numbering
     } catch (error: any) {
       console.error('❌ Failed to deploy FairWage contract!');
