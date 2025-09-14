@@ -1699,6 +1699,8 @@ app.post("/api/accrued-balance", async (req, res) => {
 app.post("/api/get-accrued-balance", async (req, res) => {
   try {
     const { fairWageContractId, employeeAddress } = req.body;
+    
+    console.log('🔍 get-accrued-balance request:', { fairWageContractId, employeeAddress });
 
     if (!fairWageContractId || !employeeAddress) {
       return res
@@ -1725,14 +1727,25 @@ app.post("/api/get-accrued-balance", async (req, res) => {
       .build();
 
     const simulation = await server.simulateTransaction(tx);
-    if (simulation.error)
-      throw new Error(`Simulation failed: ${simulation.error.message}`);
+    console.log('🔍 get-accrued-balance simulation result:', { 
+      error: simulation.error, 
+      result: simulation.result,
+      contractId: fairWageContractId,
+      function: 'get_accrued_balance',
+      employeeAddress: employeeAddress
+    });
+    
+    if (simulation.error) {
+      console.error('❌ get-accrued-balance simulation error details:', simulation.error);
+      throw new Error(`Simulation failed: ${simulation.error.message || simulation.error}`);
+    }
 
     let balance = 0;
     if (simulation.result && simulation.result.retval) {
       try {
         const bi = StellarSdk.scValToNative(simulation.result.retval);
         balance = parseInt(bi.toString());
+        console.log('✅ Parsed balance:', balance);
       } catch (e) {
         console.error("Error parsing balance:", e);
       }
@@ -1887,6 +1900,8 @@ app.post("/api/get-contract-balance", async (req, res) => {
 app.post("/api/list-employees", async (req, res) => {
   try {
     const { fairWageContractId } = req.body;
+    
+    console.log('🔍 list-employees request:', { fairWageContractId });
 
     if (!fairWageContractId)
       return res
@@ -1909,13 +1924,23 @@ app.post("/api/list-employees", async (req, res) => {
       .build();
 
     const simulation = await server.simulateTransaction(tx);
-    if (simulation.error)
-      throw new Error(`Simulation failed: ${simulation.error.message}`);
+    console.log('🔍 list-employees simulation result:', { 
+      error: simulation.error, 
+      result: simulation.result,
+      contractId: fairWageContractId,
+      function: 'list_employees'
+    });
+    
+    if (simulation.error) {
+      console.error('❌ list-employees simulation error details:', simulation.error);
+      throw new Error(`Simulation failed: ${simulation.error.message || simulation.error}`);
+    }
 
     let employees = [];
     if (simulation.result && simulation.result.retval) {
       try {
         const addresses = StellarSdk.scValToNative(simulation.result.retval);
+        console.log('🔍 Raw addresses from contract:', addresses);
         employees = (addresses || []).map((addr) => {
           if (typeof addr === "string") return addr;
           if (addr && typeof addr.toString === "function")
@@ -1926,6 +1951,7 @@ app.post("/api/list-employees", async (req, res) => {
             return String(addr);
           }
         });
+        console.log('✅ Parsed employees:', employees);
       } catch (e) {
         console.error("Error parsing employees:", e);
         employees = [];

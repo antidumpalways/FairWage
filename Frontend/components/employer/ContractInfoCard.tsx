@@ -15,6 +15,43 @@ const ContractInfoCard: React.FC = () => {
     navigator.clipboard.writeText(text);
   };
 
+  const refreshContractData = async () => {
+    try {
+      console.log('🔄 Refreshing contract data from registry...');
+      
+      // Get contract registry
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/contracts`);
+      const result = await response.json();
+      
+      if (result.success && result.contracts.length > 0) {
+        // Find the most recent contract (last in array)
+        const latestContract = result.contracts[result.contracts.length - 1];
+        
+        console.log('✅ Found latest contract:', latestContract);
+        
+        // Update localStorage with correct data
+        if (latestContract.id) {
+          localStorage.setItem('fairWageContractId', latestContract.id);
+        }
+        if (latestContract.tokenContract) {
+          localStorage.setItem('tokenContractId', latestContract.tokenContract);
+        }
+        if (latestContract.name) {
+          localStorage.setItem('companyName', latestContract.name);
+        }
+        if (latestContract.tokenSymbol) {
+          localStorage.setItem('tokenSymbol', latestContract.tokenSymbol);
+          localStorage.setItem('tokenName', latestContract.tokenSymbol); // Use symbol as name
+        }
+        
+        // Reload the component
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('❌ Failed to refresh contract data:', error);
+    }
+  };
+
   const formatAddress = (address: string) => {
     return `${address.slice(0, 8)}...${address.slice(-6)}`;
   };
@@ -135,6 +172,20 @@ const ContractInfoCard: React.FC = () => {
             <div className="flex items-center justify-between py-2">
               <span className="text-slate-600 text-sm">Network:</span>
               <span className="text-slate-900 text-sm font-semibold">{contractInfo.network}</span>
+            </div>
+
+            {/* Refresh Button */}
+            <div className="pt-4 border-t border-slate-200">
+              <Button
+                onClick={refreshContractData}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                size="sm"
+              >
+                🔄 Refresh Contract Data
+              </Button>
+              <p className="text-xs text-slate-500 mt-2 text-center">
+                Sync with latest contract from registry
+              </p>
             </div>
           </>
         ) : (

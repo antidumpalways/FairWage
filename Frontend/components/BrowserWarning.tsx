@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Chrome, Firefox, Globe } from 'lucide-react';
+import { AlertTriangle, Chrome, Globe, Monitor } from 'lucide-react';
 
 export function BrowserWarning() {
   const [isEdge, setIsEdge] = useState(false);
@@ -37,7 +37,7 @@ export function BrowserWarning() {
               <span>Chrome</span>
             </div>
             <div className="flex items-center gap-1">
-              <Firefox className="h-4 w-4" />
+              <Monitor className="h-4 w-4" />
               <span>Firefox</span>
             </div>
             <div className="flex items-center gap-1">

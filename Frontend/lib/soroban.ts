@@ -1068,18 +1068,23 @@ export const getEmployeeBalance = async (employeeAddress: string, contractId?: s
 // List employees function
 export const listEmployees = async (fairWageContractId: string): Promise<any[]> => {
     try {
+        console.log('🔍 Frontend listEmployees request:', { fairWageContractId });
+        
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/list-employees`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fairWageContractId })
         });
 
+        console.log('🔍 listEmployees response status:', response.status);
+
         if (!response.ok) {
-            console.warn('⚠️ Failed to list employees');
+            console.warn('⚠️ Failed to list employees, status:', response.status);
             return [];
         }
 
         const result = await response.json();
+        console.log('🔍 listEmployees result:', result);
         return result.employees || [];
     } catch (error) {
         console.warn('⚠️ Failed to list employees from blockchain:', error);
