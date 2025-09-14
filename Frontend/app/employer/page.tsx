@@ -18,13 +18,15 @@ export default function EmployerPage() {
   const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
 
   useEffect(() => {
-    // Load saved contract IDs from localStorage
+    // Load saved contract IDs from localStorage only on initial load
     const savedTokenId = localStorage.getItem('tokenContractId');
     const savedFairWageId = localStorage.getItem('fairWageContractId');
     
+    console.log('🔍 EmployerPage useEffect - loading from localStorage:', { savedTokenId, savedFairWageId });
+    
     if (savedTokenId) setTokenContractId(savedTokenId);
     if (savedFairWageId) setFairWageContractId(savedFairWageId);
-  }, []);
+  }, []); // Only run once on mount
 
   const handleOnboardingComplete = (tokenId: string, fairWageId: string) => {
     setTokenContractId(tokenId);
@@ -37,11 +39,13 @@ export default function EmployerPage() {
   };
 
   const handleContractSelected = (contractId: string, tokenId?: string) => {
+    console.log('🔍 handleContractSelected called:', { contractId, tokenId });
     setFairWageContractId(contractId);
     if (tokenId) {
       setTokenContractId(tokenId);
     }
     setShowDiscoveryModal(false);
+    console.log('✅ Contract selection completed');
   };
 
   const handleShowOnboarding = () => {
