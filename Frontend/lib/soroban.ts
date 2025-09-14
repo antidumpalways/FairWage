@@ -215,13 +215,9 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
             console.log('📋 Transaction operations count:', transaction.operations.length);
             console.log('📋 First operation type:', transaction.operations[0]?.type);
             
-            // Check if this is a Soroban transaction
-            const hasSorobanOps = transaction.operations.some((op: any) => 
-                op.type === 'createStellarAssetContract' || 
-                op.type === 'invokeHostFunction' ||
-                op.type === 'createCustomContract'
-            );
-            console.log('📋 Has Soroban operations:', hasSorobanOps);
+            // Check if this is a Soroban transaction (simplified for Vercel build)
+            const hasSorobanOps = transaction.operations.length > 0;
+            console.log('📋 Has operations:', hasSorobanOps);
             
         } catch (xdrError) {
             console.error('❌ XDR validation failed:', xdrError);
