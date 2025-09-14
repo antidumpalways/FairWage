@@ -259,8 +259,8 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                 signResult = await window.rabet.sign(result.transactionXdr, 'testnet');
                 console.log('✅ Signed with Rabet wallet');
                 signingError = null;
-            } catch (rabetError) {
-                console.log('⚠️ Rabet testnet failed:', rabetError.message);
+            } catch (rabetError: any) {
+                console.log('⚠️ Rabet testnet failed:', rabetError?.message || rabetError);
                 signingError = rabetError;
                 
                 // Try with 'TESTNET' (uppercase)
@@ -268,8 +268,8 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                     signResult = await window.rabet.sign(result.transactionXdr, 'TESTNET');
                     console.log('✅ Signed with TESTNET (uppercase)');
                     signingError = null;
-                } catch (error2) {
-                    console.log('⚠️ TESTNET (uppercase) failed:', error2.message);
+                } catch (error2: any) {
+                    console.log('⚠️ TESTNET (uppercase) failed:', error2?.message || error2);
                     signingError = error2;
                     
                     // Try without network parameter
@@ -277,8 +277,8 @@ export const deployTokenContract = async (tokenName: string, tokenSymbol: string
                         signResult = await window.rabet.sign(result.transactionXdr);
                         console.log('✅ Signed without network parameter');
                         signingError = null;
-                    } catch (error3) {
-                        console.log('⚠️ No network parameter failed:', error3.message);
+                    } catch (error3: any) {
+                        console.log('⚠️ No network parameter failed:', error3?.message || error3);
                         signingError = error3;
                     }
                 }
