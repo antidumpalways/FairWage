@@ -103,7 +103,7 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                 Join Company
                             </CardTitle>
                             <CardDescription className="text-slate-600">
-                                Enter your company's contract ID to access your dashboard
+                                Enter your company's contract ID to access your employee dashboard and view your earnings
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -118,6 +118,9 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                     onChange={(e) => setContractIdInput(e.target.value)}
                                     className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 />
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Get this from your employer or HR department
+                                </p>
                             </div>
                             <div>
                                 <Label htmlFor="companyName" className="text-slate-700 font-medium">
@@ -130,6 +133,9 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                     onChange={(e) => setCompanyName(e.target.value)}
                                     className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 />
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Your company's official name
+                                </p>
                             </div>
                             <div>
                                 <Label htmlFor="tokenSymbol" className="text-slate-700 font-medium">
@@ -142,16 +148,24 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                     onChange={(e) => setTokenSymbol(e.target.value)}
                                     className="border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 />
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Company's payment token symbol
+                                </p>
                             </div>
                             {validationError && (
                                 <p className="text-red-600 text-sm mt-1">{validationError}</p>
                             )}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
+                                <p className="text-xs text-blue-700 font-medium">
+                                    🔒 Your data is secured with blockchain technology
+                                </p>
+                            </div>
                             <Button
                                 onClick={handleJoinCompany}
                                 disabled={isValidating || !contractId.trim() || !companyName.trim()}
                                 className="w-full bg-gradient-primary hover:shadow-soft-lg text-white transition-all duration-300"
                             >
-                                {isValidating ? 'Joining...' : 'Join Company'}
+                                {isValidating ? 'Joining...' : 'Access Dashboard'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -164,26 +178,43 @@ export default function CompanySelector({ onCompanySelected }: CompanySelectorPr
                                 Create Company
                             </CardTitle>
                             <CardDescription className="text-slate-600">
-                                Deploy a new FairWage contract for your company
+                                Deploy a new FairWage contract for your company and start managing payroll on blockchain
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <p className="text-sm text-slate-700 font-medium">
-                                    You'll need to:
+                                    Setup Process:
                                 </p>
-                                <ul className="text-sm text-slate-600 space-y-1 ml-4">
-                                    <li>• Deploy token contract</li>
-                                    <li>• Deploy FairWage contract</li>
-                                    <li>• Initialize both contracts</li>
-                                    <li>• Add employees</li>
+                                <ul className="text-sm text-slate-600 space-y-2">
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">1</span>
+                                        <span>Deploy custom token contract for your company</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">2</span>
+                                        <span>Deploy FairWage payroll contract with your settings</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">3</span>
+                                        <span>Initialize both contracts and configure parameters</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">4</span>
+                                        <span>Add employees and start managing payroll</span>
+                                    </li>
                                 </ul>
+                            </div>
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mt-4">
+                                <p className="text-xs text-emerald-700 font-medium">
+                                    💡 Complete setup takes approximately 5-10 minutes
+                                </p>
                             </div>
                             <Button
                                 onClick={handleCreateCompany}
                                 className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white hover:shadow-soft-lg transition-all duration-300"
                             >
-                                Create Company
+                                Start Setup Process
                             </Button>
                         </CardContent>
                     </Card>
