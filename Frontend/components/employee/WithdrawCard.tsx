@@ -136,15 +136,15 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
   }, [isWalletConnected, publicKey, selectedContract]);
 
   return (
-    <Card className="bg-slate-800/50 border border-slate-600 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm">
+    <Card className="bg-white border border-slate-200 hover:shadow-soft-lg transition-all duration-300 shadow-soft">
       <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+        <CardTitle className="text-slate-900 flex items-center">
+          <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center mr-4 shadow-soft">
             <ArrowUpCircle className="w-6 h-6 text-white" />
           </div>
           <div>
             <span className="text-xl font-bold">Withdraw Wages</span>
-            <p className="text-slate-400 text-sm font-normal mt-1">Access your earned wages instantly with secure blockchain transactions</p>
+            <p className="text-slate-600 text-sm font-normal mt-1">Access your earned wages instantly with secure blockchain transactions</p>
           </div>
         </CardTitle>
       </CardHeader>
@@ -159,7 +159,7 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
               className={`flex-1 font-semibold py-3 transition-all duration-300 ${
                 withdrawMode === 'full' 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' 
-                  : 'bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:border-blue-400'
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-blue-50 hover:border-blue-400'
               }`}
             >
               Withdraw All
@@ -171,7 +171,7 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
               className={`flex-1 font-semibold py-3 transition-all duration-300 ${
                 withdrawMode === 'partial' 
                   ? 'bg-slate-600 hover:bg-slate-700 text-white shadow-lg' 
-                  : 'bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50 hover:border-slate-400'
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400'
               }`}
             >
               Custom Amount
@@ -179,10 +179,10 @@ const WithdrawCard: React.FC<WithdrawCardProps> = ({ selectedContract }) => {
           </div>
           
           <div className="text-center mb-1">
-            <div className="text-lg text-white mb-2">
+            <div className="text-lg text-slate-900 mb-2">
               {withdrawMode === 'full' ? 'Withdraw All Accrued Wages' : 'Withdraw Custom Amount'}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-slate-600">
               {withdrawMode === 'full' ? 'Withdraw all your earned wages at once' : 'Enter the amount you want to withdraw'}
             </div>
           </div>

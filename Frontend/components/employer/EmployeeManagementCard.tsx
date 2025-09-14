@@ -698,7 +698,7 @@ const EmployeeManagementCard: React.FC = () => {
     return (
       <Card className="bg-slate-800 border-slate-700">
         <CardContent className="p-6 text-center">
-          <div className="text-gray-400">Connect your wallet to manage employees</div>
+          <div className="text-slate-600">Connect your wallet to manage employees</div>
         </CardContent>
       </Card>
     );
@@ -774,7 +774,7 @@ const EmployeeManagementCard: React.FC = () => {
               <Button
                 onClick={() => void handlePayAllEmployees()}
                 disabled={isLoading}
-                className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
                 Pay All
@@ -834,7 +834,7 @@ const EmployeeManagementCard: React.FC = () => {
                     id="wage-period"
                     value={newEmployee.wagePeriod}
                     onChange={(e) => setNewEmployee({ ...newEmployee, wagePeriod: e.target.value as any })}
-                    className="w-full p-3 bg-slate-600/50 border border-slate-500 rounded-lg text-white focus:border-blue-400 focus:ring-blue-400/20"
+                    className="w-full p-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
                   >
                     <option value="hour">Per Hour</option>
                     <option value="day">Per Day</option>
@@ -855,12 +855,12 @@ const EmployeeManagementCard: React.FC = () => {
           )}
 
           {/* Fund Contract Section */}
-          <div className="bg-slate-700/50 p-6 rounded-xl mb-6 border border-slate-600">
+          <div className="bg-slate-50 p-6 rounded-xl mb-6 border border-slate-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold text-lg">Fund Contract</h3>
+              <h3 className="text-slate-900 font-bold text-lg">Fund Contract</h3>
               <Button
                 onClick={() => setIsFunding((v) => !v)}
-                className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
                 {isFunding ? "Cancel" : "Fund Contract"}
@@ -869,7 +869,7 @@ const EmployeeManagementCard: React.FC = () => {
             {isFunding && (
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="fund-amount" className="text-white font-semibold mb-2 block">
+                  <Label htmlFor="fund-amount" className="text-slate-900 font-semibold mb-2 block">
                     Amount to Fund (Tokens)
                   </Label>
                   <Input
@@ -880,7 +880,7 @@ const EmployeeManagementCard: React.FC = () => {
                     onChange={(e) => setFundAmount(e.target.value)}
                     className="bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-500/20"
                   />
-                  <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-2 leading-relaxed">
                     Transfer tokens from your account to the contract for payroll operations
                   </p>
                 </div>
@@ -899,17 +899,17 @@ const EmployeeManagementCard: React.FC = () => {
           {/* Employees List */}
           <div className="space-y-4">
           {employees.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 text-slate-600">
                 No employees added yet. Click "Add Employee" to get started.
             </div>
           ) : (
               employees.map((employee) => (
-                <div key={employee.id} className="bg-slate-700 p-4 rounded-lg border border-slate-600">
+                <div key={employee.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-soft">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
                   <div>
-                        <h3 className="text-white font-semibold">{employee.name}</h3>
-                        <p className="text-sm text-gray-400 font-mono">{formatAddress(employee.address)}</p>
+                        <h3 className="text-slate-900 font-semibold">{employee.name}</h3>
+                        <p className="text-sm text-slate-600 font-mono">{formatAddress(employee.address)}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                         <Button

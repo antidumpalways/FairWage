@@ -153,9 +153,9 @@ const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selecte
 
   if (!isWalletConnected) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border border-slate-200 shadow-soft">
         <CardContent className="p-6 text-center">
-          <div className="text-gray-400">
+          <div className="text-slate-600">
             Connect your wallet to view transaction history
           </div>
         </CardContent>
@@ -165,12 +165,12 @@ const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selecte
 
   if (isLoading) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border border-slate-200 shadow-soft">
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-slate-700 rounded w-3/4"></div>
-            <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-            <div className="h-4 bg-slate-700 rounded w-2/3"></div>
+            <div className="h-6 bg-slate-200 rounded w-3/4"></div>
+            <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+            <div className="h-4 bg-slate-200 rounded w-2/3"></div>
           </div>
         </CardContent>
       </Card>
@@ -178,13 +178,13 @@ const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selecte
   }
 
   return (
-    <Card className="bg-slate-800 border-slate-700">
+    <Card className="bg-white border border-slate-200 shadow-soft">
       <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <Clock className="w-5 h-5 mr-2 text-purple-400" />
+        <CardTitle className="text-slate-900 flex items-center">
+          <Clock className="w-5 h-5 mr-2 text-purple-600" />
           Transaction History
         </CardTitle>
-        <p className="text-gray-400 text-sm">
+        <p className="text-slate-600 text-sm">
           View all your wage transactions and withdrawals
         </p>
       </CardHeader>
@@ -197,20 +197,20 @@ const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selecte
             return (
               <div
                 key={tx.id || 'unknown'}
-                className="bg-slate-700 p-4 rounded-lg border border-slate-600"
+                className="bg-slate-50 p-4 rounded-lg border border-slate-200"
               >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
                   {getTransactionIcon(tx?.type || 'unknown')}
                   <div>
-                    <h4 className="text-white font-semibold capitalize">
+                    <h4 className="text-slate-900 font-semibold capitalize">
                       {(tx?.type || 'unknown').replace('_', ' ')}
                     </h4>
-                    <p className="text-sm text-gray-400">{tx?.description || 'No description'}</p>
+                    <p className="text-sm text-slate-600">{tx?.description || 'No description'}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-white">
+                  <div className="text-lg font-bold text-slate-900">
                     {(tx?.type || 'unknown') === 'withdrawal' ? '-' : '+'}{formatTokens(tx?.amount || 0)}
                   </div>
                   {getStatusBadge(tx?.status || 'unknown')}
@@ -219,14 +219,14 @@ const TransactionHistoryCard: React.FC<TransactionHistoryCardProps> = ({ selecte
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-400">Time</p>
-                  <p className="text-white">{formatDateTime(tx?.timestamp || new Date().toISOString())}</p>
+                  <p className="text-slate-600">Time</p>
+                  <p className="text-slate-900">{formatDateTime(tx?.timestamp || new Date().toISOString())}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Status</p>
+                  <p className="text-slate-600">Status</p>
                   <div className="flex items-center">
                     {getStatusIcon(tx?.status || 'unknown')}
-                    <span className="text-white ml-1 capitalize">{tx?.status || 'unknown'}</span>
+                    <span className="text-slate-900 ml-1 capitalize">{tx?.status || 'unknown'}</span>
                   </div>
                 </div>
                 <div>
